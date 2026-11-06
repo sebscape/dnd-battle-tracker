@@ -179,20 +179,21 @@ function HitPoints({ c, monster, apply }: { c: Combatant; monster?: Monster; app
 }
 
 function Conditions({ c, monster, apply }: { c: Combatant; monster?: Monster; apply: Props["apply"] }) {
-  const [name, setName] = useState<string>(CONDITIONS[0]);
+  const [name, setName] = useState<string>("");
   const [custom, setCustom] = useState("");
   const [rounds, setRounds] = useState("");
   const chosen = name === "__custom" ? custom.trim() : name;
   const immune = monster ? conditionImmunities(monster).some(x => x.toLowerCase() === chosen.toLowerCase()) : false;
   return <div className="conditions">
     <h3>Conditions</h3>
-    {c.conditions.length === 0 && <p className="muted small-text">None.</p>}
+    {c.conditions.length === 0 && <p className="muted small-text">No conditions.</p>}
     <div className="chips">{c.conditions.map(cond => <span key={cond.id} className="chip">
       {cond.name}{cond.rounds !== null ? " · " + cond.rounds + " rd" : ""}
       <button type="button" aria-label={"Remove " + cond.name} onClick={() => apply(b => rules.removeCondition(b, c.id, cond.id))}>×</button>
     </span>)}</div>
-    <form className="condition-add" onSubmit={e => { e.preventDefault(); if (!chosen) return; const r = rounds.trim() ? clampInt(rounds, 1, 999, 1) : null; apply(b => rules.addCondition(b, c.id, chosen, r)); setRounds(""); setCustom(""); }}>
-      <label>Condition<select value={name} onChange={e => setName(e.target.value)}>
+    <form className="condition-add" onSubmit={e => { e.preventDefault(); if (!chosen) return; const r = rounds.trim() ? clampInt(rounds, 1, 999, 1) : null; apply(b => rules.addCondition(b, c.id, chosen, r)); setName(""); setRounds(""); setCustom(""); }}>
+      <label>Add a condition<select value={name} onChange={e => setName(e.target.value)}>
+        <option value="">Choose a condition…</option>
         {CONDITIONS.map(x => <option key={x} value={x}>{x}</option>)}<option value="__custom">Other…</option></select></label>
       {name === "__custom" && <label>Name<input value={custom} placeholder="e.g. Hasted" onChange={e => setCustom(e.target.value)} /></label>}
       <label>Rounds<input type="number" min="1" value={rounds} placeholder="Until removed" onChange={e => setRounds(e.target.value)} /></label>
