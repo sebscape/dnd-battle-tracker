@@ -1,10 +1,21 @@
 // A battle in progress or finished. Stored in this site's localStorage.
 
+/** A DM-defined effect on d20 rolls, e.g. Vicious Mockery: Disadvantage on attacks, next roll only. */
+export interface ConditionEffect {
+  mode: "advantage" | "disadvantage";
+  /** The creature's own attack rolls, saves or all d20 rolls — or attack rolls made against it. */
+  on: "attacks" | "saves" | "all" | "attacks_against";
+}
+
 export interface ActiveCondition {
   id: string;
   name: string;
   /** Rounds left; counts down at the end of the affected combatant's turn. null = until removed. */
   rounds: number | null;
+  /** Only for custom conditions; standard ones have built-in rules (lib/effects.ts). */
+  effect?: ConditionEffect;
+  /** Removed after the first roll it affects. */
+  next_roll_only?: boolean;
 }
 
 export interface Combatant {

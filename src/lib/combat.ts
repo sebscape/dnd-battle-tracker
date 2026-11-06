@@ -1,6 +1,8 @@
 // Pure battle rules: creating a battle, turn order, hit points and conditions.
 // Every function returns a new Battle; the caller keeps old ones for undo.
-import type { ActiveCondition, Battle, Combatant } from "../models/combat";
+import type { ActiveCondition, Battle, Combatant, ConditionEffect } from "../models/combat";
+import { CONDITIONS } from "../models/combat";
+import { describeEffect } from "./effects";
 import type { Encounter, PartyMember } from "../models/battle";
 import type { Monster } from "../models/monster";
 import { parseDice, rollD20, rollDice } from "./dice";
@@ -101,7 +103,7 @@ export function nextTurn(b: Battle): Battle {
       return [{ ...cond, rounds: cond.rounds - 1 }];
     });
     out = update(out, current.id, () => ({ conditions }));
-    for (const name of expired) out = withLog(out, current.name + " is no longer " + name + ".");
+    for (const name of expired) out = withLog(out, current.name + ((CONDITIONS as readonly string[]).includes(name) ? " is no longer " : " is no longer affected by ") + name + ".");
   }
   const start = Math.max(0, order.findIndex(c => c.id === b.active_id));
   // Defeated monsters are skipped; downed PCs still get a turn (death saving throws).
@@ -151,16 +153,30 @@ export function rename(b: Battle, id: string, name: string): Battle {
   return update(b, id, () => ({ name }));
 }
 
-export function addCondition(b: Battle, id: string, name: string, rounds: number | null): Battle {
-  const cond: ActiveCondition = { id: uid(), name, rounds };
+export function addCondition(b: Battle, id: string, name: string, rounds: number | null, effect?: ConditionEffect, nextRollOnly = false): Battle {
+  const cond: ActiveCondition = { id: uid(), name, rounds, ...(effect ? { effect } : {}), ...(effect && nextRollOnly ? { next_roll_only: true } : {}) };
+  const duration = rounds ? " for " + rounds + " round" + (rounds === 1 ? "" : "s") : "";
+  const detail = effect ? " (" + describeEffect(effect, cond.next_roll_only) + ")" : "";
+  const standard = (CONDITIONS as readonly string[]).includes(name);
   return withLog(update(b, id, c => ({ conditions: [...c.conditions, cond] })),
-    named(b, id) + " is " + name + (rounds ? " for " + rounds + " round" + (rounds === 1 ? "" : "s") : "") + ".");
+    named(b, id) + (standard ? " is " : " is affected by ") + name + duration + detail + ".");
+}
+
+/** Removes one-shot effects used up by a roll. */
+export function consumeConditions(b: Battle, used: { combatantId: string; condition: ActiveCondition }[]): Battle {
+  let out = b;
+  for (const { combatantId, condition } of used) {
+    out = withLog(update(out, combatantId, c => ({ conditions: c.conditions.filter(x => x.id !== condition.id) })),
+      named(out, combatantId) + "'s " + condition.name + " is used up.");
+  }
+  return out;
 }
 
 export function removeCondition(b: Battle, id: string, conditionId: string): Battle {
   const cond = b.combatants.find(c => c.id === id)?.conditions.find(x => x.id === conditionId);
+  const standard = !!cond && (CONDITIONS as readonly string[]).includes(cond.name);
   return withLog(update(b, id, c => ({ conditions: c.conditions.filter(x => x.id !== conditionId) })),
-    named(b, id) + " is no longer " + (cond?.name ?? "affected") + ".");
+    named(b, id) + (standard ? " is no longer " + cond!.name : cond ? " is no longer affected by " + cond.name : " is no longer affected") + ".");
 }
 
 export function addCombatants(b: Battle, list: Combatant[]): Battle {

@@ -202,3 +202,9 @@ button.suggested:hover { background: #378052; }
 button.dimmed { opacity: .55; }
 button.dimmed:hover { opacity: .85; }
 .roll-note { margin: 6px 0 0; font-size: 13px; color: #c8f0d4; }
+
+/* Condition effects */
+.roll-hint { margin: 0; display: flex; flex-direction: column; gap: 2px; color: #c8d6e8; }
+.roll-hint p { margin: 0; }
+button.marked { border-color: #f2cf8a; }
+.condition-add .effect-pick { width: 270px; }
