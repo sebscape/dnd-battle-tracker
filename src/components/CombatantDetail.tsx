@@ -56,7 +56,7 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
       return;
     }
     const mode = override ?? fx.mode;
-    const why = override !== null ? (override === "normal" ? "" : " — " + override + ", set by you") : fx.summary ? " — " + fx.summary : "";
+    const why = override !== null ? (override === "normal" ? "" : " — " + override + ", chosen by you") : fx.summary ? " — " + fx.summary : "";
     const r = await roller.d20(c.name + ": " + label + vs, bonus, mode);
     if (!r) return;
     onOverride(null);
@@ -122,13 +122,7 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
           {others.map(o => <option key={o.id} value={o.id}>{o.name} — AC {o.armor_class}{o.out ? (o.kind === "pc" ? " (down)" : " (defeated)") : ""}</option>)}
         </select>
       </label>
-      <div className="roll-mode" role="group" aria-label="Next d20 roll">
-        <span className="muted small-text">Next d20:</span>
-        <button type="button" className={"small " + (override === null ? "selected" : "")} aria-pressed={override === null} onClick={() => onOverride(null)}
-          title="Advantage or Disadvantage worked out from conditions">Auto</button>
-        {(["normal", "advantage", "disadvantage"] as const).map(m => <button key={m} type="button" className={"small " + (override === m ? "selected" : "")} aria-pressed={override === m} onClick={() => onOverride(m)}>
-          {m === "normal" ? "Normal" : m === "advantage" ? "Advantage" : "Disadvantage"}</button>)}
-      </div>
+      <RollModeButtons fx={attackFx} override={override} onOverride={onOverride} />
       <RollHints c={c} override={override} attackFx={attackFx} />
       {lastRoll && <p className="last-roll" role="status">{lastRoll}</p>}
 
@@ -307,7 +301,7 @@ function NameField({ name, onCommit }: { name: string; onCommit: (v: string) => 
 
 /** What will happen to this combatant's next rolls, and why. */
 function RollHints({ c, override, attackFx }: { c: Combatant; override: Advantage | null; attackFx: ReturnType<typeof rollEffects> }) {
-  if (override !== null) return <p className="roll-hint small-text">Next d20: <b>{override === "normal" ? "Normal" : override === "advantage" ? "Advantage" : "Disadvantage"}</b>, set by you (then back to Auto).</p>;
+  if (override !== null) return <p className="roll-hint small-text">Next d20: <b>{MODE_LABEL[override]}</b>, chosen by you for one roll{attackFx.mode !== override ? " (conditions say " + MODE_LABEL[attackFx.mode] + ")" : ""}.</p>;
   const lines: string[] = [];
   if (attackFx.summary) lines.push("Attack rolls: " + attackFx.summary);
   const dex = rollEffects(c, null, "save", "Dexterity"), str = rollEffects(c, null, "save", "Strength"), wis = rollEffects(c, null, "save", "Wisdom");
@@ -318,5 +312,40 @@ function RollHints({ c, override, attackFx }: { c: Combatant; override: Advantag
   return <div className="roll-hint small-text">
     {lines.map((l, i) => <p key={i}>{l}</p>)}
     {attackFx.reminders.map((r, i) => <p key={"r" + i} className="warn-text">{r}</p>)}
+  </div>;
+}
+
+const MODE_LABEL: Record<Advantage, string> = { normal: "Normal", advantage: "Advantage", disadvantage: "Disadvantage" };
+
+/** Why conditions lead to a mode, for the highlighted button's tooltip. */
+function modeReason(fx: ReturnType<typeof rollEffects>): string {
+  const adv = fx.reasons.filter(r => r.startsWith("Advantage: ")).map(r => r.slice(11));
+  const dis = fx.reasons.filter(r => r.startsWith("Disadvantage: ")).map(r => r.slice(14));
+  const list = (xs: string[]) => xs.map(x => x[0].toUpperCase() + x.slice(1)).join("; ");
+  if (fx.mode === "advantage") return "Advantage on attack rolls — " + list(adv);
+  if (fx.mode === "disadvantage") return "Disadvantage on attack rolls — " + list(dis);
+  if (adv.length && dis.length) return "Normal: Advantage (" + adv.join(", ") + ") and Disadvantage (" + dis.join(", ") + ") cancel out";
+  return "Normal: no conditions affect attack rolls";
+}
+
+/**
+ * Next d20: the mode the conditions call for is highlighted (with the reason on hover);
+ * the others are dimmed but clickable to override it for one roll. Clicking the
+ * condition-based choice again goes back to automatic.
+ */
+function RollModeButtons({ fx, override, onOverride }: { fx: ReturnType<typeof rollEffects>; override: Advantage | null; onOverride: (m: Advantage | null) => void }) {
+  const active = override ?? fx.mode;
+  const reason = modeReason(fx);
+  return <div className="roll-mode" role="group" aria-label="Next d20 roll">
+    <span className="muted small-text">Next d20:</span>
+    {(["normal", "advantage", "disadvantage"] as const).map(m => {
+      const isActive = m === active;
+      const title = isActive
+        ? (override === null ? reason : MODE_LABEL[m] + " — chosen by you for the next roll. " + (m === fx.mode ? "" : "Click " + MODE_LABEL[fx.mode] + " to go back to what the conditions say (" + reason + ")."))
+        : m === fx.mode ? "Go back to what the conditions say: " + reason
+        : "Use " + MODE_LABEL[m] + " instead for the next roll";
+      return <button key={m} type="button" className={"small " + (isActive ? "selected" : "dimmed") + (isActive && override !== null && m !== fx.mode ? " manual" : "")}
+        aria-pressed={isActive} title={title} onClick={() => onOverride(m === fx.mode ? null : m)}>{MODE_LABEL[m]}</button>;
+    })}
   </div>;
 }

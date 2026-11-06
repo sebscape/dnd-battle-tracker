@@ -102,7 +102,7 @@ SRD 5.2.1 actions use consistent wording, which the app parses into roll buttons
 - Durations count down automatically, with a reminder when a condition ends.
 - **Standard conditions apply their SRD 5.2.1 effects to monster rolls automatically** (`src/lib/effects.ts`): e.g. Poisoned → Disadvantage on attacks; Restrained → Disadvantage on attacks and Dex saves, attacks against it have Advantage; Paralyzed/Petrified/Stunned/Unconscious → automatic failure on Str/Dex saves; Petrified → resistance to all damage. Things that depend on distance or sight (Prone, Grappled, Frightened, Invisible, critical hits within 5 feet) are shown as reminders, not guessed.
 - **Custom conditions** (spells etc.) can carry an effect: Advantage or Disadvantage on the creature's attack rolls, saves or all d20 rolls, or on attacks against it — optionally "next roll only", removed after the first roll it affects.
-- Advantage and Disadvantage cancel, as in the rules. The **Next d20** buttons are a manual override per combatant (Auto by default), used for one roll.
+- Advantage and Disadvantage cancel, as in the rules. The **Next d20** buttons highlight the mode the conditions call for (hover shows why) and dim the others; clicking a dimmed one overrides it for one roll (dashed outline), and clicking the highlighted condition-based mode again goes back to automatic.
 - Attack rolls take the attacker's conditions and the chosen target's conditions into account.
 
 ### Legendary actions and lairs

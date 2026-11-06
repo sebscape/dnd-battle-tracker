@@ -201,6 +201,8 @@ button.suggested { background: #2f6b46; border-color: #9be3b4; box-shadow: 0 0 0
 button.suggested:hover { background: #378052; }
 button.dimmed { opacity: .55; }
 button.dimmed:hover { opacity: .85; }
+/* Next d20 chosen by the DM instead of by conditions */
+button.selected.manual { border-style: dashed; }
 .roll-note { margin: 6px 0 0; font-size: 13px; color: #c8f0d4; }
 
 /* Condition effects */
