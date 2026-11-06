@@ -15,7 +15,7 @@ export default function App() {
   const data = useMonsters();
   const [party, setParty, partyError] = useStoredList(PARTY_KEY, isPartyMember);
   const [encounters, setEncounters, encounterError] = useStoredList(ENCOUNTERS_KEY, isEncounter);
-  const battle = useBattle();
+  const battle = useBattle(party);
   const [tab, setTab] = useState<Tab>(() => battle.battle ? "battle" : "encounters");
 
   function startBattle(encounter: Encounter | null) {

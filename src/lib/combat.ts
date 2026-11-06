@@ -25,6 +25,24 @@ export function pcCombatant(p: PartyMember): Combatant {
     armor_class: p.armor_class, conditions: [], out: false };
 }
 
+/**
+ * Party members in a battle follow the Party tab: name and AC come from the roster.
+ * Returns the same battle object when nothing changed. PCs whose roster entry was
+ * deleted keep the details they had.
+ */
+export function syncParty(b: Battle, party: PartyMember[]): Battle {
+  let changed = false;
+  const combatants = b.combatants.map(c => {
+    const p = c.kind === "pc" && c.party_member_id ? party.find(x => x.id === c.party_member_id) : undefined;
+    if (!p) return c;
+    const name = p.name.trim() || "Unnamed character";
+    if (c.name === name && c.armor_class === p.armor_class) return c;
+    changed = true;
+    return { ...c, name, armor_class: p.armor_class };
+  });
+  return changed ? { ...b, combatants } : b;
+}
+
 /** A PC's initiative bonus: from the party roster (read live, so later edits count), or entered when added by hand. */
 export function pcInitiativeBonus(c: Combatant, party: PartyMember[]): number | undefined {
   if (c.kind !== "pc") return undefined;
