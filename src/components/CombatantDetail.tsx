@@ -5,9 +5,11 @@ import type { Monster, NamedFeature } from "../models/monster";
 import type { PartyMember } from "../models/battle";
 import type { Advantage, D20Roll, DiceExpr, DiceRoll } from "../lib/dice";
 import { critical, describeD20, describeDice, formatDice, signed } from "../lib/dice";
-import type { DamagePart, DamageType } from "../lib/statblock";
+import type { Ability, DamagePart, DamageType } from "../lib/statblock";
 import { ABILITIES, DAMAGE_TYPES, adjustDamage, conditionImmunities, parseDamageTraits, parseFeature, saveBonus } from "../lib/statblock";
 import * as rules from "../lib/combat";
+import { describeEffect, describeRule, resistsAllDamage, rollEffects } from "../lib/effects";
+import type { ConditionEffect } from "../models/combat";
 import { clampInt } from "../lib/format";
 
 export interface Roller {
@@ -27,6 +29,9 @@ interface Props {
   others: Combatant[];
   targetId: string;
   onTarget: (id: string) => void;
+  /** Manual Advantage/Disadvantage for this combatant's next d20; null = automatic from conditions. */
+  override: Advantage | null;
+  onOverride: (mode: Advantage | null) => void;
 }
 
 /** Result of the latest attack roll for one feature, used to suggest the next button. */
@@ -34,26 +39,35 @@ interface AttackOutcome { key: string; natural: number; total: number; hit: bool
 
 const FEATURE_SECTIONS = [["traits", "Traits"], ["actions", "Actions"], ["bonus_actions", "Bonus Actions"], ["reactions", "Reactions"], ["legendary_actions", "Legendary Actions"]] as const;
 
-export default function CombatantDetail({ combatant: c, monster, member, artwork, started, apply, roller, others, targetId, onTarget }: Props) {
+export default function CombatantDetail({ combatant: c, monster, member, artwork, started, apply, roller, others, targetId, onTarget, override, onOverride }: Props) {
   const [lastRoll, setLastRoll] = useState("");
-  const [mode, setMode] = useState<Advantage>("normal");
   const [outcome, setOutcome] = useState<AttackOutcome | null>(null);
   const target = others.find(o => o.id === targetId) ?? null;
+  const attackFx = rollEffects(c, target, "attack");
 
-  async function rollD20(label: string, bonus: number, attackKey?: string) {
+  async function rollD20(label: string, bonus: number, attackKey?: string, ability?: Ability) {
     const isAttack = attackKey !== undefined;
+    const fx = rollEffects(c, isAttack ? target : null, isAttack ? "attack" : "save", ability);
     const vs = isAttack && target ? " vs " + target.name + " (AC " + target.armor_class + ")" : "";
+    if (fx.autoFail && override === null) {
+      const text = c.name + " — " + label + ": automatically fails (" + fx.autoFail + ").";
+      setLastRoll(text); setOutcome(null);
+      apply(b => rules.withLog(b, text));
+      return;
+    }
+    const mode = override ?? fx.mode;
+    const why = override !== null ? (override === "normal" ? "" : " — " + override + ", set by you") : fx.summary ? " — " + fx.summary : "";
     const r = await roller.d20(c.name + ": " + label + vs, bonus, mode);
     if (!r) return;
-    setMode("normal");
+    onOverride(null);
     // A natural 20 always hits and is a critical hit; a natural 1 always misses.
     const hit = !isAttack ? null : r.natural === 20 ? true : r.natural === 1 ? false : target ? r.total >= target.armor_class : null;
     const nat = r.natural === 20 ? " — natural 20" + (isAttack ? ", a critical hit!" : "!") : r.natural === 1 ? " — natural 1" + (isAttack ? ", an automatic miss." : ".") : "";
     const verdict = isAttack && target && r.natural !== 20 && r.natural !== 1 ? (hit ? " — hit." : " — miss.") : "";
-    const text = c.name + " — " + label + vs + ": " + r.total + " (" + describeD20(r) + ")" + nat + verdict;
+    const text = c.name + " — " + label + vs + ": " + r.total + " (" + describeD20(r) + why + ")" + nat + verdict;
     setLastRoll(text);
     setOutcome(isAttack ? { key: attackKey!, natural: r.natural, total: r.total, hit } : null);
-    apply(b => rules.withLog(b, text));
+    apply(b => rules.consumeConditions(rules.withLog(b, text), fx.consumed));
   }
   async function rollDamage(label: string, parts: DamagePart[], crit: boolean) {
     const results: string[] = [];
@@ -89,6 +103,7 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
     </div>
 
     {c.kind === "monster" && c.hp !== undefined && c.max_hp !== undefined && <HitPoints c={c} monster={monster} apply={apply} />}
+    {c.conditions.some(x => describeRule(x.name).includes("can't take actions")) && <p className="warn-text small-text">{c.name} can't take actions or reactions ({c.conditions.filter(x => describeRule(x.name).includes("can't take actions")).map(x => x.name).join(", ")}).</p>}
     {c.kind === "pc" && member?.notes && <p className="muted">{member.notes}</p>}
 
     <div className="row-actions">
@@ -109,15 +124,24 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
       </label>
       <div className="roll-mode" role="group" aria-label="Next d20 roll">
         <span className="muted small-text">Next d20:</span>
-        {(["normal", "advantage", "disadvantage"] as const).map(m => <button key={m} type="button" className={"small " + (mode === m ? "selected" : "")} aria-pressed={mode === m} onClick={() => setMode(m)}>
+        <button type="button" className={"small " + (override === null ? "selected" : "")} aria-pressed={override === null} onClick={() => onOverride(null)}
+          title="Advantage or Disadvantage worked out from conditions">Auto</button>
+        {(["normal", "advantage", "disadvantage"] as const).map(m => <button key={m} type="button" className={"small " + (override === m ? "selected" : "")} aria-pressed={override === m} onClick={() => onOverride(m)}>
           {m === "normal" ? "Normal" : m === "advantage" ? "Advantage" : "Disadvantage"}</button>)}
       </div>
+      <RollHints c={c} override={override} attackFx={attackFx} />
       {lastRoll && <p className="last-roll" role="status">{lastRoll}</p>}
 
       <h3>Saving throws</h3>
       <div className="save-buttons">
-        {ABILITIES.map(a => { const bonus = saveBonus(monster, a); return <button key={a} type="button" className="small" title={a + " saving throw"} onClick={() => rollD20(a + " saving throw", bonus)}>
-          {a.slice(0, 3).toUpperCase()} {signed(bonus)}</button>; })}
+        {ABILITIES.map(a => {
+          const bonus = saveBonus(monster, a);
+          const fx = rollEffects(c, null, "save", a);
+          const mark = override !== null ? "" : fx.autoFail ? " ✕" : fx.mode === "advantage" ? " ▲" : fx.mode === "disadvantage" ? " ▼" : "";
+          const tip = a + " saving throw" + (fx.autoFail ? " — automatically fails (" + fx.autoFail + ")" : fx.summary ? " — " + fx.summary : "");
+          return <button key={a} type="button" className={"small" + (mark ? " marked" : "")} title={tip} onClick={() => rollD20(a + " saving throw", bonus, undefined, a)}>
+            {a.slice(0, 3).toUpperCase()} {signed(bonus)}{mark}</button>;
+        })}
       </div>
 
       <StatSummary monster={monster} />
@@ -191,7 +215,12 @@ function HitPoints({ c, monster, apply }: { c: Combatant; monster?: Monster; app
   const [maxText, setMaxText] = useState(String(c.max_hp));
   const n = Math.round(Number(amount));
   const valid = amount.trim() !== "" && Number.isFinite(n) && n > 0;
-  const typed = monster && valid && type ? adjustDamage(monster, n, type) : null;
+  const base = monster && valid ? adjustDamage(monster, n, type) : null;
+  // Petrified creatures resist all damage, on top of the stat block (resistance doesn't stack).
+  const petrified = base && resistsAllDamage(c) && base.amount > 0 && !base.note.includes("resistant")
+    ? { amount: Math.floor(base.amount / 2), note: (base.note ? base.note + ", " : "") + "Petrified: resistant to all damage" } : null;
+  const calc = petrified ?? base;
+  const typed = calc && (type || calc.note) ? calc : null;
   const adjusted = typed && !override ? typed : { amount: n, note: "" };
   const unclear = monster ? [monster.damage_resistances, monster.damage_immunities, monster.damage_vulnerabilities].some(t => parseDamageTraits(t).unclear) : false;
   const pct = Math.max(0, Math.min(100, (c.hp! / c.max_hp!) * 100));
@@ -216,34 +245,55 @@ function HitPoints({ c, monster, apply }: { c: Combatant; monster?: Monster; app
       <button type="button" disabled={!valid} onClick={() => { apply(b => rules.heal(b, c.id, n)); setAmount(""); }}>Heal</button>
     </form>
     {typed && <p className="small-text muted">
-      {typed.note ? n + " " + type + " → " + typed.amount + " (" + typed.note + ")" : "No resistance to " + type + "."}
+      {typed.note ? n + (type ? " " + type : "") + " → " + typed.amount + " (" + typed.note + ")" : "No resistance to " + type + "."}
       {typed.note && <label className="check inline"><input type="checkbox" checked={override} onChange={e => setOverride(e.target.checked)} /> Ignore (apply full {n})</label>}
     </p>}
     {unclear && <p className="small-text warn-text">This stat block has a resistance or immunity the app can't apply automatically — check it before applying damage.</p>}
   </div>;
 }
 
+const EFFECT_OPTIONS: { value: string; label: string; effect: ConditionEffect | null }[] = [
+  { value: "", label: "No effect on rolls", effect: null },
+  { value: "dis-attacks", label: "Disadvantage on its attack rolls", effect: { mode: "disadvantage", on: "attacks" } },
+  { value: "dis-saves", label: "Disadvantage on its saving throws", effect: { mode: "disadvantage", on: "saves" } },
+  { value: "dis-all", label: "Disadvantage on all its d20 rolls", effect: { mode: "disadvantage", on: "all" } },
+  { value: "adv-attacks", label: "Advantage on its attack rolls", effect: { mode: "advantage", on: "attacks" } },
+  { value: "adv-saves", label: "Advantage on its saving throws", effect: { mode: "advantage", on: "saves" } },
+  { value: "adv-all", label: "Advantage on all its d20 rolls", effect: { mode: "advantage", on: "all" } },
+  { value: "adv-against", label: "Attacks against it have Advantage", effect: { mode: "advantage", on: "attacks_against" } },
+  { value: "dis-against", label: "Attacks against it have Disadvantage", effect: { mode: "disadvantage", on: "attacks_against" } },
+];
+
 function Conditions({ c, monster, apply }: { c: Combatant; monster?: Monster; apply: Props["apply"] }) {
   const [name, setName] = useState<string>("");
   const [custom, setCustom] = useState("");
   const [rounds, setRounds] = useState("");
+  const [effectKey, setEffectKey] = useState("");
+  const [nextOnly, setNextOnly] = useState(false);
+  const effect = name === "__custom" ? EFFECT_OPTIONS.find(o => o.value === effectKey)?.effect ?? undefined : undefined;
+  const reset = () => { setName(""); setRounds(""); setCustom(""); setEffectKey(""); setNextOnly(false); };
   const chosen = name === "__custom" ? custom.trim() : name;
   const immune = monster ? conditionImmunities(monster).some(x => x.toLowerCase() === chosen.toLowerCase()) : false;
   return <div className="conditions">
     <h3>Conditions</h3>
     {c.conditions.length === 0 && <p className="muted small-text">No conditions.</p>}
-    <div className="chips">{c.conditions.map(cond => <span key={cond.id} className="chip">
-      {cond.name}{cond.rounds !== null ? " · " + cond.rounds + " rd" : ""}
+    <div className="chips">{c.conditions.map(cond => <span key={cond.id} className="chip" title={cond.effect ? describeEffect(cond.effect, cond.next_roll_only) : describeRule(cond.name)}>
+      {cond.name}{cond.effect ? " · " + (cond.effect.mode === "advantage" ? "Adv" : "Dis") + (cond.effect.on === "attacks_against" ? " vs it" : "") + (cond.next_roll_only ? ", next roll" : "") : ""}{cond.rounds !== null ? " · " + cond.rounds + " rd" : ""}
       <button type="button" aria-label={"Remove " + cond.name} onClick={() => apply(b => rules.removeCondition(b, c.id, cond.id))}>×</button>
     </span>)}</div>
-    <form className="condition-add" onSubmit={e => { e.preventDefault(); if (!chosen) return; const r = rounds.trim() ? clampInt(rounds, 1, 999, 1) : null; apply(b => rules.addCondition(b, c.id, chosen, r)); setName(""); setRounds(""); setCustom(""); }}>
+    <form className="condition-add" onSubmit={e => { e.preventDefault(); if (!chosen) return; const r = rounds.trim() ? clampInt(rounds, 1, 999, 1) : null; apply(b => rules.addCondition(b, c.id, chosen, r, effect, nextOnly)); reset(); }}>
       <label>Add a condition<select value={name} onChange={e => setName(e.target.value)}>
         <option value="">Choose a condition…</option>
         {CONDITIONS.map(x => <option key={x} value={x}>{x}</option>)}<option value="__custom">Other…</option></select></label>
-      {name === "__custom" && <label>Name<input value={custom} placeholder="e.g. Hasted" onChange={e => setCustom(e.target.value)} /></label>}
+      {name === "__custom" && <label>Name<input value={custom} placeholder="e.g. Vicious Mockery" onChange={e => setCustom(e.target.value)} /></label>}
+      {name === "__custom" && <label className="effect-pick">Effect on rolls<select value={effectKey} onChange={e => setEffectKey(e.target.value)}>
+        {EFFECT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></label>}
+      {name === "__custom" && effect && <label className="check"><input type="checkbox" checked={nextOnly} onChange={e => setNextOnly(e.target.checked)} /> Next roll only</label>}
       <label>Rounds<input type="number" min="1" value={rounds} placeholder="Until removed" onChange={e => setRounds(e.target.value)} /></label>
       <button type="submit" className="small" disabled={!chosen}>Add</button>
     </form>
+    {name && name !== "__custom" && describeRule(name) && <p className="small-text muted">{describeRule(name)}</p>}
+    {name === "__custom" && effect && nextOnly && <p className="small-text muted">Removed after the first roll it affects{rounds.trim() ? ", or when the rounds run out" : ""}.</p>}
     {immune && <p className="small-text warn-text">{c.name} is immune to {chosen}.</p>}
   </div>;
 }
@@ -253,4 +303,20 @@ function NameField({ name, onCommit }: { name: string; onCommit: (v: string) => 
   const [value, setValue] = useState(name);
   const commit = () => { const v = value.trim(); if (v && v !== name) onCommit(v); else setValue(name); };
   return <label>Name<input value={value} onChange={e => setValue(e.target.value)} onBlur={commit} onKeyDown={e => { if (e.key === "Enter") commit(); }} /></label>;
+}
+
+/** What will happen to this combatant's next rolls, and why. */
+function RollHints({ c, override, attackFx }: { c: Combatant; override: Advantage | null; attackFx: ReturnType<typeof rollEffects> }) {
+  if (override !== null) return <p className="roll-hint small-text">Next d20: <b>{override === "normal" ? "Normal" : override === "advantage" ? "Advantage" : "Disadvantage"}</b>, set by you (then back to Auto).</p>;
+  const lines: string[] = [];
+  if (attackFx.summary) lines.push("Attack rolls: " + attackFx.summary);
+  const dex = rollEffects(c, null, "save", "Dexterity"), str = rollEffects(c, null, "save", "Strength"), wis = rollEffects(c, null, "save", "Wisdom");
+  if (str.autoFail) lines.push("Strength and Dexterity saves: automatic failure (" + str.autoFail + ")");
+  else if (dex.summary && dex.summary !== wis.summary) lines.push("Dexterity saves: " + dex.summary);
+  if (wis.summary) lines.push((str.autoFail ? "Other saving throws: " : "Saving throws: ") + wis.summary);
+  if (!lines.length && !attackFx.reminders.length) return null;
+  return <div className="roll-hint small-text">
+    {lines.map((l, i) => <p key={i}>{l}</p>)}
+    {attackFx.reminders.map((r, i) => <p key={"r" + i} className="warn-text">{r}</p>)}
+  </div>;
 }
