@@ -5,7 +5,7 @@ import type { MonsterData } from "../lib/useMonsters";
 import type { Advantage, DiceExpr } from "../lib/dice";
 import { rollD20, rollDice } from "../lib/dice";
 import * as rules from "../lib/combat";
-import { statusBadges } from "../lib/effects";
+import { BADGE_KEY, statusBadges } from "../lib/effects";
 import CombatantDetail from "./CombatantDetail";
 import type { Roller } from "./CombatantDetail";
 import AddCombatants from "./AddCombatants";
@@ -101,6 +101,10 @@ export default function BattleScreen({ battle, canUndo, apply, undo, finish, par
           {order.map(c => <InitiativeRow key={c.id} c={c} active={c.id === battle.active_id} selected={c.id === selected?.id}
             onSelect={() => setSelectedId(c.id)} onInitiative={v => apply(b => rules.setInitiative(b, c.id, v))} />)}
         </ol>
+        {order.length > 0 && <details className="badge-key">
+          <summary>What the badges mean</summary>
+          <dl>{BADGE_KEY.map(k => <div key={k.kind}><dt><span className={"status-badge " + k.kind}>{k.label}</span></dt><dd>{k.meaning}</dd></div>)}</dl>
+        </details>}
       </section>
 
       <section className="panel detail">
@@ -144,7 +148,10 @@ function InitiativeRow({ c, active, selected, onSelect, onInitiative }: { c: Com
     <button type="button" className="turn-main" onClick={onSelect} aria-current={active ? "step" : undefined}>
       <span className="turn-top">
         <span className="turn-name">{active && <span aria-hidden="true">▶ </span>}{c.name}{c.init_group ? <small> · group</small> : null}</span>
-        {badges.length > 0 && <span className="badges">{badges.map(x => <span key={x.kind + x.label} className={"status-badge " + x.kind} title={x.title} aria-label={x.title}>{x.label}</span>)}</span>}
+        {badges.length > 0 && <span className="badges">{badges.map(x => <span key={x.kind + x.label} className={"status-badge " + x.kind} aria-label={x.meaning + (x.detail ? ". " + x.detail : "")}>
+          {x.label}
+          <span className="badge-tip" aria-hidden="true"><b>{x.meaning}</b>{x.detail && <span>{x.detail}</span>}</span>
+        </span>)}</span>}
       </span>
       <span className="turn-meta">
         AC {c.armor_class}

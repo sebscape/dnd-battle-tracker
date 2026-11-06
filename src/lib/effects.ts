@@ -114,11 +114,31 @@ export function rollEffects(roller: Combatant, target: Combatant | null, kind: R
 /** A PC at 0 HP who isn't dead yet. */
 export const isDownPc = (c: Combatant) => c.kind === "pc" && c.out && (c.death_saves?.failures ?? 0) < 3;
 
-export type BadgeKind = "adv-against" | "dis-against" | "prone" | "crit" | "own-dis" | "own-adv" | "no-actions" | "concentrating" | "death-saves" | "stable" | "dead";
-export interface Badge { kind: BadgeKind; label: string; title: string }
+export type BadgeKind = "adv-against" | "dis-against" | "mixed" | "prone" | "crit" | "own-dis" | "own-adv" | "no-actions" | "concentrating" | "death-saves" | "stable" | "dead";
+/** label: what the badge shows; meaning: the unabbreviated meaning; detail: why it applies. */
+export interface Badge { kind: BadgeKind; label: string; meaning: string; detail: string }
+
+/** Unabbreviated meaning of each badge, also used for the badge key. */
+export const BADGE_KEY: { kind: BadgeKind; label: string; meaning: string }[] = [
+  { kind: "adv-against", label: "Adv", meaning: "Attacks against it have Advantage" },
+  { kind: "dis-against", label: "Dis", meaning: "Attacks against it have Disadvantage" },
+  { kind: "mixed", label: "Adv/Dis", meaning: "Attacks against it: Advantage and Disadvantage cancel out" },
+  { kind: "prone", label: "Prone", meaning: "Prone: Advantage for attackers within 5 feet, Disadvantage from farther away" },
+  { kind: "crit", label: "Crit", meaning: "Any hit from within 5 feet is a critical hit" },
+  { kind: "own-dis", label: "Atk▼", meaning: "Its own attack rolls have Disadvantage" },
+  { kind: "own-adv", label: "Atk▲", meaning: "Its own attack rolls have Advantage" },
+  { kind: "no-actions", label: "No actions", meaning: "Can't take actions or reactions (no opportunity attacks)" },
+  { kind: "concentrating", label: "Conc", meaning: "Concentrating on a spell" },
+  { kind: "death-saves", label: "✓1 ✗2", meaning: "Death saving throws: successes ✓ and failures ✗" },
+  { kind: "stable", label: "Stable", meaning: "Stable at 0 hit points" },
+  { kind: "dead", label: "Dead", meaning: "Dead (three failed death saves)" },
+];
+const MEANING = Object.fromEntries(BADGE_KEY.map(k => [k.kind, k.meaning])) as Record<BadgeKind, string>;
+const badge = (kind: BadgeKind, label: string, detail: string, meaning = MEANING[kind]): Badge => ({ kind, label, meaning, detail });
 
 const NO_ATTACKER: Combatant = { id: "", kind: "monster", name: "", initiative: null, initiative_bonus: 0, armor_class: 0, conditions: [], out: false };
 const tidy = (r: string) => r.replace(/^(Advantage|Disadvantage): /, "").replace(/^target (is|has) /, "");
+const because = (xs: string[]) => "Because: " + xs.map(x => x[0].toUpperCase() + x.slice(1)).join(", ") + ".";
 
 /** Short status badges for the initiative list: what matters when choosing a target. */
 export function statusBadges(c: Combatant): Badge[] {
@@ -127,9 +147,10 @@ export function statusBadges(c: Combatant): Badge[] {
   const ds = c.death_saves ?? { successes: 0, failures: 0 };
 
   if (c.kind === "pc" && c.out) {
-    if (ds.failures >= 3) return [{ kind: "dead", label: "Dead", title: "Three failed death saves" }];
-    if (ds.successes >= 3) badges.push({ kind: "stable", label: "Stable", title: "Three successful death saves: stable at 0 HP. Any damage makes them start over (and is a failure)." });
-    else badges.push({ kind: "death-saves", label: "✓" + ds.successes + " ✗" + ds.failures, title: "Death saves: " + ds.successes + " success" + (ds.successes === 1 ? "" : "es") + ", " + ds.failures + " failure" + (ds.failures === 1 ? "" : "s") });
+    if (ds.failures >= 3) return [badge("dead", "Dead", "")];
+    if (ds.successes >= 3) badges.push(badge("stable", "Stable", "Three successful death saves. Taking damage makes them start over, and counts as a failure."));
+    else badges.push(badge("death-saves", "✓" + ds.successes + " ✗" + ds.failures, "",
+      "Death saving throws: " + ds.successes + " success" + (ds.successes === 1 ? "" : "es") + ", " + ds.failures + " failure" + (ds.failures === 1 ? "" : "s")));
   }
   if (c.kind === "monster" && c.out) return badges;
 
@@ -137,21 +158,22 @@ export function statusBadges(c: Combatant): Badge[] {
   const against = rollEffects(NO_ATTACKER, c, "attack");
   const adv = against.reasons.filter(r => r.startsWith("Advantage: ")).map(tidy);
   const dis = against.reasons.filter(r => r.startsWith("Disadvantage: ")).map(tidy);
-  if (against.mode === "advantage") badges.push({ kind: "adv-against", label: "Adv", title: "Attacks against it have Advantage: " + adv.join(", ") });
-  if (against.mode === "disadvantage") badges.push({ kind: "dis-against", label: "Dis", title: "Attacks against it have Disadvantage: " + dis.join(", ") });
-  if (against.mode === "normal" && adv.length && dis.length) badges.push({ kind: "prone", label: "Adv/Dis", title: "Attacks against it: Advantage (" + adv.join(", ") + ") and Disadvantage (" + dis.join(", ") + ") cancel out" });
-  if (has("Prone")) badges.push({ kind: "prone", label: "Prone", title: "Prone: attacks from within 5 feet have Advantage, from farther away Disadvantage" });
-  if (has("Paralyzed") || has("Unconscious") || isDownPc(c)) badges.push({ kind: "crit", label: "Crit", title: "Any hit from within 5 feet is a critical hit" });
+  if (against.mode === "advantage") badges.push(badge("adv-against", "Adv", because(adv)));
+  if (against.mode === "disadvantage") badges.push(badge("dis-against", "Dis", because(dis)));
+  if (against.mode === "normal" && adv.length && dis.length) badges.push(badge("mixed", "Adv/Dis", "Advantage: " + adv.join(", ") + ". Disadvantage: " + dis.join(", ") + "."));
+  if (has("Prone")) badges.push(badge("prone", "Prone", "The app can't tell distance — set Advantage or Disadvantage on the attacker's Next d20 buttons."));
+  if (has("Paralyzed") || has("Unconscious") || isDownPc(c)) badges.push(badge("crit", "Crit",
+    because([...(has("Paralyzed") ? ["Paralyzed"] : []), ...(has("Unconscious") ? ["Unconscious"] : []), ...(isDownPc(c) && !has("Unconscious") ? ["down (Unconscious)"] : [])])));
 
   // Its own attacks.
   const own = rollEffects(c, null, "attack");
-  const ownWhy = own.reasons.map(tidy).filter(r => r !== "they cancel out").join(", ");
-  if (!c.out && own.mode === "disadvantage") badges.push({ kind: "own-dis", label: "Atk▼", title: "Its own attacks have Disadvantage: " + ownWhy });
-  if (!c.out && own.mode === "advantage") badges.push({ kind: "own-adv", label: "Atk▲", title: "Its own attacks have Advantage: " + ownWhy });
+  const ownWhy = own.reasons.map(tidy).filter(r => r !== "they cancel out");
+  if (!c.out && own.mode === "disadvantage") badges.push(badge("own-dis", "Atk▼", because(ownWhy)));
+  if (!c.out && own.mode === "advantage") badges.push(badge("own-adv", "Atk▲", because(ownWhy)));
 
   const noAct = c.conditions.filter(x => CONDITION_RULES[x.name]?.incapacitated || x.name === "Incapacitated").map(x => x.name);
-  if (noAct.length && !c.out) badges.push({ kind: "no-actions", label: "No actions", title: "Can't take actions or reactions (no opportunity attacks): " + noAct.join(", ") });
-  if (has("Concentrating")) badges.push({ kind: "concentrating", label: "Conc", title: "Concentrating on a spell: damage forces a Constitution save (DC 10 or half the damage, whichever is higher, up to 30)" });
+  if (noAct.length && !c.out) badges.push(badge("no-actions", "No actions", because(noAct)));
+  if (has("Concentrating")) badges.push(badge("concentrating", "Conc", "Taking damage forces a Constitution saving throw (DC 10 or half the damage, whichever is higher, up to 30) to keep the spell."));
   return badges;
 }
 

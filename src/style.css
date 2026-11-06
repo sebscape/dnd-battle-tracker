@@ -139,11 +139,24 @@ label.check.inline { display: inline-flex; margin-left: 10px; font-size: 13px; }
 .turn-name { font-weight: 600; overflow-wrap: anywhere; }
 .turn-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; width: 100%; }
 .badges { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 3px; flex-shrink: 0; max-width: 55%; }
-.status-badge { font-size: 11px; font-weight: 600; line-height: 1.5; padding: 0 5px; border-radius: 4px; background: #334155; color: #e8edf6; white-space: nowrap; cursor: help; }
+.status-badge { font-size: 11px; font-weight: 600; line-height: 1.5; padding: 0 5px; border-radius: 4px; background: #334155; color: #e8edf6; white-space: nowrap; cursor: help; position: relative; }
+/* Tooltip: shown at once on hover, right-aligned so it stays inside the panel. */
+.badge-tip { display: none; position: absolute; right: 0; top: calc(100% + 6px); z-index: 20; width: max-content; max-width: 240px;
+  padding: 8px 10px; border-radius: 8px; background: #0b1220; border: 1px solid #527ca9; box-shadow: 0 6px 18px #000a;
+  color: #e8edf6; font-size: 12px; font-weight: 400; line-height: 1.4; white-space: normal; text-align: left; pointer-events: none; }
+.badge-tip b { display: block; font-weight: 700; }
+.badge-tip span { display: block; color: #b2c2d8; margin-top: 3px; }
+.status-badge:hover .badge-tip { display: block; }
+.badge-key { margin-top: 10px; font-size: 12px; color: #9aa9bd; }
+.badge-key summary { cursor: pointer; }
+.badge-key dl { margin: 8px 0 0; display: flex; flex-direction: column; gap: 5px; }
+.badge-key dl div { display: grid; grid-template-columns: 64px 1fr; gap: 8px; align-items: baseline; }
+.badge-key dt { text-align: right; } .badge-key dd { margin: 0; color: #c8d6e8; }
+.badge-key .status-badge { cursor: default; }
 .status-badge.adv-against, .status-badge.crit { background: #1d3b2c; color: #9be3b4; }
 .status-badge.crit { background: #3b2a1d; color: #f5a36c; }
 .status-badge.dis-against { background: #3b1d24; color: #fca5a5; }
-.status-badge.prone { background: #3b2f1d; color: #f2cf8a; }
+.status-badge.prone, .status-badge.mixed { background: #3b2f1d; color: #f2cf8a; }
 .status-badge.own-dis, .status-badge.own-adv, .status-badge.no-actions { background: #26384e; color: #c8d6e8; }
 .status-badge.concentrating { background: #22305a; color: #a9c3ff; }
 .status-badge.death-saves { background: #2a1d3b; color: #d9c3ff; }
@@ -237,3 +250,4 @@ button.marked { border-color: #f2cf8a; }
 .initiative-heading { align-items: center; margin-bottom: 8px; }
 .initiative-heading h2 { margin: 0; }
 .initiative-heading span { display: inline-block; }
+.turn:hover { position: relative; z-index: 6; } /* keep a row's badge tooltip above the rows below it */
