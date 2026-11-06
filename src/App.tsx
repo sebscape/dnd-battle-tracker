@@ -20,7 +20,10 @@ export default function App() {
 
   return <main>
     <header>
-      <div><h1>D&amp;D Battle Tracker</h1><p className="muted">Plan encounters and run combat.</p></div>
+      <div className="app-brand">
+        <img className="app-brand-logo" src="/images/battle-tracker-logo.webp" alt="" width="296" height="320" />
+        <div><h1>D&amp;D Battle Tracker</h1><p className="muted">Plan encounters and run combat.</p></div>
+      </div>
       <div className="header-status">
         <span>{data.loading ? "Loading monsters…" : data.published.length + " published monsters"}</span>
         <span className={"bridge-status " + data.bridge} title="Custom monsters and artwork come from the Monster Reference app in this browser">{bridgeText}</span>
