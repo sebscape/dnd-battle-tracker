@@ -18,11 +18,12 @@ interface Props {
   onChange: (encounters: Encounter[]) => void;
   party: PartyMember[];
   data: MonsterData;
+  onStartBattle: (encounter: Encounter) => void;
 }
 
 const monsterTotal = (e: Encounter) => e.monsters.reduce((n, m) => n + m.count, 0);
 
-export default function Encounters({ encounters, onChange, party, data }: Props) {
+export default function Encounters({ encounters, onChange, party, data, onStartBattle }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = encounters.find(e => e.id === selectedId) ?? null;
 
@@ -60,7 +61,7 @@ export default function Encounters({ encounters, onChange, party, data }: Props)
     </section>
     <section className="panel detail">
       {selected
-        ? <EncounterEditor key={selected.id} encounter={selected} party={party} data={data} onChange={update} onDuplicate={() => duplicate(selected)} onDelete={() => remove(selected)} />
+        ? <EncounterEditor key={selected.id} encounter={selected} party={party} data={data} onChange={update} onDuplicate={() => duplicate(selected)} onDelete={() => remove(selected)} onStart={() => onStartBattle(selected)} />
         : <p className="muted">Select an encounter to edit it, or create a new one.</p>}
     </section>
   </div>;
@@ -73,9 +74,10 @@ interface EditorProps {
   onChange: (e: Encounter) => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  onStart: () => void;
 }
 
-function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDelete }: EditorProps) {
+function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDelete, onStart }: EditorProps) {
   const set = (patch: Partial<Encounter>) => onChange({ ...encounter, ...patch });
   const setMonster = (index: number, patch: Partial<EncounterMonster>) =>
     set({ monsters: encounter.monsters.map((m, i) => i === index ? { ...m, ...patch } : m) });
@@ -139,7 +141,7 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
     <MonsterPicker monsters={allMonsters} onAdd={addMonster} />
 
     <div className="actions">
-      <button type="button" disabled title="The battle screen is the next build step">Start battle (coming next)</button>
+      <button type="button" className="primary" disabled={data.loading || (encounter.monsters.length === 0 && encounter.party_member_ids.length === 0)} onClick={onStart}>Start battle ▸</button>
       <span className="actions-right">
         <button type="button" onClick={onDuplicate}>Duplicate</button>
         <button type="button" className="danger" onClick={onDelete}>Delete</button>

@@ -1,22 +1,36 @@
 import { useState } from "react";
+import BattleScreen from "./components/BattleScreen";
 import Encounters from "./components/Encounters";
 import PartyRoster from "./components/PartyRoster";
+import type { Encounter } from "./models/battle";
 import { isEncounter, isPartyMember } from "./models/battle";
+import { createBattle } from "./lib/combat";
+import { useBattle } from "./lib/useBattle";
 import { ENCOUNTERS_KEY, PARTY_KEY, useStoredList } from "./lib/storage";
 import { useMonsters } from "./lib/useMonsters";
 
-type Tab = "encounters" | "party";
+type Tab = "battle" | "encounters" | "party";
 
 export default function App() {
   const data = useMonsters();
   const [party, setParty, partyError] = useStoredList(PARTY_KEY, isPartyMember);
   const [encounters, setEncounters, encounterError] = useStoredList(ENCOUNTERS_KEY, isEncounter);
-  const [tab, setTab] = useState<Tab>("encounters");
+  const battle = useBattle();
+  const [tab, setTab] = useState<Tab>(() => battle.battle ? "battle" : "encounters");
+
+  function startBattle(encounter: Encounter | null) {
+    if (battle.battle && !window.confirm("A battle is already in progress. End it (saving it to history) and start a new one?")) return;
+    if (battle.battle) battle.finish();
+    const { battle: b, skipped } = createBattle(encounter?.name || "Quick battle", encounter, party, data.byId);
+    if (skipped.length) window.alert("These custom monsters aren't available and were left out: " + skipped.join(", "));
+    battle.start(b);
+    setTab("battle");
+  }
 
   const bridgeText = data.bridge === "connecting" ? "Checking Monster Reference…"
     : data.bridge === "connected" ? data.custom.length + " custom monster" + (data.custom.length === 1 ? "" : "s") + " from Monster Reference"
     : "Published monsters only — Monster Reference not reachable";
-  const saveError = partyError || encounterError;
+  const saveError = partyError || encounterError || battle.error;
 
   return <main>
     <header>
@@ -31,17 +45,27 @@ export default function App() {
     </header>
 
     <nav className="tabs" aria-label="Sections">
-      {(["encounters", "party"] as const).map(t => <button key={t} type="button" className="tab" aria-current={tab === t ? "page" : undefined} onClick={() => setTab(t)}>
-        {t === "encounters" ? "Encounters" : "Party (" + party.length + ")"}
+      {(["battle", "encounters", "party"] as const).map(t => <button key={t} type="button" className="tab" aria-current={tab === t ? "page" : undefined} onClick={() => setTab(t)}>
+        {t === "battle" ? (battle.battle ? "Battle · round " + battle.battle.round : "Battle") : t === "encounters" ? "Encounters" : "Party (" + party.length + ")"}
       </button>)}
     </nav>
 
     {data.error && <p role="alert" className="error">{data.error}</p>}
     {saveError && <p role="alert" className="error">{saveError}</p>}
 
-    {tab === "encounters"
-      ? <Encounters encounters={encounters} onChange={setEncounters} party={party} data={data} />
-      : <PartyRoster party={party} onChange={setParty} />}
+    {tab === "battle" && (battle.battle
+      ? <BattleScreen key={battle.battle.id} battle={battle.battle} canUndo={battle.canUndo} apply={battle.apply} undo={battle.undo}
+          finish={() => { battle.finish(); setTab("encounters"); }} party={party} data={data} />
+      : <section className="panel empty-battle">
+          <h2>No battle in progress</h2>
+          <p className="muted">Start one from a saved encounter, or start an empty battle and add combatants as the fight begins.</p>
+          <div className="actions-left">
+            <button type="button" className="primary" disabled={data.loading} onClick={() => startBattle(null)}>Start an empty battle</button>
+            <button type="button" onClick={() => setTab("encounters")}>Go to encounters</button>
+          </div>
+        </section>)}
+    {tab === "encounters" && <Encounters encounters={encounters} onChange={setEncounters} party={party} data={data} onStartBattle={startBattle} />}
+    {tab === "party" && <PartyRoster party={party} onChange={setParty} />}
 
     <footer>
       <p>Party and encounters are saved in this browser. Custom monsters and artwork are read from <a href="https://dnd-monster-ref.c2ma.com/">Monster Reference</a> in this same browser and are never changed here.</p>
