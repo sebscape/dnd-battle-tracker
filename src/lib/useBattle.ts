@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Battle } from "../models/combat";
 import { isBattle } from "../models/combat";
-import { endBattle } from "./combat";
+import type { PartyMember } from "../models/battle";
+import { endBattle, syncParty } from "./combat";
 
 const ACTIVE_KEY = "dnd-battle-tracker-active-v1";
 export const HISTORY_KEY = "dnd-battle-tracker-history-v1";
@@ -26,9 +27,15 @@ export function loadHistory(): Battle[] {
   } catch { return []; }
 }
 
-/** The battle in progress, saved after every change, with step-by-step undo. */
-export function useBattle() {
+/**
+ * The battle in progress, saved after every change, with step-by-step undo.
+ * Party members' names and AC always follow the current party roster.
+ */
+export function useBattle(party: PartyMember[]) {
   const [state, setState] = useState<Stored>(load);
+  const partyRef = useRef(party);
+  partyRef.current = party;
+  const sync = (b: Battle) => syncParty(b, partyRef.current);
   const [error, setError] = useState("");
   const first = useRef(true);
 
@@ -44,8 +51,9 @@ export function useBattle() {
   const apply = useCallback((change: (b: Battle) => Battle) => {
     setState(s => {
       if (!s.battle) return s;
-      const next = change(s.battle);
-      return next === s.battle ? s : { battle: next, undo: [...s.undo, s.battle].slice(-UNDO_LIMIT) };
+      const before = sync(s.battle);
+      const next = change(before);
+      return next === before ? s : { battle: next, undo: [...s.undo, before].slice(-UNDO_LIMIT) };
     });
   }, []);
 
@@ -59,7 +67,7 @@ export function useBattle() {
 
   /** Ends the battle and moves it to history. */
   const finish = useCallback(() => {
-    const battle = current.current.battle;
+    const battle = current.current.battle && sync(current.current.battle);
     if (!battle) return;
     const ended = endBattle(battle);
     try { localStorage.setItem(HISTORY_KEY, JSON.stringify([...loadHistory(), ended].slice(-HISTORY_LIMIT))); }
@@ -67,5 +75,7 @@ export function useBattle() {
     setState({ battle: null, undo: [] });
   }, []);
 
-  return { battle: state.battle, canUndo: state.undo.length > 0, apply, undo, start, finish, error };
+  // What's shown: the stored battle with the roster's current names and AC.
+  const battle = useMemo(() => state.battle && syncParty(state.battle, party), [state.battle, party]);
+  return { battle, canUndo: state.undo.length > 0, apply, undo, start, finish, error };
 }

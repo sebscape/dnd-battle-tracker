@@ -94,10 +94,13 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
     <div className="detail-head">
       {artwork && <img className="detail-art" src={artwork} alt="" />}
       <div className="grow">
-        <NameField key={c.id + c.name} name={c.name} onCommit={v => apply(b => rules.rename(b, c.id, v))} />
+        {c.party_member_id && member
+          ? <label>Name<input value={c.name} readOnly title="Change the name on the Party tab" /></label>
+          : <NameField key={c.id + c.name} name={c.name} onCommit={v => apply(b => rules.rename(b, c.id, v))} />}
         <p className="muted small-text">
           {monster ? monster.size + " " + monster.type + " · CR " + monster.challenge_rating : "Player character" + (member ? " · level " + member.level : "")}
           {" · AC " + c.armor_class}{member ? " · Passive Perception " + member.passive_perception : ""}
+          {member && " · Name, level and AC come from the Party tab"}
         </p>
       </div>
     </div>
