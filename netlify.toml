@@ -1,4 +1,3 @@
-# Prototype stage: static files only, no build step.
-# When the Vite app is added, change to: command = "npm run build", publish = "dist".
 [build]
-  publish = "public"
+  command = "npm run build"
+  publish = "dist"
