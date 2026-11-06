@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Bridge Test</title>
+<style>
+  :root { color-scheme: dark; --bg: #16161c; --panel: #22222b; --text: #ece9e2; --muted: #a29f97; --ok: #6fcf8f; --bad: #ef7d6d; --warn: #e8c46a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  h2 { font-size: 1.05rem; margin: 0 0 8px; }
+  p { margin: 0 0 8px; }
+  .muted { color: var(--muted); }
+  section { background: var(--panel); border-radius: 10px; padding: 16px; margin-top: 16px; }
+  .status { font-weight: 600; font-size: 1.1rem; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0; }
+  dt { color: var(--muted); } dd { margin: 0; overflow-wrap: anywhere; }
+  ul { margin: 0; padding-left: 20px; }
+  .art { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .art figure { margin: 0; width: 80px; text-align: center; font-size: 0.75rem; color: var(--muted); }
+  .art img { width: 80px; height: 160px; object-fit: contain; background: #0003; border-radius: 6px; }
+  button { font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid #555; background: #33333d; color: var(--text); cursor: pointer; }
+  a { color: #9cc3ff; }
+  code { font-size: 0.9em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Storage Bridge Test</h1>
+  <p class="muted">Checks whether this site can read custom monsters and artwork saved in the Monster Reference app in this same browser.</p>
+
+  <section>
+    <p id="status" class="status">Connecting…</p>
+    <p id="detail" class="muted"></p>
+    <button id="retry" type="button">Run again</button>
+  </section>
+
+  <section id="results" hidden>
+    <h2>What the bridge sees</h2>
+    <dl id="facts"></dl>
+  </section>
+
+  <section id="monsters-section" hidden>
+    <h2>Custom monsters</h2>
+    <ul id="monsters"></ul>
+  </section>
+
+  <section id="art-section" hidden>
+    <h2>Approved artwork</h2>
+    <div id="art" class="art"></div>
+  </section>
+
+  <section>
+    <h2>How to check the result</h2>
+    <p>Open <a id="ref-link" href="#" target="_blank" rel="noopener">the Monster Reference app</a> in this same browser and compare its custom monster count and artwork with what's shown here. They should match.</p>
+    <p class="muted">If the bridge connects but shows 0 custom monsters when the reference app has some, this browser is keeping the two sites' storage apart. Note which browser that happens in.</p>
+  </section>
+</main>
+<script>
+(() => {
+  "use strict";
+  const PROTOCOL = "dnd-bridge";
+  const TIMEOUT_MS = 5000;
+  // Known bridge locations only; ?bridge=local is for development.
+  const BRIDGES = {
+    production: "https://dnd-monster-ref.c2ma.com/bridge.html",
+    local: "http://localhost:5173/bridge.html",
+  };
+  const params = new URLSearchParams(location.search);
+  const bridgeUrl = BRIDGES[params.get("bridge")] || BRIDGES.production;
+  const bridgeOrigin = new URL(bridgeUrl).origin;
+  const $ = id => document.getElementById(id);
+  $("ref-link").href = bridgeOrigin + "/";
+
+  let frame = null;
+  let counter = 0;
+  const pending = new Map();
+
+  window.addEventListener("message", event => {
+    if (event.origin !== bridgeOrigin || !frame || event.source !== frame.contentWindow) return;
+    const msg = event.data;
+    if (!msg || msg.protocol !== PROTOCOL || !pending.has(msg.id)) return;
+    const { resolve, reject, timer } = pending.get(msg.id);
+    pending.delete(msg.id); clearTimeout(timer);
+    msg.ok ? resolve(msg.result) : reject(new Error(msg.error || "Bridge error"));
+  });
+
+  function request(type, payload) {
+    return new Promise((resolve, reject) => {
+      const id = "req-" + (++counter);
+      const timer = setTimeout(() => { pending.delete(id); reject(new Error("timeout")); }, TIMEOUT_MS);
+      pending.set(id, { resolve, reject, timer });
+      frame.contentWindow.postMessage({ protocol: PROTOCOL, id, type, payload }, bridgeOrigin);
+    });
+  }
+
+  function loadFrame() {
+    return new Promise((resolve, reject) => {
+      if (frame) frame.remove();
+      frame = document.createElement("iframe");
+      frame.src = bridgeUrl;
+      frame.title = "Monster Reference bridge";
+      frame.setAttribute("aria-hidden", "true");
+      frame.style.cssText = "position:absolute;width:0;height:0;border:0;visibility:hidden";
+      const timer = setTimeout(() => reject(new Error("timeout")), TIMEOUT_MS);
+      frame.onload = () => { clearTimeout(timer); resolve(); };
+      document.body.appendChild(frame);
+    });
+  }
+
+  function setStatus(text, cls, detail) {
+    $("status").textContent = text; $("status").className = "status " + cls;
+    $("detail").textContent = detail || "";
+  }
+  function fact(label, value) {
+    const dt = document.createElement("dt"); dt.textContent = label;
+    const dd = document.createElement("dd"); dd.textContent = value;
+    $("facts").append(dt, dd);
+  }
+
+  async function run() {
+    $("retry").disabled = true;
+    for (const id of ["results", "monsters-section", "art-section"]) $(id).hidden = true;
+    $("facts").replaceChildren(); $("monsters").replaceChildren(); $("art").replaceChildren();
+    setStatus("Connecting…", "", "");
+    const started = performance.now();
+    try {
+      await loadFrame();
+      const hello = await request("hello");
+      const { monsters } = await request("listCustomMonsters");
+      const { artwork } = await request("getArtwork", { monsterIds: null });
+      const ms = Math.round(performance.now() - started);
+      const artCount = Object.keys(artwork).length;
+
+      if (monsters.length || artCount) setStatus("Connected — shared data found", "ok", "The bridge can read the reference app's storage in this browser.");
+      else setStatus("Connected — no custom data found", "warn", "Either the reference app has no custom monsters or artwork in this browser, or this browser keeps the two sites' storage apart. Compare with the reference app.");
+
+      fact("Bridge", bridgeUrl);
+      fact("Bridge version", String(hello.bridgeVersion));
+      fact("Schema version", hello.schemaVersion);
+      fact("Custom monsters", String(monsters.length));
+      fact("Approved artwork", String(artCount));
+      fact("Storage keys seen", hello.storage.localStorageKeys.join(", ") || "none");
+      fact("Round trip", ms + " ms");
+      fact("Browser", navigator.userAgent);
+      $("results").hidden = false;
+
+      const byId = new Map(monsters.map(m => [m.id, m]));
+      if (monsters.length) {
+        for (const m of monsters) {
+          const li = document.createElement("li");
+          li.textContent = m.name + " — " + m.size + " " + m.type + ", CR " + m.challenge_rating;
+          $("monsters").append(li);
+        }
+        $("monsters-section").hidden = false;
+      }
+      if (artCount) {
+        for (const [id, url] of Object.entries(artwork)) {
+          if (!/^data:image\/(png|jpeg|webp);base64,/.test(url)) continue;
+          const fig = document.createElement("figure");
+          const img = document.createElement("img"); img.src = url; img.alt = "";
+          const cap = document.createElement("figcaption");
+          cap.textContent = byId.get(id)?.name || "Published monster";
+          fig.append(img, cap); $("art").append(fig);
+        }
+        $("art-section").hidden = false;
+      }
+    } catch (e) {
+      const msg = e && e.message === "timeout"
+        ? "The bridge didn't answer within " + TIMEOUT_MS / 1000 + " seconds. It may not be deployed yet, or this site isn't on its allowed list."
+        : String(e && e.message || e);
+      setStatus("Could not connect to the bridge", "bad", msg);
+      fact("Bridge", bridgeUrl); fact("Browser", navigator.userAgent); $("results").hidden = false;
+    } finally {
+      $("retry").disabled = false;
+    }
+  }
+
+  $("retry").addEventListener("click", run);
+  run();
+})();
+</script>
+</body>
+</html>

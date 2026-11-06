@@ -20,24 +20,30 @@ A web tool for Dungeon Masters to run combat: initiative order, monster hit poin
 
 - **Published monsters** (SRD 5.2.1, 330 monsters) are bundled with the battle app, so it works without the reference app.
 - **Custom monsters and artwork** live in the reference app's browser storage on `dnd-monster-ref.c2ma.com`. Browsers isolate storage per subdomain, so the battle app reads them through a **storage bridge**:
-  - The reference app hosts a small bridge page (e.g. `/bridge.html`) with no UI.
+  - The reference app hosts a small bridge page, `public/bridge.html` (served at `/bridge.html`), with no UI.
   - The battle app loads it in a hidden iframe and requests data with `postMessage`.
-  - The bridge only answers requests from `https://dnd-battle-tracker.c2ma.com` (and `http://localhost:5173` in development) and checks the message origin on both sides.
+  - The bridge only answers requests from `https://dnd-battle-tracker.c2ma.com` (and `http://localhost:5174`, the battle app's dev server) and checks the message origin on both sides. The reference app's dev server stays on port 5173.
   - Both sites are under `c2ma.com` (same site), so browsers should give the iframe the same storage the reference app sees. **This must be verified in Chrome, Firefox and Safari before other work is built on it.**
 - **Read-only.** The battle app never changes custom monsters or artwork. All editing stays in the reference app.
 - **Fallback.** If the bridge doesn't respond within a few seconds, the battle app continues with published monsters only and says so in the UI.
 - **Monster references in saved encounters** use the monster UUID. If a custom monster is missing later (bridge offline, monster deleted), the encounter shows it as unavailable rather than failing.
 - **Schema.** The battle app copies the `Monster` type and `isMonster()` validator from the reference app (schema 1.2.0). Shared code can move to a common package later if the duplication becomes a problem.
 
-### Bridge messages (draft)
+### Bridge messages (version 1)
 
-| Request | Response |
+Every message is `{ protocol: "dnd-bridge", id, type, payload }`. Replies are `{ protocol: "dnd-bridge", id, ok: true, result }` or `{ ..., ok: false, error }`.
+
+| Request | Result |
 |---|---|
-| `hello` | bridge version, schema version |
-| `listCustomMonsters` | array of custom `Monster` records |
-| `getArtwork { monsterIds }` | approved image data URLs for those IDs |
+| `hello` | `{ bridgeVersion, schemaVersion, storage: { customMonsterCount, artworkCount, localStorageKeys } }` |
+| `listCustomMonsters` | `{ monsters }`: custom (`homebrew`) `Monster` records |
+| `getArtwork { monsterIds }` | `{ artwork }`: map of monster ID → image data URL. `monsterIds: null` returns all (max 500 IDs per request). |
 
-The published catalog is not sent through the bridge; the battle app has its own copy.
+The bridge never writes to storage and never creates the artwork database if it doesn't exist. The published catalog is not sent through the bridge; the battle app has its own copy.
+
+### Prototype status
+
+`public/bridge-test.html` (live at `/bridge-test.html`) connects to the production bridge and shows what it can read. `?bridge=local` points it at the reference app's dev server instead. Tested in Chrome locally (protocol, allow-list, empty storage). Still to verify on the live sites in Chrome, Firefox and Safari, on desktop and mobile.
 
 ## Battle app storage
 
