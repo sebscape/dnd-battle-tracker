@@ -103,6 +103,8 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
           {member && " · Name, level and AC come from the Party tab"}
         </p>
       </div>
+      <button type="button" className="tiny danger remove-corner" title={"Take " + c.name + " out of this battle (Undo brings them back)"}
+        onClick={() => { if (window.confirm("Remove " + c.name + " from the battle?")) apply(b => rules.removeCombatant(b, c.id)); }}>Remove</button>
     </div>
 
     {c.kind === "monster" && c.hp !== undefined && c.max_hp !== undefined && <HitPoints c={c} monster={monster} apply={apply} />}
@@ -113,7 +115,6 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
       <label className="check"><input type="checkbox" checked={c.out} onChange={e => { const v = e.target.checked; apply(b => rules.setOut(b, c.id, v)); }} />
         {c.kind === "pc" ? "Down (0 HP)" : "Defeated"}</label>
       {c.kind === "monster" && <button type="button" className="small" onClick={() => apply(b => rules.rerollInitiative(b, c.id))}>Reroll initiative{c.init_group ? " (group)" : ""}</button>}
-      <button type="button" className="small danger" onClick={() => { if (window.confirm("Remove " + c.name + " from the battle?")) apply(b => rules.removeCombatant(b, c.id)); }}>Remove</button>
     </div>
 
     <Conditions c={c} monster={monster} apply={apply} />

@@ -146,6 +146,8 @@ label.check.inline { display: inline-flex; margin-left: 10px; font-size: 13px; }
 .combatant-detail { display: flex; flex-direction: column; gap: 12px; }
 .combatant-detail h3 { margin: 8px 0 4px; }
 .detail-head { display: flex; gap: 14px; align-items: flex-start; }
+button.tiny { padding: 3px 8px; font-size: 12px; border-radius: 6px; }
+.remove-corner { flex-shrink: 0; margin-top: -2px; }
 .detail-art { width: 80px; height: 160px; object-fit: contain; border-radius: 8px; background: #0003; flex-shrink: 0; }
 .grow { flex: 1; min-width: 0; }
 .row-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
