@@ -5,6 +5,13 @@ import type { Monster } from "../models/monster";
 import type { MonsterData } from "../lib/useMonsters";
 import { isCustom } from "../lib/format";
 import MonsterPicker from "./MonsterPicker";
+import DifficultyPanel from "./DifficultyPanel";
+import { encounterDifficulty, monsterXp } from "../lib/difficulty";
+
+const xpText = (cr: string, count: number) => {
+  const xp = monsterXp(cr);
+  return xp === null ? "" : " · " + (xp * count).toLocaleString("en-US") + " XP" + (count > 1 ? " (" + xp.toLocaleString("en-US") + " each)" : "");
+};
 
 interface Props {
   encounters: Encounter[];
@@ -85,6 +92,10 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
   // Party members that were deleted from the roster are ignored.
   const missingPcs = encounter.party_member_ids.filter(id => !party.some(p => p.id === id)).length;
   const allMonsters = [...data.published, ...data.custom];
+  const presentPcs = party.filter(p => encounter.party_member_ids.includes(p.id));
+  const difficulty = encounterDifficulty(
+    presentPcs.map(p => p.level),
+    encounter.monsters.flatMap(em => { const m = data.byId.get(em.monster_id); return m ? [{ name: m.name, cr: m.challenge_rating, count: em.count }] : []; }));
 
   return <div className="editor">
     <label>Encounter name<input value={encounter.name} onChange={e => set({ name: e.target.value })} /></label>
@@ -108,7 +119,7 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
         return <li key={em.monster_id} className={unavailable ? "unavailable" : ""}>
           <div className="em-name">
             <strong>{m?.name ?? em.monster_name}</strong>
-            <small>{m ? m.size + " " + m.type + " · CR " + m.challenge_rating + (isCustom(m) ? " · Custom" : "") : unavailable ? "Unavailable: custom monster not found in Monster Reference" : "Loading…"}</small>
+            <small>{m ? m.size + " " + m.type + " · CR " + m.challenge_rating + xpText(m.challenge_rating, em.count) + (isCustom(m) ? " · Custom" : "") : unavailable ? "Unavailable: custom monster not found in Monster Reference" : "Loading…"}</small>
           </div>
           <div className="stepper" role="group" aria-label={"Number of " + em.monster_name}>
             <button type="button" className="small" aria-label="One fewer" disabled={em.count <= 1} onClick={() => setMonster(i, { count: em.count - 1 })}>−</button>
@@ -122,6 +133,8 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
         </li>;
       })}
     </ul>
+
+    <DifficultyPanel difficulty={difficulty} partySize={presentPcs.length} />
 
     <MonsterPicker monsters={allMonsters} onAdd={addMonster} />
 

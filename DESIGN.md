@@ -118,7 +118,7 @@ SRD 5.2.1 actions use consistent wording, which the app parses into roll buttons
 - Monster artwork, when available through the bridge, appears on the active monster's card.
 
 ## Build order
-Progress: step 1 deployed (connects in Chrome on the live sites; Firefox and Safari still to check); step 2 built on the `foundation` branch.
+Progress: step 1 deployed (connects in Chrome on the live sites; Firefox and Safari still to check); step 2 built on the `foundation` branch, including encounter difficulty (moved up from step 4).
 
 1. **Bridge prototype.** Bridge page in the reference app plus a bare test page on this site; verify in Chrome, Firefox and Safari.
 2. **Foundation.** Project setup, monster loading (bundled catalog + bridge), party roster, encounter builder.
