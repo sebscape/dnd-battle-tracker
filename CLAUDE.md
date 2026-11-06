@@ -14,9 +14,14 @@ Combat tracker for D&D Dungeon Masters. Full design and agreed decisions: **DESI
 | Path | Purpose |
 |---|---|
 | `src/App.tsx` | Header, tabs, monster data and stored lists |
-| `src/components/` | `Encounters` (list + editor), `MonsterPicker`, `PartyRoster` |
+| `src/components/` | `Encounters` (list + editor, difficulty), `MonsterPicker`, `PartyRoster`, `BattleScreen` (turn order, log), `CombatantDetail` (HP, conditions, stat block rolls), `AddCombatants`, `NumberPrompt` (physical dice) |
 | `src/lib/bridge.ts` | Client for the reference app's read-only storage bridge |
 | `src/lib/useMonsters.ts` | Bundled published catalog + custom monsters/artwork via the bridge |
+| `src/lib/combat.ts` | Pure battle rules: creating a battle, turn order, HP, conditions. Each function returns a new `Battle`. |
+| `src/lib/useBattle.ts` | Active battle (`dnd-battle-tracker-active-v1`) with undo snapshots; finished battles go to `dnd-battle-tracker-history-v1` |
+| `src/lib/statblock.ts` | Parses SRD 5.2.1 attack, saving throw, damage and resistance text |
+| `src/lib/dice.ts` | Dice notation, crypto-random rolls, advantage/disadvantage |
+| `src/lib/difficulty.ts` | SRD 5.2.1 XP budgets and monster XP by CR |
 | `src/lib/storage.ts` | localStorage lists (`dnd-battle-tracker-party-v1`, `dnd-battle-tracker-encounters-v1`) |
 | `src/models/monster.ts` | **Copy** of the reference app's model (schema 1.2.0). Keep in sync. |
 | `src/models/battle.ts` | Party member and encounter types and validators |

@@ -105,3 +105,91 @@ footer { padding-top: 30px; font-size: 12px; }
   .party-member > button { grid-column: 1 / -1; }
   .actions-right { width: 100%; }
 }
+
+/* ---------- Battle ---------- */
+button.primary { background: #2f6b46; border-color: #4f9a6c; font-weight: 600; }
+button.primary:hover { background: #378052; }
+button.link { background: none; border: 0; color: #9ec5fe; text-decoration: underline; padding: 2px 4px; }
+button.selected { background: #3d6ea3; border-color: #93c5fd; }
+.warn-text { color: #f2cf8a; }
+.actions-left { display: flex; gap: 10px; flex-wrap: wrap; }
+.empty-battle { max-width: 640px; }
+label.check.inline { display: inline-flex; margin-left: 10px; font-size: 13px; }
+
+.battle { display: flex; flex-direction: column; gap: 16px; }
+.battle-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; flex-wrap: wrap; padding: 14px 20px; }
+.battle-bar h2 { margin: 0; }
+.battle-bar p { margin: 2px 0 0; }
+.battle-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.battle-layout { display: grid; grid-template-columns: minmax(250px, 1fr) minmax(360px, 2fr) minmax(220px, 1fr); gap: 16px; align-items: start; }
+.battle-layout .panel { padding: 16px; }
+
+.turn-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.turn { display: grid; grid-template-columns: 56px 1fr; gap: 8px; align-items: stretch; }
+.init-input { padding: 8px 4px; text-align: center; font-weight: 700; font-size: 16px; }
+.turn-main { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; background: #1e293b; border-color: #334155; padding: 8px 10px; min-width: 0; }
+.turn-main:hover { background: #26384e; }
+.turn.pc .turn-main { border-left: 4px solid #6aa7e8; }
+.turn.monster .turn-main { border-left: 4px solid #c8703a; }
+.turn.selected .turn-main { border-color: #93c5fd; background: #294467; }
+.turn.active .turn-main { box-shadow: 0 0 0 2px #9be3b4; }
+.turn.out .turn-main { opacity: .5; }
+.turn.out .turn-name { text-decoration: line-through; }
+.turn-name { font-weight: 600; overflow-wrap: anywhere; }
+.turn-meta, .turn-conditions { font-size: 12px; color: #b2c2d8; }
+.turn-conditions { color: #f2cf8a; }
+.mini-hp { display: block; width: 100%; height: 4px; background: #334155; border-radius: 2px; overflow: hidden; }
+.mini-hp span, .hp-bar div { display: block; height: 100%; background: #4f9a6c; }
+.mini-hp span.mid, .hp-bar div.mid { background: #c49a3e; }
+.mini-hp span.low, .hp-bar div.low { background: #b84a4a; }
+
+.combatant-detail { display: flex; flex-direction: column; gap: 12px; }
+.combatant-detail h3 { margin: 8px 0 4px; }
+.detail-head { display: flex; gap: 14px; align-items: flex-start; }
+.detail-art { width: 80px; height: 160px; object-fit: contain; border-radius: 8px; background: #0003; flex-shrink: 0; }
+.grow { flex: 1; min-width: 0; }
+.row-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.hp-block { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid #40516a; border-radius: 10px; }
+.hp-line { display: flex; justify-content: space-between; align-items: baseline; }
+.hp-number b { font-size: 26px; }
+.hp-bar { height: 10px; background: #334155; border-radius: 5px; overflow: hidden; }
+.hp-change, .hp-edit, .condition-add, .add-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.hp-change label { width: 110px; } .hp-change label:nth-child(2) { width: 150px; }
+.hp-edit label, .condition-add label { width: 130px; }
+.hp-block p { margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; background: #3b2f1d; color: #f2cf8a; border-radius: 999px; padding: 3px 4px 3px 10px; font-size: 13px; }
+.chip button { padding: 0 7px; border-radius: 999px; background: #0003; border: 0; color: inherit; line-height: 1.4; }
+.roll-mode { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.last-roll { background: #1d3b2c; color: #c8f0d4; border-radius: 8px; padding: 8px 12px; margin: 0; }
+.save-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.stat-summary { margin: 0; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.stat-summary div { display: flex; gap: 8px; } .stat-summary dt { color: #9aa9bd; min-width: 110px; } .stat-summary dd { margin: 0; }
+.feature { border-bottom: 1px solid #2a3a52; padding: 8px 0; }
+.feature p { margin: 0 0 6px; font-size: 14px; line-height: 1.45; }
+.feature-rolls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.badge { font-size: 12px; padding: 4px 8px; border-radius: 6px; background: #26384e; color: #c8d6e8; }
+.add-combatants { border: 1px solid #40516a; border-radius: 10px; padding: 14px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
+.add-combatants h3 { margin: 0; }
+.add-row label { width: 120px; } .add-row label.grow { flex: 1; min-width: 160px; width: auto; } .add-row label.check { width: auto; }
+
+.log-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 13px; max-height: 70vh; overflow-y: auto; }
+.log-list li { border-bottom: 1px solid #2a3a52; padding-bottom: 6px; }
+
+.modal-backdrop { position: fixed; inset: 0; background: #0009; display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+.modal { background: #172235; border: 1px solid #527ca9; border-radius: 12px; padding: 20px; width: min(420px, 100%); display: flex; flex-direction: column; gap: 10px; }
+.modal input { font-size: 22px; text-align: center; }
+
+@media (max-width: 1100px) {
+  .battle-layout { grid-template-columns: minmax(240px, 1fr) minmax(320px, 2fr); }
+  .battle-layout .log { grid-column: 1 / -1; }
+  .log-list { max-height: 320px; }
+}
+@media (max-width: 760px) {
+  .battle-layout { grid-template-columns: 1fr; }
+  .detail-art { width: 60px; height: 120px; }
+  .hp-change label, .hp-change label:nth-child(2) { width: calc(50% - 4px); }
+  .hp-change button { flex: 1; }
+}
+/* Keep turn controls reachable while scrolling a long stat block. */
+.battle-bar { position: sticky; top: 0; z-index: 5; box-shadow: 0 4px 12px #0006; }
