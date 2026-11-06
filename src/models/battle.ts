@@ -6,6 +6,8 @@ export interface PartyMember {
   level: number;
   armor_class: number;
   passive_perception: number;
+  /** Optional; unset until the player provides it. Needed for "Roll PCs". */
+  initiative_bonus?: number;
   notes?: string;
 }
 
@@ -38,6 +40,7 @@ export function isPartyMember(value: unknown): value is PartyMember {
   const p = value as Partial<PartyMember>;
   return isString(p.id) && p.id.length > 0 && isString(p.name)
     && isInt(p.level, 1, 20) && isInt(p.armor_class, 0, 50) && isInt(p.passive_perception, 0, 50)
+    && (p.initiative_bonus === undefined || isInt(p.initiative_bonus, -10, 30))
     && (p.notes === undefined || isString(p.notes));
 }
 

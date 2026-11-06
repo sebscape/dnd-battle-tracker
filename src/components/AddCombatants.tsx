@@ -20,6 +20,7 @@ export default function AddCombatants({ battle, party, monsters, apply, onAdded 
   const [group, setGroup] = useState(false);
   const [pcName, setPcName] = useState("");
   const [pcAc, setPcAc] = useState("10");
+  const [pcInit, setPcInit] = useState("");
   const inBattle = new Set(battle.combatants.map(c => c.party_member_id).filter(Boolean));
   const available = party.filter(p => !inBattle.has(p.id));
 
@@ -39,11 +40,14 @@ export default function AddCombatants({ battle, party, monsters, apply, onAdded 
     <form className="add-row" onSubmit={e => {
       e.preventDefault();
       if (!pcName.trim()) return;
-      add([{ ...rules.pcCombatant({ id: "", name: pcName.trim(), level: 1, armor_class: clampInt(pcAc, 0, 50, 10), passive_perception: 10 }), party_member_id: undefined }]);
-      setPcName("");
+      const known = pcInit.trim() !== "";
+      add([{ ...rules.pcCombatant({ id: "", name: pcName.trim(), level: 1, armor_class: clampInt(pcAc, 0, 50, 10), passive_perception: 10 }), party_member_id: undefined,
+        initiative_bonus: known ? clampInt(pcInit, -10, 30, 0) : 0, initiative_bonus_known: known }]);
+      setPcName(""); setPcInit("");
     }}>
       <label className="grow">Other character or ally<input value={pcName} placeholder="Name" onChange={e => setPcName(e.target.value)} /></label>
       <label>AC<input type="number" min="0" max="50" value={pcAc} onChange={e => setPcAc(e.target.value)} /></label>
+      <label>Init. bonus<input type="number" min="-10" max="30" placeholder="Not set" value={pcInit} onChange={e => setPcInit(e.target.value)} /></label>
       <button type="submit" className="small" disabled={!pcName.trim()}>Add</button>
     </form>
     <div className="add-row">

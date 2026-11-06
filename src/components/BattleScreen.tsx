@@ -36,6 +36,13 @@ export default function BattleScreen({ battle, canUndo, apply, undo, finish, par
   const order = rules.turnOrder(battle);
   const selected = battle.combatants.find(c => c.id === (selectedId ?? battle.active_id)) ?? null;
   const missingInit = battle.combatants.filter(c => c.initiative === null);
+  // Before combat, Roll PCs rolls for every PC; once combat has begun, only for PCs still without initiative (joined mid-fight).
+  const pcs = battle.combatants.filter(c => c.kind === "pc");
+  const pcsToRoll = battle.started ? pcs.filter(c => c.initiative === null) : pcs;
+  const pcsWithoutBonus = pcsToRoll.filter(c => rules.pcInitiativeBonus(c, party) === undefined);
+  const rollPcsTip = !pcsToRoll.length ? (pcs.length ? "Every PC already has initiative" : "No player characters in this battle")
+    : pcsWithoutBonus.length ? "Initiative not set for all players"
+    : battle.started ? "Roll initiative for PCs who don't have it yet" : "Roll d20 + initiative bonus for every PC";
 
   const ask = (title: string, min: number, max: number) => new Promise<number | null>(resolve =>
     setPrompt({ title, min, max, resolve: v => { setPrompt(null); resolve(v); } }));
@@ -79,7 +86,15 @@ export default function BattleScreen({ battle, canUndo, apply, undo, finish, par
 
     <div className="battle-layout">
       <section className="panel initiative" aria-label="Initiative order">
-        <h2>Initiative</h2>
+        <div className="panel-heading initiative-heading">
+          <h2>Initiative</h2>
+          {/* The tooltip sits on a wrapper because some browsers don't show tooltips on disabled buttons. */}
+          <span title={rollPcsTip}>
+            <button type="button" className="small" disabled={!pcsToRoll.length || pcsWithoutBonus.length > 0}
+              onClick={() => apply(b => rules.rollPcInitiative(b, pcsToRoll.map(c => c.id), party))}>Roll PCs</button>
+          </span>
+        </div>
+        {pcsWithoutBonus.length > 0 && pcsToRoll.length > 0 && <p className="muted small-text">No initiative bonus for {pcsWithoutBonus.map(c => c.name).join(", ")}. Add it on the Party tab, or enter their initiative by hand.</p>}
         {order.length === 0 && <p className="muted">No combatants yet. Use + Add.</p>}
         <ol className="turn-list">
           {order.map(c => <InitiativeRow key={c.id} c={c} active={c.id === battle.active_id} selected={c.id === selected?.id}

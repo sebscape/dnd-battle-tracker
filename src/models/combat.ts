@@ -26,8 +26,10 @@ export interface Combatant {
   party_member_id?: string;
   /** null until rolled or entered. */
   initiative: number | null;
-  /** Used to break initiative ties. PCs: 0. */
+  /** Used to break initiative ties. For PCs, 0 until known. */
   initiative_bonus: number;
+  /** PCs added by hand (not from the party): whether initiative_bonus was entered. */
+  initiative_bonus_known?: boolean;
   /** Combatants sharing a group act on one initiative roll. */
   init_group?: string;
   armor_class: number;

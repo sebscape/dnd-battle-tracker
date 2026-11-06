@@ -24,6 +24,8 @@ export default function PartyRoster({ party, onChange }: Props) {
         <label className="grow">Name<input value={p.name} placeholder="Character name" onChange={e => update(p.id, { name: e.target.value })} /></label>
         <label>Level<input type="number" min="1" max="20" value={p.level} onChange={e => update(p.id, { level: clampInt(e.target.value, 1, 20, p.level) })} /></label>
         <label>AC<input type="number" min="0" max="50" value={p.armor_class} onChange={e => update(p.id, { armor_class: clampInt(e.target.value, 0, 50, p.armor_class) })} /></label>
+        <label title="Initiative bonus (usually the Dexterity modifier). Leave empty until the player tells you.">Init. bonus<input type="number" min="-10" max="30" placeholder="Not set" value={p.initiative_bonus ?? ""}
+          onChange={e => update(p.id, { initiative_bonus: e.target.value.trim() === "" ? undefined : clampInt(e.target.value, -10, 30, p.initiative_bonus ?? 0) })} /></label>
         <label title="Passive Perception">Passive Perc.<input type="number" min="0" max="50" value={p.passive_perception} onChange={e => update(p.id, { passive_perception: clampInt(e.target.value, 0, 50, p.passive_perception) })} /></label>
         <label className="full">Notes<input value={p.notes ?? ""} placeholder="Class, player name, anything useful" onChange={e => update(p.id, { notes: e.target.value || undefined })} /></label>
         <button type="button" className="danger small" onClick={() => remove(p)}>Remove</button>

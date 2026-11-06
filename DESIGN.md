@@ -59,7 +59,8 @@ Export/import of all battle-app data as JSON for backup, matching the reference 
 ## Core features
 
 ### Party roster ("light" PC tracking)
-- Saved once: name, level, AC, passive Perception.
+- Saved once: name, level, AC, initiative bonus (optional), passive Perception.
+- **Roll PCs** (initiative panel) rolls d20 + initiative bonus for every PC before combat, or only for PCs still without initiative once combat has begun. It is disabled until every PC it would roll for has a bonus ("Initiative not set for all players").
 - In battle: initiative, conditions, up/down status. Players track their own HP.
 - Level is needed for encounter difficulty.
 
