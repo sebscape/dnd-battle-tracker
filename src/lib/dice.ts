@@ -53,12 +53,17 @@ export function rollD20(bonus: number, mode: Advantage = "normal", manualNatural
 
 export const signed = (n: number) => (n >= 0 ? "+" : "−") + Math.abs(n);
 
+const plus = (n: number) => n === 0 ? "" : (n > 0 ? " + " : " − ") + Math.abs(n);
+
+/** How a d20 total was made, e.g. "d20 11 + 4" or "d20 13 and 5 with advantage, keeping 13, + 4". */
 export function describeD20(r: D20Roll): string {
-  const dice = r.manual ? "rolled " + r.natural : r.rolls.length > 1 ? "d20 " + r.rolls.join(", ") + " → " + r.natural : "d20 " + r.natural;
-  return dice + " " + signed(r.bonus) + " = " + r.total + (r.natural === 20 ? " (natural 20)" : r.natural === 1 ? " (natural 1)" : "");
+  if (r.manual) return "you rolled " + r.natural + plus(r.bonus);
+  if (r.rolls.length > 1) return "d20 " + r.rolls.join(" and ") + " with " + r.mode + ", keeping " + r.natural + (r.bonus ? "," + plus(r.bonus) : "");
+  return "d20 " + r.natural + plus(r.bonus);
 }
 
+/** How a damage total was made, e.g. "2d6: 4 + 4, + 4" or "you rolled 8, + 4". */
 export function describeDice(r: DiceRoll): string {
-  const mod = r.expr.modifier ? " " + signed(r.expr.modifier) : "";
-  return (r.manual ? "rolled " + r.dice[0] : formatDice({ ...r.expr, modifier: 0 }) + " [" + r.dice.join(", ") + "]") + mod + " = " + r.total;
+  const mod = r.expr.modifier ? "," + plus(r.expr.modifier) : "";
+  return (r.manual ? "you rolled " + r.dice[0] : r.expr.count + "d" + r.expr.sides + ": " + r.dice.join(" + ")) + mod;
 }

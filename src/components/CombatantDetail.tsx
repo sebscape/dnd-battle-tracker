@@ -31,11 +31,12 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
   const [lastRoll, setLastRoll] = useState("");
   const [mode, setMode] = useState<Advantage>("normal");
 
-  async function rollD20(label: string, bonus: number) {
+  async function rollD20(label: string, bonus: number, isAttack = false) {
     const r = await roller.d20(c.name + ": " + label, bonus, mode);
     if (!r) return;
     setMode("normal");
-    const text = c.name + " — " + label + (r.mode !== "normal" ? " (" + r.mode + ")" : "") + ": " + r.total + ". " + describeD20(r);
+    const nat = r.natural === 20 ? " — natural 20" + (isAttack ? ", a critical hit!" : "!") : r.natural === 1 ? " — natural 1" + (isAttack ? ", an automatic miss." : ".") : "";
+    const text = c.name + " — " + label + ": " + r.total + " (" + describeD20(r) + ")" + nat;
     setLastRoll(text);
     apply(b => rules.withLog(b, text));
   }
@@ -43,14 +44,17 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
     const results: string[] = [];
     let total = 0;
     for (const p of parts) {
-      if (!p.dice) { total += p.average; results.push(p.average + " " + p.type); continue; }
+      if (!p.dice) { total += p.average; results.push(p.average + " " + p.type + " (fixed, no roll)"); continue; }
       const expr = crit ? critical(p.dice) : p.dice;
       const r = await roller.dice(c.name + ": " + label + " — " + formatDice(expr) + " " + p.type, expr);
       if (!r) return;
       total += r.total;
       results.push(r.total + " " + p.type + " (" + describeDice(r) + ")");
     }
-    const text = c.name + " — " + label + (crit ? " critical" : "") + " damage: " + total + ". " + results.join(" + ");
+    const heading = c.name + " — " + (crit ? label.replace(/ hits$/, "") + " critical hit" : label);
+    const text = parts.length === 1
+      ? heading + ": " + results[0].replace(/^(\d+) (\w+)/, "$1 $2 damage")
+      : heading + ": " + total + " damage — " + results.join(" + ");
     setLastRoll(text);
     apply(b => rules.withLog(b, text));
   }
@@ -89,7 +93,7 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
 
       <h3>Saving throws</h3>
       <div className="save-buttons">
-        {ABILITIES.map(a => { const bonus = saveBonus(monster, a); return <button key={a} type="button" className="small" onClick={() => rollD20(a + " save", bonus)}>
+        {ABILITIES.map(a => { const bonus = saveBonus(monster, a); return <button key={a} type="button" className="small" title={a + " saving throw"} onClick={() => rollD20(a + " saving throw", bonus)}>
           {a.slice(0, 3).toUpperCase()} {signed(bonus)}</button>; })}
       </div>
 
@@ -101,7 +105,7 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
         return <section key={key}>
           <h3>{title}</h3>
           {key === "legendary_actions" && monster.legendary_actions_intro && <p className="muted small-text">{monster.legendary_actions_intro}</p>}
-          {features.map((f, i) => <Feature key={i} feature={f} onAttack={rollD20} onDamage={rollDamage} />)}
+          {features.map((f, i) => <Feature key={i} feature={f} onAttack={(label, bonus) => rollD20(label, bonus, true)} onDamage={rollDamage} />)}
         </section>;
       })}
       {(monster.spellcasting?.length ?? 0) > 0 && <section><h3>Spellcasting</h3>{monster.spellcasting!.map((f, i) => <p key={i}><b>{f.name}.</b> {f.description}</p>)}</section>}
@@ -117,15 +121,15 @@ function Feature({ feature, onAttack, onDamage }: { feature: NamedFeature; onAtt
     <p><b>{feature.name}.</b> {feature.description}</p>
     {(p.attack || p.save) && <div className="feature-rolls">
       {p.attack && <>
-        <button type="button" className="small" onClick={() => onAttack(feature.name + " attack", p.attack!.bonus)}>Attack {signed(p.attack.bonus)}</button>
+        <button type="button" className="small" title="Roll to hit: d20 + bonus, compared with the target's AC" onClick={() => onAttack(feature.name + " attack roll", p.attack!.bonus)}>Attack {signed(p.attack.bonus)}</button>
         {p.attack.damage.length > 0 && <>
-          <button type="button" className="small" onClick={() => onDamage(feature.name, p.attack!.damage, false)}>Damage {dmgLabel(p.attack.damage)}</button>
-          <button type="button" className="small" onClick={() => onDamage(feature.name, p.attack!.damage, true)}>Critical</button>
+          <button type="button" className="small" title="Damage on a hit" onClick={() => onDamage(feature.name + " hits", p.attack!.damage, false)}>Damage {dmgLabel(p.attack.damage)}</button>
+          {p.attack.damage.some(d => d.dice) && <button type="button" className="small" title="On a natural 20: the damage dice are rolled twice" onClick={() => onDamage(feature.name + " hits", p.attack!.damage, true)}>Critical damage</button>}
         </>}
       </>}
       {p.save && <>
         <span className="badge">DC {p.save.dc} {p.save.ability} save{p.save.halfOnSuccess ? ", half on success" : ""}</span>
-        {p.save.failureDamage.length > 0 && <button type="button" className="small" onClick={() => onDamage(feature.name, p.save!.failureDamage, false)}>Damage {dmgLabel(p.save.failureDamage)}</button>}
+        {p.save.failureDamage.length > 0 && <button type="button" className="small" title="Damage to a creature that fails the save" onClick={() => onDamage(feature.name + " (failed save)", p.save!.failureDamage, false)}>Damage {dmgLabel(p.save.failureDamage)}</button>}
       </>}
     </div>}
   </div>;
