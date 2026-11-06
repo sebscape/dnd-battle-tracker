@@ -85,6 +85,11 @@ export function rollEffects(roller: Combatant, target: Combatant | null, kind: R
   }
 
   if (kind === "attack" && target) {
+    // A PC at 0 HP is Unconscious even if the condition wasn't added by hand.
+    if (isDownPc(target) && !target.conditions.some(x => x.name === "Unconscious")) {
+      add("advantage", "target is down (Unconscious)");
+      reminders.push("Target is down: a hit from within 5 feet is a critical hit, and any hit causes a death save failure (two on a critical hit).");
+    }
     for (const cond of target.conditions) {
       const rule = CONDITION_RULES[cond.name];
       if (rule?.against) add(rule.against, "target is " + cond.name);
@@ -104,6 +109,50 @@ export function rollEffects(roller: Combatant, target: Combatant | null, kind: R
   const summary = adv.length && dis.length ? "Normal: Advantage (" + adv.join(", ") + ") and Disadvantage (" + dis.join(", ") + ") cancel out"
     : adv.length ? "Advantage (" + adv.join(", ") + ")" : dis.length ? "Disadvantage (" + dis.join(", ") + ")" : "";
   return { mode, reasons, summary, autoFail, reminders: [...new Set(reminders)], consumed };
+}
+
+/** A PC at 0 HP who isn't dead yet. */
+export const isDownPc = (c: Combatant) => c.kind === "pc" && c.out && (c.death_saves?.failures ?? 0) < 3;
+
+export type BadgeKind = "adv-against" | "dis-against" | "prone" | "crit" | "own-dis" | "own-adv" | "no-actions" | "concentrating" | "death-saves" | "stable" | "dead";
+export interface Badge { kind: BadgeKind; label: string; title: string }
+
+const NO_ATTACKER: Combatant = { id: "", kind: "monster", name: "", initiative: null, initiative_bonus: 0, armor_class: 0, conditions: [], out: false };
+const tidy = (r: string) => r.replace(/^(Advantage|Disadvantage): /, "").replace(/^target (is|has) /, "");
+
+/** Short status badges for the initiative list: what matters when choosing a target. */
+export function statusBadges(c: Combatant): Badge[] {
+  const badges: Badge[] = [];
+  const has = (name: string) => c.conditions.some(x => x.name === name);
+  const ds = c.death_saves ?? { successes: 0, failures: 0 };
+
+  if (c.kind === "pc" && c.out) {
+    if (ds.failures >= 3) return [{ kind: "dead", label: "Dead", title: "Three failed death saves" }];
+    if (ds.successes >= 3) badges.push({ kind: "stable", label: "Stable", title: "Three successful death saves: stable at 0 HP. Any damage makes them start over (and is a failure)." });
+    else badges.push({ kind: "death-saves", label: "✓" + ds.successes + " ✗" + ds.failures, title: "Death saves: " + ds.successes + " success" + (ds.successes === 1 ? "" : "es") + ", " + ds.failures + " failure" + (ds.failures === 1 ? "" : "s") });
+  }
+  if (c.kind === "monster" && c.out) return badges;
+
+  // How attacks against it are rolled (attacker's own conditions aside).
+  const against = rollEffects(NO_ATTACKER, c, "attack");
+  const adv = against.reasons.filter(r => r.startsWith("Advantage: ")).map(tidy);
+  const dis = against.reasons.filter(r => r.startsWith("Disadvantage: ")).map(tidy);
+  if (against.mode === "advantage") badges.push({ kind: "adv-against", label: "Adv", title: "Attacks against it have Advantage: " + adv.join(", ") });
+  if (against.mode === "disadvantage") badges.push({ kind: "dis-against", label: "Dis", title: "Attacks against it have Disadvantage: " + dis.join(", ") });
+  if (against.mode === "normal" && adv.length && dis.length) badges.push({ kind: "prone", label: "Adv/Dis", title: "Attacks against it: Advantage (" + adv.join(", ") + ") and Disadvantage (" + dis.join(", ") + ") cancel out" });
+  if (has("Prone")) badges.push({ kind: "prone", label: "Prone", title: "Prone: attacks from within 5 feet have Advantage, from farther away Disadvantage" });
+  if (has("Paralyzed") || has("Unconscious") || isDownPc(c)) badges.push({ kind: "crit", label: "Crit", title: "Any hit from within 5 feet is a critical hit" });
+
+  // Its own attacks.
+  const own = rollEffects(c, null, "attack");
+  const ownWhy = own.reasons.map(tidy).filter(r => r !== "they cancel out").join(", ");
+  if (!c.out && own.mode === "disadvantage") badges.push({ kind: "own-dis", label: "Atk▼", title: "Its own attacks have Disadvantage: " + ownWhy });
+  if (!c.out && own.mode === "advantage") badges.push({ kind: "own-adv", label: "Atk▲", title: "Its own attacks have Advantage: " + ownWhy });
+
+  const noAct = c.conditions.filter(x => CONDITION_RULES[x.name]?.incapacitated || x.name === "Incapacitated").map(x => x.name);
+  if (noAct.length && !c.out) badges.push({ kind: "no-actions", label: "No actions", title: "Can't take actions or reactions (no opportunity attacks): " + noAct.join(", ") });
+  if (has("Concentrating")) badges.push({ kind: "concentrating", label: "Conc", title: "Concentrating on a spell: damage forces a Constitution save (DC 10 or half the damage, whichever is higher, up to 30)" });
+  return badges;
 }
 
 /** Petrified creatures have Resistance to all damage. */

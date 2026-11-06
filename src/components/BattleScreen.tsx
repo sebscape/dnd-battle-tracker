@@ -5,6 +5,7 @@ import type { MonsterData } from "../lib/useMonsters";
 import type { Advantage, DiceExpr } from "../lib/dice";
 import { rollD20, rollDice } from "../lib/dice";
 import * as rules from "../lib/combat";
+import { statusBadges } from "../lib/effects";
 import CombatantDetail from "./CombatantDetail";
 import type { Roller } from "./CombatantDetail";
 import AddCombatants from "./AddCombatants";
@@ -136,15 +137,19 @@ function InitiativeRow({ c, active, selected, onSelect, onInitiative }: { c: Com
     if (v !== c.initiative) onInitiative(v);
   };
   const hpPct = c.hp !== undefined && c.max_hp ? Math.max(0, Math.min(100, (c.hp / c.max_hp) * 100)) : null;
-  return <li className={"turn " + (active ? "active " : "") + (selected ? "selected " : "") + (c.out ? "out " : "") + c.kind}>
+  const badges = statusBadges(c);
+  return <li className={"turn " + (active ? "active " : "") + (selected ? "selected " : "") + (c.out ? "out " : "") + (c.kind === "pc" && c.out && (c.death_saves?.failures ?? 0) >= 3 ? "dead " : "") + c.kind}>
     <input className="init-input" aria-label={"Initiative for " + c.name} type="number" inputMode="numeric" value={text} placeholder="—"
       onChange={e => setText(e.target.value)} onBlur={commit} onKeyDown={e => { if (e.key === "Enter") commit(); }} />
     <button type="button" className="turn-main" onClick={onSelect} aria-current={active ? "step" : undefined}>
-      <span className="turn-name">{active && <span aria-hidden="true">▶ </span>}{c.name}{c.init_group ? <small> · group</small> : null}</span>
+      <span className="turn-top">
+        <span className="turn-name">{active && <span aria-hidden="true">▶ </span>}{c.name}{c.init_group ? <small> · group</small> : null}</span>
+        {badges.length > 0 && <span className="badges">{badges.map(x => <span key={x.kind + x.label} className={"status-badge " + x.kind} title={x.title} aria-label={x.title}>{x.label}</span>)}</span>}
+      </span>
       <span className="turn-meta">
         AC {c.armor_class}
         {c.hp !== undefined && <> · {c.hp}/{c.max_hp} HP</>}
-        {c.out && <> · {c.kind === "pc" ? "Down" : "Defeated"}</>}
+        {c.out && <> · {c.kind === "pc" ? ((c.death_saves?.failures ?? 0) >= 3 ? "Dead" : "Down") : "Defeated"}</>}
       </span>
       {hpPct !== null && <span className="mini-hp" aria-hidden="true"><span style={{ width: hpPct + "%" }} className={hpPct <= 25 ? "low" : hpPct <= 50 ? "mid" : ""} /></span>}
       {c.conditions.length > 0 && <span className="turn-conditions">{c.conditions.map(x => x.name + (x.rounds !== null ? " (" + x.rounds + ")" : "")).join(", ")}</span>}
