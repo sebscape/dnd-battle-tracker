@@ -23,35 +23,56 @@ interface Props {
   started: boolean;
   apply: (change: (b: Battle) => Battle) => void;
   roller: Roller;
+  /** Everyone else in the battle, for choosing an attack's target. */
+  others: Combatant[];
+  targetId: string;
+  onTarget: (id: string) => void;
 }
+
+/** Result of the latest attack roll for one feature, used to suggest the next button. */
+interface AttackOutcome { key: string; natural: number; total: number; hit: boolean | null }
 
 const FEATURE_SECTIONS = [["traits", "Traits"], ["actions", "Actions"], ["bonus_actions", "Bonus Actions"], ["reactions", "Reactions"], ["legendary_actions", "Legendary Actions"]] as const;
 
-export default function CombatantDetail({ combatant: c, monster, member, artwork, started, apply, roller }: Props) {
+export default function CombatantDetail({ combatant: c, monster, member, artwork, started, apply, roller, others, targetId, onTarget }: Props) {
   const [lastRoll, setLastRoll] = useState("");
   const [mode, setMode] = useState<Advantage>("normal");
+  const [outcome, setOutcome] = useState<AttackOutcome | null>(null);
+  const target = others.find(o => o.id === targetId) ?? null;
 
-  async function rollD20(label: string, bonus: number) {
-    const r = await roller.d20(c.name + ": " + label, bonus, mode);
+  async function rollD20(label: string, bonus: number, attackKey?: string) {
+    const isAttack = attackKey !== undefined;
+    const vs = isAttack && target ? " vs " + target.name + " (AC " + target.armor_class + ")" : "";
+    const r = await roller.d20(c.name + ": " + label + vs, bonus, mode);
     if (!r) return;
     setMode("normal");
-    const text = c.name + " — " + label + (r.mode !== "normal" ? " (" + r.mode + ")" : "") + ": " + r.total + ". " + describeD20(r);
+    // A natural 20 always hits and is a critical hit; a natural 1 always misses.
+    const hit = !isAttack ? null : r.natural === 20 ? true : r.natural === 1 ? false : target ? r.total >= target.armor_class : null;
+    const nat = r.natural === 20 ? " — natural 20" + (isAttack ? ", a critical hit!" : "!") : r.natural === 1 ? " — natural 1" + (isAttack ? ", an automatic miss." : ".") : "";
+    const verdict = isAttack && target && r.natural !== 20 && r.natural !== 1 ? (hit ? " — hit." : " — miss.") : "";
+    const text = c.name + " — " + label + vs + ": " + r.total + " (" + describeD20(r) + ")" + nat + verdict;
     setLastRoll(text);
+    setOutcome(isAttack ? { key: attackKey!, natural: r.natural, total: r.total, hit } : null);
     apply(b => rules.withLog(b, text));
   }
   async function rollDamage(label: string, parts: DamagePart[], crit: boolean) {
     const results: string[] = [];
     let total = 0;
     for (const p of parts) {
-      if (!p.dice) { total += p.average; results.push(p.average + " " + p.type); continue; }
+      if (!p.dice) { total += p.average; results.push(p.average + " " + p.type + " (fixed, no roll)"); continue; }
       const expr = crit ? critical(p.dice) : p.dice;
       const r = await roller.dice(c.name + ": " + label + " — " + formatDice(expr) + " " + p.type, expr);
       if (!r) return;
       total += r.total;
       results.push(r.total + " " + p.type + " (" + describeDice(r) + ")");
     }
-    const text = c.name + " — " + label + (crit ? " critical" : "") + " damage: " + total + ". " + results.join(" + ");
+    const onTarget = outcome?.hit && target ? " " + target.name : "";
+    const heading = c.name + " — " + (crit ? label.replace(/ hits$/, "") + " critical hit" + (onTarget ? " on" + onTarget : "") : label + onTarget);
+    const text = parts.length === 1
+      ? heading + ": " + results[0].replace(/^(\d+) (\w+)/, "$1 $2 damage")
+      : heading + ": " + total + " damage — " + results.join(" + ");
     setLastRoll(text);
+    setOutcome(null);
     apply(b => rules.withLog(b, text));
   }
 
@@ -80,6 +101,12 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
     <Conditions c={c} monster={monster} apply={apply} />
 
     {monster && <>
+      <label className="target-pick">Target
+        <select value={target ? target.id : ""} onChange={e => { onTarget(e.target.value); setOutcome(null); }}>
+          <option value="">No target (compare with AC yourself)</option>
+          {others.map(o => <option key={o.id} value={o.id}>{o.name} — AC {o.armor_class}{o.out ? (o.kind === "pc" ? " (down)" : " (defeated)") : ""}</option>)}
+        </select>
+      </label>
       <div className="roll-mode" role="group" aria-label="Next d20 roll">
         <span className="muted small-text">Next d20:</span>
         {(["normal", "advantage", "disadvantage"] as const).map(m => <button key={m} type="button" className={"small " + (mode === m ? "selected" : "")} aria-pressed={mode === m} onClick={() => setMode(m)}>
@@ -89,7 +116,7 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
 
       <h3>Saving throws</h3>
       <div className="save-buttons">
-        {ABILITIES.map(a => { const bonus = saveBonus(monster, a); return <button key={a} type="button" className="small" onClick={() => rollD20(a + " save", bonus)}>
+        {ABILITIES.map(a => { const bonus = saveBonus(monster, a); return <button key={a} type="button" className="small" title={a + " saving throw"} onClick={() => rollD20(a + " saving throw", bonus)}>
           {a.slice(0, 3).toUpperCase()} {signed(bonus)}</button>; })}
       </div>
 
@@ -101,7 +128,8 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
         return <section key={key}>
           <h3>{title}</h3>
           {key === "legendary_actions" && monster.legendary_actions_intro && <p className="muted small-text">{monster.legendary_actions_intro}</p>}
-          {features.map((f, i) => <Feature key={i} feature={f} onAttack={rollD20} onDamage={rollDamage} />)}
+          {features.map((f, i) => { const k = key + ":" + i; return <Feature key={i} feature={f} outcome={outcome?.key === k ? outcome : null}
+            onAttack={(label, bonus) => rollD20(label, bonus, k)} onDamage={rollDamage} />; })}
         </section>;
       })}
       {(monster.spellcasting?.length ?? 0) > 0 && <section><h3>Spellcasting</h3>{monster.spellcasting!.map((f, i) => <p key={i}><b>{f.name}.</b> {f.description}</p>)}</section>}
@@ -110,24 +138,41 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
   </div>;
 }
 
-function Feature({ feature, onAttack, onDamage }: { feature: NamedFeature; onAttack: (label: string, bonus: number) => void; onDamage: (label: string, parts: DamagePart[], crit: boolean) => void }) {
+interface FeatureProps {
+  feature: NamedFeature;
+  outcome: AttackOutcome | null;
+  onAttack: (label: string, bonus: number) => void;
+  onDamage: (label: string, parts: DamagePart[], crit: boolean) => void;
+}
+
+function Feature({ feature, outcome, onAttack, onDamage }: FeatureProps) {
   const p = parseFeature(feature);
+  const hasCrit = !!p.attack?.damage.some(d => d.dice);
+  // Which damage button to point at after an attack roll. Nothing is disabled: the DM can always override.
+  const nat20 = outcome?.natural === 20, missed = outcome?.hit === false;
+  const suggest: "damage" | "critical" | "none" | null = !outcome ? null : missed ? "none" : nat20 && hasCrit ? "critical" : "damage";
+  const cls = (which: "damage" | "critical") => "small" + (suggest === null ? "" : suggest === which ? " suggested" : " dimmed");
+  const note = !outcome ? "" : nat20 ? (hasCrit ? "Natural 20 — a critical hit. Roll Critical damage." : "Natural 20 — a critical hit (fixed damage doesn't change).")
+    : outcome.natural === 1 ? "Natural 1 — an automatic miss. No damage."
+    : outcome.hit === true ? "Hit — roll Damage." : missed ? "Miss — no damage."
+    : "Compare " + outcome.total + " with the target's AC. If it's equal or higher, roll Damage.";
   const dmgLabel = (parts: DamagePart[]) => parts.map(d => d.dice ? formatDice(d.dice) : String(d.average)).join(" + ") + " " + [...new Set(parts.map(d => d.type))].join("/");
   return <div className="feature">
     <p><b>{feature.name}.</b> {feature.description}</p>
     {(p.attack || p.save) && <div className="feature-rolls">
       {p.attack && <>
-        <button type="button" className="small" onClick={() => onAttack(feature.name + " attack", p.attack!.bonus)}>Attack {signed(p.attack.bonus)}</button>
+        <button type="button" className="small" title="Roll to hit: d20 + bonus, compared with the target's AC" onClick={() => onAttack(feature.name + " attack roll", p.attack!.bonus)}>Attack {signed(p.attack.bonus)}</button>
         {p.attack.damage.length > 0 && <>
-          <button type="button" className="small" onClick={() => onDamage(feature.name, p.attack!.damage, false)}>Damage {dmgLabel(p.attack.damage)}</button>
-          <button type="button" className="small" onClick={() => onDamage(feature.name, p.attack!.damage, true)}>Critical</button>
+          <button type="button" className={cls("damage")} title="Damage on a hit" onClick={() => onDamage(feature.name + " hits", p.attack!.damage, false)}>Damage {dmgLabel(p.attack.damage)}</button>
+          {hasCrit && <button type="button" className={cls("critical")} title="On a natural 20: the damage dice are rolled twice" onClick={() => onDamage(feature.name + " hits", p.attack!.damage, true)}>Critical damage</button>}
         </>}
       </>}
       {p.save && <>
         <span className="badge">DC {p.save.dc} {p.save.ability} save{p.save.halfOnSuccess ? ", half on success" : ""}</span>
-        {p.save.failureDamage.length > 0 && <button type="button" className="small" onClick={() => onDamage(feature.name, p.save!.failureDamage, false)}>Damage {dmgLabel(p.save.failureDamage)}</button>}
+        {p.save.failureDamage.length > 0 && <button type="button" className="small" title="Damage to a creature that fails the save" onClick={() => onDamage(feature.name + " (failed save)", p.save!.failureDamage, false)}>Damage {dmgLabel(p.save.failureDamage)}</button>}
       </>}
     </div>}
+    {note && <p className="roll-note" role="status">{note}</p>}
   </div>;
 }
 

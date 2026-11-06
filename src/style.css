@@ -194,3 +194,11 @@ label.check.inline { display: inline-flex; margin-left: 10px; font-size: 13px; }
 }
 /* Keep turn controls reachable while scrolling a long stat block. */
 .battle-bar { position: sticky; top: 0; z-index: 5; box-shadow: 0 4px 12px #0006; }
+
+/* Attack targeting and next-step hints */
+.target-pick { max-width: 420px; }
+button.suggested { background: #2f6b46; border-color: #9be3b4; box-shadow: 0 0 0 2px #9be3b4; }
+button.suggested:hover { background: #378052; }
+button.dimmed { opacity: .55; }
+button.dimmed:hover { opacity: .85; }
+.roll-note { margin: 6px 0 0; font-size: 13px; color: #c8f0d4; }

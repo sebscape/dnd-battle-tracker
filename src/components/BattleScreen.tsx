@@ -28,6 +28,8 @@ export default function BattleScreen({ battle, canUndo, apply, undo, finish, par
   const [showAdd, setShowAdd] = useState(battle.combatants.length === 0);
   const [physical, setPhysical] = useState(() => { try { return localStorage.getItem(PHYSICAL_KEY) === "1"; } catch { return false; } });
   const [prompt, setPrompt] = useState<PromptRequest | null>(null);
+  // Last chosen attack target for each attacker, kept while switching between combatants.
+  const [targets, setTargets] = useState<Record<string, string>>({});
 
   const order = rules.turnOrder(battle);
   const selected = battle.combatants.find(c => c.id === (selectedId ?? battle.active_id)) ?? null;
@@ -87,6 +89,8 @@ export default function BattleScreen({ battle, canUndo, apply, undo, finish, par
         {showAdd && <AddCombatants battle={battle} party={party} monsters={[...data.published, ...data.custom]} apply={apply} onAdded={c => setSelectedId(c.id)} />}
         {selected
           ? <CombatantDetail key={selected.id} combatant={selected} started={battle.started} apply={apply} roller={roller}
+              others={order.filter(o => o.id !== selected.id && !(o.kind === "monster" && o.out))}
+              targetId={targets[selected.id] ?? ""} onTarget={id => setTargets(t => ({ ...t, [selected.id]: id }))}
               monster={selected.monster_id ? data.byId.get(selected.monster_id) : undefined}
               member={selected.party_member_id ? party.find(p => p.id === selected.party_member_id) : undefined}
               artwork={selected.monster_id ? data.artwork[selected.monster_id] : undefined} />
