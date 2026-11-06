@@ -103,6 +103,8 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
           {member && " · Name, level and AC come from the Party tab"}
         </p>
       </div>
+      <button type="button" className="tiny danger remove-corner" title={"Take " + c.name + " out of this battle (Undo brings them back)"}
+        onClick={() => { if (window.confirm("Remove " + c.name + " from the battle?")) apply(b => rules.removeCombatant(b, c.id)); }}>Remove</button>
     </div>
 
     {c.kind === "monster" && c.hp !== undefined && c.max_hp !== undefined && <HitPoints c={c} monster={monster} apply={apply} />}
@@ -113,8 +115,9 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
       <label className="check"><input type="checkbox" checked={c.out} onChange={e => { const v = e.target.checked; apply(b => rules.setOut(b, c.id, v)); }} />
         {c.kind === "pc" ? "Down (0 HP)" : "Defeated"}</label>
       {c.kind === "monster" && <button type="button" className="small" onClick={() => apply(b => rules.rerollInitiative(b, c.id))}>Reroll initiative{c.init_group ? " (group)" : ""}</button>}
-      <button type="button" className="small danger" onClick={() => { if (window.confirm("Remove " + c.name + " from the battle?")) apply(b => rules.removeCombatant(b, c.id)); }}>Remove</button>
     </div>
+
+    {c.kind === "pc" && c.out && <DeathSaves c={c} apply={apply} />}
 
     <Conditions c={c} monster={monster} apply={apply} />
 
@@ -350,5 +353,28 @@ function RollModeButtons({ fx, override, onOverride }: { fx: ReturnType<typeof r
       return <button key={m} type="button" className={"small " + (isActive ? "selected" : "dimmed") + (isActive && override !== null && m !== fx.mode ? " manual" : "")}
         aria-pressed={isActive} title={title} onClick={() => onOverride(m === fx.mode ? null : m)}>{MODE_LABEL[m]}</button>;
     })}
+  </div>;
+}
+
+/** Three success and three failure boxes. Clicking box n sets the count to n (or back to n − 1). */
+function DeathSaves({ c, apply }: { c: Combatant; apply: Props["apply"] }) {
+  const ds = c.death_saves ?? { successes: 0, failures: 0 };
+  const set = (s: number, f: number) => apply(b => rules.setDeathSaves(b, c.id, s, f));
+  const row = (kind: "successes" | "failures", label: string, mark: string) => <div className="ds-row" role="group" aria-label={label}>
+    <span className="ds-label">{label}</span>
+    {[1, 2, 3].map(n => {
+      const on = ds[kind] >= n;
+      const next = on && ds[kind] === n ? n - 1 : n;
+      return <button key={n} type="button" className={"ds-box " + kind + (on ? " on" : "")} aria-pressed={on} aria-label={label + " " + n}
+        onClick={() => kind === "successes" ? set(next, ds.failures) : set(ds.successes, next)}>{on ? mark : ""}</button>;
+    })}
+  </div>;
+  const status = ds.failures >= 3 ? "Dead." : ds.successes >= 3 ? "Stable at 0 HP." : "";
+  return <div className="death-save-panel">
+    <h3>Death saves</h3>
+    {row("successes", "Successes", "✓")}
+    {row("failures", "Failures", "✗")}
+    {status && <p className={ds.failures >= 3 ? "warn-text" : "muted"}>{status}</p>}
+    <p className="muted small-text">The player rolls a d20 at the start of their turn: 10 or higher is a success, 9 or lower a failure. A natural 20 means they regain 1 HP (untick Down); a natural 1 counts as two failures. Taking damage while down is a failure (two on a critical hit).</p>
   </div>;
 }

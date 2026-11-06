@@ -39,6 +39,8 @@ export interface Combatant {
   conditions: ActiveCondition[];
   /** Monster defeated, or PC down. */
   out: boolean;
+  /** PCs at 0 HP: death saving throws recorded by the DM. Cleared when they're back up. */
+  death_saves?: { successes: number; failures: number };
 }
 
 export interface LogEntry { id: string; round: number; text: string }

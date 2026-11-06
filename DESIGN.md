@@ -75,6 +75,10 @@ Export/import of all battle-app data as JSON for backup, matching the reference 
 - **Initiative:** each monster rolls separately by default; the encounter can switch a monster type to one shared roll.
 - **Names:** copies are auto-numbered (Goblin 1, Goblin 2) and each can be renamed.
 
+### Status badges and death saves
+- Each initiative row shows small badges; hovering shows the full meaning and the reason, and a "What the badges mean" key sits under the list (for touch screens): **Adv** / **Dis** (attacks against it), **Prone**, **Crit** (hits from within 5 feet are critical), **Atk▼/Atk▲** (its own attacks), **No actions**, **Conc** (concentrating), and for a downed PC its death saves (**✓1 ✗2**, **Stable**, **Dead**).
+- A PC marked Down counts as Unconscious for attacks against it. The DM records death saves (players roll them) in three success and three failure boxes; three failures mark the PC dead and skip their turns. Death saves reset when the PC is back up.
+
 ### Turn order
 - Initiative list sorted high to low, with the active combatant highlighted; next/previous turn; round counter.
 - PC initiative entered by the DM.

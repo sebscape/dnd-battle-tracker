@@ -151,6 +151,7 @@ export function nextTurn(b: Battle): Battle {
     const idx = (start + step) % order.length;
     const c = order[idx];
     if (c.kind === "monster" && c.out) continue;
+    if (c.kind === "pc" && c.out && (c.death_saves?.failures ?? 0) >= 3) continue; // dead
     const wrapped = idx <= start;
     const round = wrapped ? out.round + 1 : out.round;
     out = { ...out, active_id: c.id, round };
@@ -186,7 +187,20 @@ export function setOut(b: Battle, id: string, isOut: boolean): Battle {
   const c = b.combatants.find(x => x.id === id);
   if (!c) return b;
   const label = c.kind === "pc" ? (isOut ? "is down" : "is back up") : (isOut ? "is defeated" : "is back in the fight");
-  return withLog(update(b, id, () => ({ out: isOut })), c.name + " " + label + ".");
+  // Death saves start fresh each time a PC drops to 0 HP.
+  return withLog(update(b, id, () => ({ out: isOut, death_saves: undefined })), c.name + " " + label + ".");
+}
+
+/** Records a downed PC's death saving throws (players roll their own). */
+export function setDeathSaves(b: Battle, id: string, successes: number, failures: number): Battle {
+  const c = b.combatants.find(x => x.id === id);
+  if (!c || c.kind !== "pc") return b;
+  const s = Math.max(0, Math.min(3, successes)), f = Math.max(0, Math.min(3, failures));
+  const prev = c.death_saves ?? { successes: 0, failures: 0 };
+  let out = update(b, id, () => ({ death_saves: { successes: s, failures: f } }));
+  const status = f >= 3 && prev.failures < 3 ? " " + c.name + " dies." : s >= 3 && prev.successes < 3 ? " " + c.name + " is stable." : "";
+  out = withLog(out, c.name + " death saves: " + s + " success" + (s === 1 ? "" : "es") + ", " + f + " failure" + (f === 1 ? "" : "s") + "." + status);
+  return out;
 }
 
 export function rename(b: Battle, id: string, name: string): Battle {
