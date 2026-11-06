@@ -156,6 +156,7 @@ label.check.inline { display: inline-flex; margin-left: 10px; font-size: 13px; }
 .hp-change, .hp-edit, .condition-add, .add-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
 .hp-change label { width: 110px; } .hp-change label:nth-child(2) { width: 150px; }
 .hp-edit label, .condition-add label { width: 130px; }
+.condition-add label:first-child { width: 190px; }
 .hp-block p { margin: 0; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { display: inline-flex; align-items: center; gap: 6px; background: #3b2f1d; color: #f2cf8a; border-radius: 999px; padding: 3px 4px 3px 10px; font-size: 13px; }
