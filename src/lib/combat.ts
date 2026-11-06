@@ -5,7 +5,7 @@ import { CONDITIONS } from "../models/combat";
 import { describeEffect } from "./effects";
 import type { Encounter, PartyMember } from "../models/battle";
 import type { Monster } from "../models/monster";
-import { parseDice, rollD20, rollDice } from "./dice";
+import { describeD20, parseDice, rollD20, rollDice } from "./dice";
 
 const uid = () => crypto.randomUUID();
 const now = () => new Date().toISOString();
@@ -21,8 +21,30 @@ export function rollHitPoints(m: Monster): number {
 }
 
 export function pcCombatant(p: PartyMember): Combatant {
-  return { id: uid(), kind: "pc", name: p.name || "Unnamed character", party_member_id: p.id, initiative: null, initiative_bonus: 0,
+  return { id: uid(), kind: "pc", name: p.name || "Unnamed character", party_member_id: p.id, initiative: null, initiative_bonus: p.initiative_bonus ?? 0,
     armor_class: p.armor_class, conditions: [], out: false };
+}
+
+/** A PC's initiative bonus: from the party roster (read live, so later edits count), or entered when added by hand. */
+export function pcInitiativeBonus(c: Combatant, party: PartyMember[]): number | undefined {
+  if (c.kind !== "pc") return undefined;
+  if (c.party_member_id) return party.find(p => p.id === c.party_member_id)?.initiative_bonus;
+  return c.initiative_bonus_known ? c.initiative_bonus : undefined;
+}
+
+/** Rolls initiative for the given PCs (d20 + bonus) and logs the results. */
+export function rollPcInitiative(b: Battle, ids: string[], party: PartyMember[]): Battle {
+  const results: string[] = [];
+  const combatants = b.combatants.map(c => {
+    if (!ids.includes(c.id)) return c;
+    const bonus = pcInitiativeBonus(c, party);
+    if (bonus === undefined) return c;
+    const r = rollD20(bonus);
+    results.push(c.name + " " + r.total + " (" + describeD20(r) + ")");
+    return { ...c, initiative: r.total, initiative_bonus: bonus };
+  });
+  if (!results.length) return b;
+  return withLog({ ...b, combatants, timestamp_modified: now() }, "PC initiative rolled: " + results.join(", ") + ".");
 }
 
 /** Copies of a monster with rolled HP and initiative. Numbered when there's more than one. */
