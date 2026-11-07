@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Battle } from "../models/combat";
+import type { Battle, LootItem } from "../models/combat";
 import { isBattle } from "../models/combat";
 import type { PartyMember } from "../models/battle";
 import { endBattle, syncParty } from "./combat";
@@ -66,10 +66,10 @@ export function useBattle(party: PartyMember[]) {
   current.current = state;
 
   /** Ends the battle and moves it to history. */
-  const finish = useCallback(() => {
+  const finish = useCallback((loot?: LootItem[]) => {
     const battle = current.current.battle && sync(current.current.battle);
     if (!battle) return;
-    const ended = endBattle(battle);
+    const ended = endBattle(battle, loot);
     try { localStorage.setItem(HISTORY_KEY, JSON.stringify([...loadHistory(), ended].slice(-HISTORY_LIMIT))); }
     catch { setError("The finished battle couldn't be saved to history."); }
     setState({ battle: null, undo: [] });

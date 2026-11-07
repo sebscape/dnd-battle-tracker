@@ -2,6 +2,8 @@ import { useState } from "react";
 import BattleScreen from "./components/BattleScreen";
 import Encounters from "./components/Encounters";
 import PartyRoster from "./components/PartyRoster";
+import SettingsPanel from "./components/SettingsPanel";
+import { useTreasureSettings } from "./lib/treasure";
 import type { Encounter } from "./models/battle";
 import { isEncounter, isPartyMember } from "./models/battle";
 import { createBattle } from "./lib/combat";
@@ -9,13 +11,14 @@ import { useBattle } from "./lib/useBattle";
 import { ENCOUNTERS_KEY, PARTY_KEY, useStoredList } from "./lib/storage";
 import { useMonsters } from "./lib/useMonsters";
 
-type Tab = "battle" | "encounters" | "party";
+type Tab = "battle" | "encounters" | "party" | "settings";
 
 export default function App() {
   const data = useMonsters();
   const [party, setParty, partyError] = useStoredList(PARTY_KEY, isPartyMember);
   const [encounters, setEncounters, encounterError] = useStoredList(ENCOUNTERS_KEY, isEncounter);
   const battle = useBattle(party);
+  const [treasure, setTreasure, treasureError] = useTreasureSettings();
   const [tab, setTab] = useState<Tab>(() => battle.battle ? "battle" : "encounters");
 
   function startBattle(encounter: Encounter | null) {
@@ -30,7 +33,7 @@ export default function App() {
   const bridgeText = data.bridge === "connecting" ? "Checking Monster Reference…"
     : data.bridge === "connected" ? data.custom.length + " custom monster" + (data.custom.length === 1 ? "" : "s") + " from Monster Reference"
     : "Published monsters only — Monster Reference not reachable";
-  const saveError = partyError || encounterError || battle.error;
+  const saveError = partyError || encounterError || battle.error || treasureError;
 
   return <main>
     <header>
@@ -45,8 +48,8 @@ export default function App() {
     </header>
 
     <nav className="tabs" aria-label="Sections">
-      {(["battle", "encounters", "party"] as const).map(t => <button key={t} type="button" className="tab" aria-current={tab === t ? "page" : undefined} onClick={() => setTab(t)}>
-        {t === "battle" ? (battle.battle ? "Battle · round " + battle.battle.round : "Battle") : t === "encounters" ? "Encounters" : "Party (" + party.length + ")"}
+      {(["battle", "encounters", "party", "settings"] as const).map(t => <button key={t} type="button" className="tab" aria-current={tab === t ? "page" : undefined} onClick={() => setTab(t)}>
+        {t === "battle" ? (battle.battle ? "Battle · round " + battle.battle.round : "Battle") : t === "encounters" ? "Encounters" : t === "party" ? "Party (" + party.length + ")" : "Settings"}
       </button>)}
     </nav>
 
@@ -55,7 +58,7 @@ export default function App() {
 
     {tab === "battle" && (battle.battle
       ? <BattleScreen key={battle.battle.id} battle={battle.battle} canUndo={battle.canUndo} apply={battle.apply} undo={battle.undo}
-          finish={() => { battle.finish(); setTab("encounters"); }} party={party} data={data} />
+          finish={loot => { battle.finish(loot); setTab("encounters"); }} party={party} data={data} treasure={treasure} />
       : <section className="panel empty-battle">
           <h2>No battle in progress</h2>
           <p className="muted">Start one from a saved encounter, or start an empty battle and add combatants as the fight begins.</p>
@@ -66,6 +69,7 @@ export default function App() {
         </section>)}
     {tab === "encounters" && <Encounters encounters={encounters} onChange={setEncounters} party={party} data={data} onStartBattle={startBattle} />}
     {tab === "party" && <PartyRoster party={party} onChange={setParty} />}
+    {tab === "settings" && <SettingsPanel settings={treasure} onChange={setTreasure} />}
 
     <footer>
       <p>Party and encounters are saved in this browser. Custom monsters and artwork are read from <a href="https://dnd-monster-ref.c2ma.com/">Monster Reference</a> in this same browser and are never changed here.</p>
