@@ -61,14 +61,35 @@ export interface RollEffects {
   consumed: { combatantId: string; condition: ActiveCondition }[];
 }
 
+export interface RollOptions {
+  /** Current name of a combatant (for "Grappled by …"). */
+  nameOf?: (id: string) => string | undefined;
+  /** Extra Advantage from stat-block traits or the DM's toggles, e.g. "Pack Tactics". */
+  extraAdvantage?: string[];
+}
+
 /** Works out Advantage/Disadvantage for a roll from the roller's and target's conditions. */
-export function rollEffects(roller: Combatant, target: Combatant | null, kind: RollKind, ability?: Ability): RollEffects {
+export function rollEffects(roller: Combatant, target: Combatant | null, kind: RollKind, ability?: Ability, opts: RollOptions = {}): RollEffects {
   const adv: string[] = [], dis: string[] = [], reminders: string[] = [];
   const consumed: RollEffects["consumed"] = [];
   let autoFail: string | null = null;
   const add = (mode: "advantage" | "disadvantage", reason: string) => (mode === "advantage" ? adv : dis).push(reason);
+  const sourceName = (cond: ActiveCondition) => cond.source_id ? (opts.nameOf?.(cond.source_id) ?? cond.source_name ?? "its source") : null;
+  for (const reason of opts.extraAdvantage ?? []) add("advantage", reason);
 
   for (const cond of roller.conditions) {
+    const by = sourceName(cond);
+    // Grappled by a known creature: Disadvantage on attacks against anyone else.
+    if (cond.name === "Grappled" && by && kind === "attack") {
+      if (target && target.id !== cond.source_id) add("disadvantage", "Grappled by " + by + " (attacking someone else)");
+      else if (!target) reminders.push("Grappled by " + by + ": Disadvantage on attacks against anyone other than " + by + ".");
+      continue;
+    }
+    if (cond.name === "Frightened" && by && kind === "attack") {
+      add("disadvantage", "Frightened of " + by);
+      reminders.push("Frightened of " + by + ": Disadvantage only while " + by + " is in line of sight.");
+      continue;
+    }
     const rule = CONDITION_RULES[cond.name];
     if (rule) {
       if (kind === "attack" && rule.own?.attack) add(rule.own.attack, cond.name);

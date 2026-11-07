@@ -33,6 +33,8 @@ export default function BattleScreen({ battle, canUndo, apply, undo, finish, par
   const [targets, setTargets] = useState<Record<string, string>>({});
   // Manual Advantage/Disadvantage per combatant, kept until their next d20 roll.
   const [overrides, setOverrides] = useState<Record<string, Advantage | null>>({});
+  // Stat-block situations (e.g. Pack Tactics) switched on for a combatant's next roll.
+  const [situations, setSituations] = useState<Record<string, string[]>>({});
 
   const order = rules.turnOrder(battle);
   const selected = battle.combatants.find(c => c.id === (selectedId ?? battle.active_id)) ?? null;
@@ -98,7 +100,7 @@ export default function BattleScreen({ battle, canUndo, apply, undo, finish, par
         {pcsWithoutBonus.length > 0 && pcsToRoll.length > 0 && <p className="muted small-text">No initiative bonus for {pcsWithoutBonus.map(c => c.name).join(", ")}. Add it on the Party tab, or enter their initiative by hand.</p>}
         {order.length === 0 && <p className="muted">No combatants yet. Use + Add.</p>}
         <ol className="turn-list">
-          {order.map(c => <InitiativeRow key={c.id} c={c} active={c.id === battle.active_id} selected={c.id === selected?.id}
+          {order.map(c => <InitiativeRow key={c.id} c={c} nameOf={id => battle.combatants.find(x => x.id === id)?.name ?? "?"} active={c.id === battle.active_id} selected={c.id === selected?.id}
             onSelect={() => setSelectedId(c.id)} onInitiative={v => apply(b => rules.setInitiative(b, c.id, v))} />)}
         </ol>
         {order.length > 0 && <details className="badge-key">
@@ -114,6 +116,8 @@ export default function BattleScreen({ battle, canUndo, apply, undo, finish, par
               others={order.filter(o => o.id !== selected.id && !(o.kind === "monster" && o.out))}
               targetId={targets[selected.id] ?? ""} onTarget={id => setTargets(t => ({ ...t, [selected.id]: id }))}
               override={overrides[selected.id] ?? null} onOverride={m => setOverrides(o => ({ ...o, [selected.id]: m }))}
+              everyone={order} activeId={battle.active_id}
+              situational={situations[selected.id] ?? []} onSituational={k => setSituations(s => ({ ...s, [selected.id]: k }))}
               monster={selected.monster_id ? data.byId.get(selected.monster_id) : undefined}
               member={selected.party_member_id ? party.find(p => p.id === selected.party_member_id) : undefined}
               artwork={selected.monster_id ? data.artwork[selected.monster_id] : undefined} />
@@ -131,7 +135,7 @@ export default function BattleScreen({ battle, canUndo, apply, undo, finish, par
   </div>;
 }
 
-function InitiativeRow({ c, active, selected, onSelect, onInitiative }: { c: Combatant; active: boolean; selected: boolean; onSelect: () => void; onInitiative: (v: number | null) => void }) {
+function InitiativeRow({ c, active, selected, onSelect, onInitiative, nameOf }: { c: Combatant; active: boolean; selected: boolean; onSelect: () => void; onInitiative: (v: number | null) => void; nameOf: (id: string) => string }) {
   const [text, setText] = useState(c.initiative === null ? "" : String(c.initiative));
   const [lastSeen, setLastSeen] = useState(c.initiative);
   if (c.initiative !== lastSeen) { setLastSeen(c.initiative); setText(c.initiative === null ? "" : String(c.initiative)); }
@@ -159,7 +163,7 @@ function InitiativeRow({ c, active, selected, onSelect, onInitiative }: { c: Com
         {c.out && <> · {c.kind === "pc" ? ((c.death_saves?.failures ?? 0) >= 3 ? "Dead" : "Down") : "Defeated"}</>}
       </span>
       {hpPct !== null && <span className="mini-hp" aria-hidden="true"><span style={{ width: hpPct + "%" }} className={hpPct <= 25 ? "low" : hpPct <= 50 ? "mid" : ""} /></span>}
-      {c.conditions.length > 0 && <span className="turn-conditions">{c.conditions.map(x => x.name + (x.rounds !== null ? " (" + x.rounds + ")" : "")).join(", ")}</span>}
+      {c.conditions.length > 0 && <span className="turn-conditions">{c.conditions.map(x => { const t = rules.describeTiming(x, nameOf); return x.name + (t ? " (" + t + ")" : ""); }).join(", ")}</span>}
     </button>
   </li>;
 }

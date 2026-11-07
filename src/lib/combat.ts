@@ -1,6 +1,6 @@
 // Pure battle rules: creating a battle, turn order, hit points and conditions.
 // Every function returns a new Battle; the caller keeps old ones for undo.
-import type { ActiveCondition, Battle, Combatant, ConditionEffect } from "../models/combat";
+import type { ActiveCondition, Battle, Combatant, ConditionEffect, ConditionEnd } from "../models/combat";
 import { CONDITIONS } from "../models/combat";
 import { describeEffect } from "./effects";
 import type { Encounter, PartyMember } from "../models/battle";
@@ -130,32 +130,60 @@ export function begin(b: Battle): Battle {
 }
 
 /** Ends the current turn (counting down its conditions) and moves to the next combatant who can act. */
+const isStandard = (name: string) => (CONDITIONS as readonly string[]).includes(name);
+const endedText = (who: string, cond: ActiveCondition) => who + (isStandard(cond.name) ? " is no longer " : " is no longer affected by ") + cond.name + ".";
+
+/** Counts down conditions that end at the start or end of `turnOf`'s turn, removing and logging those that run out. */
+function tick(b: Battle, turnOf: string, when: "start" | "end"): Battle {
+  const ended: string[] = [];
+  const combatants = b.combatants.map(c => {
+    let changed = false;
+    const conditions = c.conditions.flatMap(cond => {
+      if (!cond.ends || cond.ends.of !== turnOf || cond.ends.when !== when) return [cond];
+      changed = true;
+      if (cond.ends.count <= 1) { ended.push(endedText(c.name, cond)); return []; }
+      return [{ ...cond, ends: { ...cond.ends, count: cond.ends.count - 1 } }];
+    });
+    return changed ? { ...c, conditions } : c;
+  });
+  let out: Battle = { ...b, combatants };
+  for (const text of ended) out = withLog(out, text);
+  return out;
+}
+
+/** Ends the current turn (counting down conditions) and moves to the next combatant who can act. */
 export function nextTurn(b: Battle): Battle {
   const order = turnOrder(b);
   if (!order.length) return b;
   let out = b;
   const current = b.active_id ? b.combatants.find(c => c.id === b.active_id) : null;
   if (current) {
-    const expired: string[] = [];
+    // Older saved conditions: rounds counted at the end of the affected creature's turn.
+    const expired: ActiveCondition[] = [];
     const conditions = current.conditions.flatMap(cond => {
-      if (cond.rounds === null) return [cond];
-      if (cond.rounds <= 1) { expired.push(cond.name); return []; }
+      if (cond.ends || cond.rounds === null) return [cond];
+      if (cond.rounds <= 1) { expired.push(cond); return []; }
       return [{ ...cond, rounds: cond.rounds - 1 }];
     });
     out = update(out, current.id, () => ({ conditions }));
-    for (const name of expired) out = withLog(out, current.name + ((CONDITIONS as readonly string[]).includes(name) ? " is no longer " : " is no longer affected by ") + name + ".");
+    for (const cond of expired) out = withLog(out, endedText(current.name, cond));
+    out = tick(out, current.id, "end");
   }
   const start = Math.max(0, order.findIndex(c => c.id === b.active_id));
   // Defeated monsters are skipped; downed PCs still get a turn (death saving throws).
   for (let step = 1; step <= order.length; step++) {
     const idx = (start + step) % order.length;
     const c = order[idx];
-    if (c.kind === "monster" && c.out) continue;
-    if (c.kind === "pc" && c.out && (c.death_saves?.failures ?? 0) >= 3) continue; // dead
+    const skip = (c.kind === "monster" && c.out) || (c.kind === "pc" && c.out && (c.death_saves?.failures ?? 0) >= 3);
+    if (skip) {
+      // A skipped turn still passes in time for effects measured by it.
+      out = tick(tick(out, c.id, "start"), c.id, "end");
+      continue;
+    }
     const wrapped = idx <= start;
     const round = wrapped ? out.round + 1 : out.round;
-    out = { ...out, active_id: c.id, round };
-    return withLog(out, (wrapped ? "Round " + round + ". " : "") + c.name + "'s turn.");
+    out = withLog({ ...out, active_id: c.id, round }, (wrapped ? "Round " + round + ". " : "") + c.name + "'s turn.");
+    return tick(out, c.id, "start");
   }
   return out;
 }
@@ -207,13 +235,48 @@ export function rename(b: Battle, id: string, name: string): Battle {
   return update(b, id, () => ({ name }));
 }
 
-export function addCondition(b: Battle, id: string, name: string, rounds: number | null, effect?: ConditionEffect, nextRollOnly = false): Battle {
-  const cond: ActiveCondition = { id: uid(), name, rounds, ...(effect ? { effect } : {}), ...(effect && nextRollOnly ? { next_roll_only: true } : {}) };
-  const duration = rounds ? " for " + rounds + " round" + (rounds === 1 ? "" : "s") : "";
-  const detail = effect ? " (" + describeEffect(effect, cond.next_roll_only) + ")" : "";
-  const standard = (CONDITIONS as readonly string[]).includes(name);
+export type Duration =
+  | { type: "until_removed" }
+  | { type: "rounds"; rounds: number }
+  | { type: "turn"; when: "start" | "end"; of: string };
+
+export interface ConditionOptions { effect?: ConditionEffect; nextRollOnly?: boolean; sourceId?: string; duration?: Duration }
+
+/** Works out when a new condition ends, measured from the current turn. */
+export function conditionEnd(b: Battle, affectedId: string, d: Duration): ConditionEnd | undefined {
+  if (d.type === "rounds") return { when: "start", of: b.active_id ?? affectedId, count: Math.max(1, d.rounds), style: "rounds" };
+  if (d.type === "turn") {
+    // "End of X's next turn" added during X's own turn: this turn's end doesn't count.
+    const extra = d.when === "end" && d.of === b.active_id ? 1 : 0;
+    return { when: d.when, of: d.of, count: 1 + extra, style: "turn" };
+  }
+  return undefined;
+}
+
+export function addCondition(b: Battle, id: string, name: string, opts: ConditionOptions = {}): Battle {
+  const { effect, nextRollOnly = false, sourceId, duration = { type: "until_removed" } } = opts;
+  const source = sourceId ? b.combatants.find(c => c.id === sourceId) : undefined;
+  const ends = conditionEnd(b, id, duration);
+  const cond: ActiveCondition = { id: uid(), name, rounds: null,
+    ...(ends ? { ends } : {}), ...(source ? { source_id: source.id, source_name: source.name } : {}),
+    ...(effect ? { effect } : {}), ...(effect && nextRollOnly ? { next_roll_only: true } : {}) };
+  const by = source && source.id !== id ? " (from " + source.name + ")" : "";
+  const timing = ends ? " " + describeTiming(cond, x => named(b, x), true) : "";
+  const detail = effect ? " — " + describeEffect(effect, cond.next_roll_only) : "";
   return withLog(update(b, id, c => ({ conditions: [...c.conditions, cond] })),
-    named(b, id) + (standard ? " is " : " is affected by ") + name + duration + detail + ".");
+    named(b, id) + (isStandard(name) ? " is " : " is affected by ") + name + by + timing + detail + ".");
+}
+
+/**
+ * How long a condition lasts, e.g. "2 rounds left" / "until the end of Cleric's next turn".
+ * `long` gives the sentence form used in the log and tooltips.
+ */
+export function describeTiming(cond: ActiveCondition, nameOf: (id: string) => string, long = false): string {
+  const e = cond.ends;
+  if (!e) return cond.rounds !== null ? (long ? "for " + cond.rounds + " more round" + (cond.rounds === 1 ? "" : "s") : cond.rounds + " rd") : "";
+  if (e.style === "rounds") return long ? "for " + e.count + " round" + (e.count === 1 ? "" : "s") : e.count + " rd";
+  const whose = nameOf(e.of);
+  return (long ? "until the " : "until ") + e.when + " of " + whose + "'s " + (long ? "next turn" : "turn");
 }
 
 /** Removes one-shot effects used up by a roll. */
@@ -241,7 +304,18 @@ export function removeCombatant(b: Battle, id: string): Battle {
   let out = b;
   if (b.active_id === id && b.started) out = nextTurn(b);
   const name = named(b, id);
-  out = { ...out, combatants: out.combatants.filter(c => c.id !== id) };
+  // Effects timed by the removed combatant's turns can no longer run out on their own.
+  const orphaned: string[] = [];
+  out = { ...out, combatants: out.combatants.filter(c => c.id !== id).map(c => {
+    if (!c.conditions.some(x => x.ends?.of === id)) return c;
+    return { ...c, conditions: c.conditions.map(x => {
+      if (x.ends?.of !== id) return x;
+      orphaned.push(c.name + "'s " + x.name);
+      const { ends: _ends, ...rest } = x;
+      return rest;
+    }) };
+  }) };
+  if (orphaned.length) out = withLog(out, orphaned.join(", ") + (orphaned.length === 1 ? " now lasts until removed (it was" : " now last until removed (they were") + " timed by " + name + "'s turns).");
   if (out.active_id === id) out = { ...out, active_id: null };
   return withLog(out, name + " removed from the battle.");
 }
