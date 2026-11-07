@@ -1,6 +1,6 @@
 // Pure battle rules: creating a battle, turn order, hit points and conditions.
 // Every function returns a new Battle; the caller keeps old ones for undo.
-import type { ActiveCondition, Battle, Combatant, ConditionEffect, ConditionEnd } from "../models/combat";
+import type { ActiveCondition, Battle, Combatant, ConditionEffect, ConditionEnd, LootItem } from "../models/combat";
 import { CONDITIONS } from "../models/combat";
 import { describeEffect } from "./effects";
 import type { Encounter, PartyMember } from "../models/battle";
@@ -92,7 +92,7 @@ export function createBattle(name: string, encounter: Encounter | null, party: P
   }
   const t = now();
   let battle: Battle = { id: uid(), name, encounter_id: encounter?.id, started: false, ended: false, round: 0, active_id: null,
-    combatants, log: [], timestamp_created: t, timestamp_modified: t };
+    combatants, log: [], ...(encounter?.treasure?.trim() ? { treasure_note: encounter.treasure.trim() } : {}), timestamp_created: t, timestamp_modified: t };
   battle = withLog(battle, "Battle set up" + (encounter ? " from \"" + encounter.name + "\"" : "") + ". Monster initiative and hit points rolled.");
   if (skipped.length) battle = withLog(battle, "Skipped unavailable monsters: " + skipped.join(", ") + ".");
   return { battle, skipped };
@@ -194,7 +194,30 @@ export function damage(b: Battle, id: string, amount: number, note: string): Bat
   const hp = Math.max(0, c.hp - amount);
   let out = update(b, id, () => ({ hp, out: hp === 0 ? true : c.out }));
   out = withLog(out, c.name + " takes " + amount + " damage" + (note ? " (" + note + ")" : "") + ": " + c.hp + " → " + hp + " HP.");
-  return hp === 0 && !c.out ? withLog(out, c.name + " is defeated.") : out;
+  return hp === 0 && !c.out ? releaseGrapples(withLog(out, c.name + " is defeated."), id, c.name + " is defeated") : out;
+}
+
+/** Conditions that leave a creature Incapacitated, which ends any grapple it holds. */
+const INCAPACITATING = ["Incapacitated", "Paralyzed", "Petrified", "Stunned", "Unconscious"];
+
+/** Ends every grapple held by `grapplerId` (SRD: the grappler is Incapacitated, defeated or gone). */
+export function releaseGrapples(b: Battle, grapplerId: string, why: string): Battle {
+  const freed: string[] = [];
+  const combatants = b.combatants.map(c => {
+    if (!c.conditions.some(x => x.name === "Grappled" && x.source_id === grapplerId)) return c;
+    freed.push(c.name);
+    return { ...c, conditions: c.conditions.filter(x => !(x.name === "Grappled" && x.source_id === grapplerId)) };
+  });
+  if (!freed.length) return b;
+  return withLog({ ...b, combatants }, freed.join(", ") + (freed.length === 1 ? " is" : " are") + " no longer Grappled (" + why + ").");
+}
+
+/** Adds failed death saves to a downed PC, e.g. when a monster hits them (1, or 2 on a critical hit). */
+export function addDeathSaveFailures(b: Battle, id: string, n: number, why: string): Battle {
+  const c = b.combatants.find(x => x.id === id);
+  if (!c || c.kind !== "pc" || !c.out) return b;
+  const ds = c.death_saves ?? { successes: 0, failures: 0 };
+  return setDeathSaves(withLog(b, c.name + " suffers " + n + " death save failure" + (n === 1 ? "" : "s") + " (" + why + ")."), id, ds.successes, ds.failures + n);
 }
 
 export function heal(b: Battle, id: string, amount: number): Battle {
@@ -216,7 +239,14 @@ export function setOut(b: Battle, id: string, isOut: boolean): Battle {
   if (!c) return b;
   const label = c.kind === "pc" ? (isOut ? "is down" : "is back up") : (isOut ? "is defeated" : "is back in the fight");
   // Death saves start fresh each time a PC drops to 0 HP.
-  return withLog(update(b, id, () => ({ out: isOut, death_saves: undefined })), c.name + " " + label + ".");
+  let out = withLog(update(b, id, () => ({ out: isOut, death_saves: undefined })), c.name + " " + label + ".");
+  if (!isOut || c.out) return out;
+  out = releaseGrapples(out, id, c.name + (c.kind === "pc" ? " is down" : " is defeated"));
+  // A PC at 0 HP is Unconscious, and an Unconscious creature falls Prone.
+  if (c.kind === "pc" && !c.conditions.some(x => x.name === "Prone")) {
+    out = withLog(update(out, id, x => ({ conditions: [...x.conditions, { id: uid(), name: "Prone", rounds: null }] })), c.name + " falls Prone.");
+  }
+  return out;
 }
 
 /** Records a downed PC's death saving throws (players roll their own). */
@@ -263,8 +293,9 @@ export function addCondition(b: Battle, id: string, name: string, opts: Conditio
   const by = source && source.id !== id ? " (from " + source.name + ")" : "";
   const timing = ends ? " " + describeTiming(cond, x => named(b, x), true) : "";
   const detail = effect ? " — " + describeEffect(effect, cond.next_roll_only) : "";
-  return withLog(update(b, id, c => ({ conditions: [...c.conditions, cond] })),
+  const out = withLog(update(b, id, c => ({ conditions: [...c.conditions, cond] })),
     named(b, id) + (isStandard(name) ? " is " : " is affected by ") + name + by + timing + detail + ".");
+  return INCAPACITATING.includes(name) ? releaseGrapples(out, id, named(b, id) + " is " + name) : out;
 }
 
 /**
@@ -304,6 +335,7 @@ export function removeCombatant(b: Battle, id: string): Battle {
   let out = b;
   if (b.active_id === id && b.started) out = nextTurn(b);
   const name = named(b, id);
+  out = releaseGrapples(out, id, name + " left the battle");
   // Effects timed by the removed combatant's turns can no longer run out on their own.
   const orphaned: string[] = [];
   out = { ...out, combatants: out.combatants.filter(c => c.id !== id).map(c => {
@@ -320,6 +352,18 @@ export function removeCombatant(b: Battle, id: string): Battle {
   return withLog(out, name + " removed from the battle.");
 }
 
-export function endBattle(b: Battle): Battle {
-  return withLog({ ...b, ended: true, active_id: null }, "Battle ended after " + b.round + " round" + (b.round === 1 ? "" : "s") + ".");
+export function endBattle(b: Battle, loot?: LootItem[]): Battle {
+  let out = withLog({ ...b, ended: true, active_id: null, ...(loot ? { loot } : {}) }, "Battle ended after " + b.round + " round" + (b.round === 1 ? "" : "s") + ".");
+  const taken = (loot ?? []).filter(x => x.taken);
+  if (loot) out = withLog(out, taken.length ? "Loot taken: " + taken.map(x => x.text + " (" + x.source + ")").join("; ") + "." : "The party searched but took nothing.");
+  return out;
+}
+
+/** Monsters all defeated / PCs all down — the cue to end the battle. */
+export function battleOver(b: Battle): "enemies" | "party" | null {
+  if (!b.started) return null;
+  const monsters = b.combatants.filter(c => c.kind === "monster"), pcs = b.combatants.filter(c => c.kind === "pc");
+  if (monsters.length && monsters.every(c => c.out)) return "enemies";
+  if (pcs.length && pcs.every(c => c.out)) return "party";
+  return null;
 }

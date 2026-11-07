@@ -101,7 +101,8 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
 
   return <div className="editor">
     <label>Encounter name<input value={encounter.name} onChange={e => set({ name: e.target.value })} /></label>
-    <label>Notes<textarea value={encounter.notes ?? ""} placeholder="Location, tactics, treasure…" onChange={e => set({ notes: e.target.value || undefined })} /></label>
+    <label>Notes<textarea value={encounter.notes ?? ""} placeholder="Location, tactics…" onChange={e => set({ notes: e.target.value || undefined })} /></label>
+    <label>Treasure<textarea value={encounter.treasure ?? ""} placeholder="What the party can find, e.g. Bugbear's pouch: 14 GP and a silver locket" onChange={e => set({ treasure: e.target.value || undefined })} /></label>
 
     <h3>Party</h3>
     {party.length === 0

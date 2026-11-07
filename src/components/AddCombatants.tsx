@@ -12,10 +12,11 @@ interface Props {
   monsters: Monster[];
   apply: (change: (b: Battle) => Battle) => void;
   onAdded: (c: Combatant) => void;
+  onDone: () => void;
 }
 
 /** Adds monsters, party members or one-off characters to a battle, including mid-fight. */
-export default function AddCombatants({ battle, party, monsters, apply, onAdded }: Props) {
+export default function AddCombatants({ battle, party, monsters, apply, onAdded, onDone }: Props) {
   const [count, setCount] = useState("1");
   const [group, setGroup] = useState(false);
   const [pcName, setPcName] = useState("");
@@ -32,7 +33,10 @@ export default function AddCombatants({ battle, party, monsters, apply, onAdded 
   const n = clampInt(count, 1, 20, 1);
 
   return <div className="add-combatants">
-    <h3>Add to battle</h3>
+    <div className="panel-heading add-heading">
+      <h3>Add to battle</h3>
+      <button type="button" className="small primary" onClick={onDone}>Done</button>
+    </div>
     {available.length > 0 && <div className="add-row">
       <span className="muted small-text">Party:</span>
       {available.map(p => <button key={p.id} type="button" className="small" onClick={() => add([rules.pcCombatant(p)])}>+ {p.name || "Unnamed"}</button>)}

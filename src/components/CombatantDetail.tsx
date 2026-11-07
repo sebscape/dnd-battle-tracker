@@ -8,7 +8,8 @@ import { critical, describeD20, describeDice, formatDice, signed } from "../lib/
 import type { Ability, DamagePart, DamageType } from "../lib/statblock";
 import { ABILITIES, DAMAGE_TYPES, adjustDamage, conditionImmunities, parseDamageTraits, parseFeature, saveBonus } from "../lib/statblock";
 import * as rules from "../lib/combat";
-import { describeEffect, describeRule, resistsAllDamage, rollEffects } from "../lib/effects";
+import type { RollEffects } from "../lib/effects";
+import { describeEffect, describeRule, isDownPc, resistsAllDamage, rollEffects } from "../lib/effects";
 import type { ActiveCondition, ConditionEffect } from "../models/combat";
 import { clampInt } from "../lib/format";
 import type { Prompt, Situational } from "../lib/traits";
@@ -43,7 +44,26 @@ interface Props {
 }
 
 /** Result of the latest attack roll for one feature, used to suggest the next button. */
-interface AttackOutcome { key: string; natural: number; total: number; hit: boolean | null }
+interface AttackOutcome {
+  key: string; natural: number; total: number; hit: boolean | null;
+  /** A hit on a helpless target (downed, Paralyzed, Unconscious) is a critical hit from within 5 feet. */
+  crit: "yes" | "maybe" | null;
+  /** The target is a PC at 0 HP: a hit means death save failures, not damage. */
+  downTarget: { id: string; name: string } | null;
+}
+
+/** A stat-block toggle only changes the roll when nothing else gives Advantage, or when it would cancel Disadvantage. */
+const toggleMatters = (fx: RollEffects) => fx.mode === "disadvantage" || fx.reasons.length === 0;
+
+/** Why a target is helpless enough that close hits are critical. */
+function helplessBecause(t: Combatant | null): string | null {
+  if (!t) return null;
+  if (isDownPc(t)) return "down";
+  const cond = t.conditions.find(x => x.name === "Paralyzed" || x.name === "Unconscious");
+  return cond ? cond.name : null;
+}
+
+const markOf = (fx: RollEffects | null) => !fx ? "" : fx.mode === "advantage" ? " ▲" : fx.mode === "disadvantage" ? " ▼" : "";
 
 const FEATURE_SECTIONS = [["traits", "Traits"], ["actions", "Actions"], ["bonus_actions", "Bonus Actions"], ["reactions", "Reactions"], ["legendary_actions", "Legendary Actions"]] as const;
 
@@ -59,6 +79,7 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
   // Stat-block rules that apply to all of its attacks (Pack Tactics, Bloodied frenzies…).
   const generalSit = situationalAdvantage(monster, c, target, "attack");
   const attackFx = rollEffects(c, target, "attack", undefined, { nameOf, extraAdvantage: extrasFrom(generalSit) });
+  const generalBase = rollEffects(c, target, "attack", undefined, { nameOf, extraAdvantage: generalSit.auto });
   const saveExtras = situationalAdvantage(monster, c, null, "save").auto;
 
   async function rollD20(label: string, bonus: number, attackKey?: string, ability?: Ability, feature?: NamedFeature) {
@@ -81,10 +102,15 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
     // A natural 20 always hits and is a critical hit; a natural 1 always misses.
     const hit = !isAttack ? null : r.natural === 20 ? true : r.natural === 1 ? false : target ? r.total >= target.armor_class : null;
     const nat = r.natural === 20 ? " — natural 20" + (isAttack ? ", a critical hit!" : "!") : r.natural === 1 ? " — natural 1" + (isAttack ? ", an automatic miss." : ".") : "";
-    const verdict = isAttack && target && r.natural !== 20 && r.natural !== 1 ? (hit ? " — hit." : " — miss.") : "";
-    const text = c.name + " — " + label + vs + ": " + r.total + " (" + describeD20(r) + why + ")" + nat + verdict;
+    const verdict = isAttack && target && r.natural !== 20 && r.natural !== 1 ? (hit ? " — hit" : " — miss.") : "";
+    const helpless = isAttack && hit && r.natural !== 20 ? helplessBecause(target) : null;
+    // Melee with a 5-foot reach means the attacker is within 5 feet; anything else, the DM checks.
+    const crit: AttackOutcome["crit"] = helpless ? (feature && /^Melee Attack Roll: [^.]*reach 5 ft\./.test(feature.description) ? "yes" : "maybe") : null;
+    const critText = crit === "yes" ? ", a critical hit (target is " + helpless + ", attacker within 5 feet)." : crit === "maybe" ? " — a critical hit if the attacker is within 5 feet." : verdict && hit ? "." : "";
+    const text = c.name + " — " + label + vs + ": " + r.total + " (" + describeD20(r) + why + ")" + nat + verdict + critText;
     setLastRoll(text);
-    setOutcome(isAttack ? { key: attackKey!, natural: r.natural, total: r.total, hit } : null);
+    setOutcome(isAttack ? { key: attackKey!, natural: r.natural, total: r.total, hit, crit,
+      downTarget: target && isDownPc(target) ? { id: target.id, name: target.name } : null } : null);
     apply(b => rules.consumeConditions(rules.withLog(b, text), fx.consumed));
   }
   async function rollDamage(label: string, parts: DamagePart[], crit: boolean) {
@@ -147,7 +173,7 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
         </select>
       </label>
       <RollModeButtons fx={attackFx} override={override} onOverride={onOverride} />
-      <SituationToggles prompts={generalSit.prompts} isOn={isOn} toggle={toggle} />
+      <SituationToggles prompts={toggleMatters(generalBase) ? generalSit.prompts : []} isOn={isOn} toggle={toggle} />
       <RollHints c={c} override={override} attackFx={attackFx} />
       {lastRoll && <p className="last-roll" role="status">{lastRoll}</p>}
 
@@ -175,9 +201,14 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
             const k = key + ":" + i;
             // Rules written into this attack only (beyond the general ones shown above).
             const own = situationalAdvantage(monster, c, target, "attack", f);
-            const specific: Situational = { auto: own.auto.filter(x => !generalSit.auto.includes(x)), prompts: own.prompts.filter(p => !generalSit.prompts.some(g => g.key === p.key)) };
+            const featureBase = rollEffects(c, target, "attack", undefined, { nameOf, extraAdvantage: own.auto });
+            const featureFx = rollEffects(c, target, "attack", undefined, { nameOf, extraAdvantage: extrasFrom(own) });
+            const specific: Situational = { auto: own.auto.filter(x => !generalSit.auto.includes(x)),
+              prompts: toggleMatters(featureBase) ? own.prompts.filter(p => !generalSit.prompts.some(g => g.key === p.key)) : [] };
             return <Feature key={i} feature={f} outcome={outcome?.key === k ? outcome : null} specific={specific} isOn={isOn} toggle={toggle}
-              onAttack={(label, bonus) => rollD20(label, bonus, k, undefined, f)} onDamage={rollDamage} />;
+              fx={override === null ? featureFx : null}
+              onAttack={(label, bonus) => rollD20(label, bonus, k, undefined, f)} onDamage={rollDamage}
+              onFailures={(n, why) => { const t = outcome?.downTarget; if (!t) return; setOutcome(null); apply(b => rules.addDeathSaveFailures(b, t.id, n, why)); }} />;
           })}
         </section>;
       })}
@@ -195,16 +226,28 @@ interface FeatureProps {
   toggle: (key: string) => void;
   onAttack: (label: string, bonus: number) => void;
   onDamage: (label: string, parts: DamagePart[], crit: boolean) => void;
+  /** Effects on this attack's roll, for the ▲/▼ marker; null when the DM has overridden. */
+  fx: RollEffects | null;
+  onFailures: (n: number, why: string) => void;
 }
 
-function Feature({ feature, outcome, specific, isOn, toggle, onAttack, onDamage }: FeatureProps) {
+function Feature({ feature, outcome, specific, isOn, toggle, onAttack, onDamage, fx, onFailures }: FeatureProps) {
   const p = parseFeature(feature);
   const hasCrit = !!p.attack?.damage.some(d => d.dice);
-  // Which damage button to point at after an attack roll. Nothing is disabled: the DM can always override.
+  // Which button to point at after an attack roll. Nothing is disabled: the DM can always override.
   const nat20 = outcome?.natural === 20, missed = outcome?.hit === false;
-  const suggest: "damage" | "critical" | "none" | null = !outcome ? null : missed ? "none" : nat20 && hasCrit ? "critical" : "damage";
-  const cls = (which: "damage" | "critical") => "small" + (suggest === null ? "" : suggest === which ? " suggested" : " dimmed");
-  const note = !outcome ? "" : nat20 ? (hasCrit ? "Natural 20 — a critical hit. Roll Critical damage." : "Natural 20 — a critical hit (fixed damage doesn't change).")
+  const critical = nat20 || outcome?.crit === "yes";
+  const maybeCrit = outcome?.crit === "maybe";
+  const down = outcome && !missed ? outcome.downTarget : null;
+  type Suggest = "damage" | "critical" | "both" | "none" | null;
+  const suggest: Suggest = !outcome ? null : missed || down ? "none" : maybeCrit && hasCrit ? "both" : critical && hasCrit ? "critical" : "damage";
+  const cls = (which: "damage" | "critical") => "small" + (suggest === null ? "" : suggest === which || suggest === "both" ? " suggested" : " dimmed");
+  const note = !outcome ? ""
+    : down ? (critical ? "Critical hit on " + down.name + ", who is down: two death save failures." : maybeCrit ? "Hit on " + down.name + ", who is down: one death save failure — two if the attacker is within 5 feet (a critical hit)." : "Hit on " + down.name + ", who is down: one death save failure.")
+      + " Damage doesn't matter at 0 HP, unless one hit's damage equals their HP maximum (they die outright)."
+    : nat20 ? (hasCrit ? "Natural 20 — a critical hit. Roll Critical damage." : "Natural 20 — a critical hit (fixed damage doesn't change).")
+    : outcome.crit === "yes" ? "A critical hit: the target is helpless and the attacker is within 5 feet. Roll Critical damage."
+    : maybeCrit ? "Hit. If the attacker is within 5 feet of the helpless target, it's a critical hit — roll Critical damage; otherwise roll Damage."
     : outcome.natural === 1 ? "Natural 1 — an automatic miss. No damage."
     : outcome.hit === true ? "Hit — roll Damage." : missed ? "Miss — no damage."
     : "Compare " + outcome.total + " with the target's AC. If it's equal or higher, roll Damage.";
@@ -213,11 +256,17 @@ function Feature({ feature, outcome, specific, isOn, toggle, onAttack, onDamage 
     <p><b>{feature.name}.</b> {feature.description}</p>
     {(p.attack || p.save) && <div className="feature-rolls">
       {p.attack && <>
-        <button type="button" className="small" title="Roll to hit: d20 + bonus, compared with the target's AC" onClick={() => onAttack(feature.name + " attack roll", p.attack!.bonus)}>Attack {signed(p.attack.bonus)}</button>
+        <button type="button" className={"small" + (markOf(fx) ? " marked" : "")}
+          title={"Roll to hit: d20 + bonus, compared with the target's AC" + (fx?.summary ? " — " + fx.summary : "")}
+          onClick={() => onAttack(feature.name + " attack roll", p.attack!.bonus)}>Attack {signed(p.attack.bonus)}{markOf(fx)}</button>
         {p.attack.damage.length > 0 && <>
           <button type="button" className={cls("damage")} title="Damage on a hit" onClick={() => onDamage(feature.name + " hits", p.attack!.damage, false)}>Damage {dmgLabel(p.attack.damage)}</button>
           {hasCrit && <button type="button" className={cls("critical")} title="On a natural 20: the damage dice are rolled twice" onClick={() => onDamage(feature.name + " hits", p.attack!.damage, true)}>Critical damage</button>}
         </>}
+      </>}
+      {p.attack && down && <>
+        <button type="button" className={"small" + (critical ? " dimmed" : " suggested")} onClick={() => onFailures(1, feature.name + " hit")}>+1 death save failure</button>
+        <button type="button" className={"small" + (critical || maybeCrit ? " suggested" : " dimmed")} onClick={() => onFailures(2, feature.name + " critical hit")}>+2 (critical hit)</button>
       </>}
       {p.save && <>
         <span className="badge">DC {p.save.dc} {p.save.ability} save{p.save.halfOnSuccess ? ", half on success" : ""}</span>

@@ -77,7 +77,15 @@ Export/import of all battle-app data as JSON for backup, matching the reference 
 
 ### Status badges and death saves
 - Each initiative row shows small badges; hovering shows the full meaning and the reason, and a "What the badges mean" key sits under the list (for touch screens): **Adv** / **Dis** (attacks against it), **Prone**, **Crit** (hits from within 5 feet are critical), **Atk▼/Atk▲** (its own attacks), **No actions**, **Conc** (concentrating), and for a downed PC its death saves (**✓1 ✗2**, **Stable**, **Dead**).
-- A PC marked Down counts as Unconscious for attacks against it. The DM records death saves (players roll them) in three success and three failure boxes; three failures mark the PC dead and skip their turns. Death saves reset when the PC is back up.
+- A PC marked Down counts as Unconscious for attacks against it and falls Prone (added automatically). A hit on a helpless target (down, Paralyzed, Unconscious) from within 5 feet is a critical hit: automatic for 5-foot-reach melee attacks, flagged for the DM otherwise. Hits on a downed PC offer +1 / +2 death save failure buttons instead of damage.
+- Grapples end automatically when the grappler is defeated, becomes Incapacitated (Incapacitated, Paralyzed, Petrified, Stunned, Unconscious) or leaves the battle.
+- Each Attack button shows ▲/▼ when that attack's own rules (e.g. Light Hammer vs a creature the bugbear grapples) give Advantage or Disadvantage. Stat-block toggles like Pack Tactics are hidden when they wouldn't change the roll.
+- Undo sits at the top of the Log (and in the top bar on narrow screens); the Add to battle panel has a Done button. The DM records death saves (players roll them) in three success and three failure boxes; three failures mark the PC dead and skip their turns. Death saves reset when the PC is back up.
+
+### Ending a battle and treasure
+- A banner appears when every monster is defeated ("All enemies are defeated") or every PC is down, with an End battle button.
+- **End battle** opens a search list per defeated monster: the **gear** from its SRD stat block (45 monsters list some), coins from the DM's own table if one is set, and the encounter's **Treasure** field ("planned treasure"). The DM unticks what the party leaves; the list is saved with the battle in history and summarised in its log. "End without searching" skips it.
+- **Settings → Treasure:** the DM can enter a coin table (CR range → dice × multiplier, coin type), e.g. from their own DMG. The SRD 5.2.1 has no treasure table, so the app ships none. Beasts, Plants and Oozes get no coins by default.
 
 ### Turn order
 - Initiative list sorted high to low, with the active combatant highlighted; next/previous turn; round counter.

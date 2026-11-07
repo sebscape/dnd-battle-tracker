@@ -75,8 +75,20 @@ export interface Battle {
   active_id: string | null;
   combatants: Combatant[];
   log: LogEntry[];
+  /** Planned treasure copied from the encounter when the battle started. */
+  treasure_note?: string;
+  /** What the party found when searching after the battle. */
+  loot?: LootItem[];
   timestamp_created: string;
   timestamp_modified: string;
+}
+
+export interface LootItem {
+  id: string;
+  /** Where it was found, e.g. "Bugbear Warrior" or "Planned treasure". */
+  source: string;
+  text: string;
+  taken: boolean;
 }
 
 export function isBattle(value: unknown): value is Battle {

@@ -1,5 +1,7 @@
 import { useState } from "react";
-import type { Battle, Combatant } from "../models/combat";
+import type { Battle, Combatant, LootItem } from "../models/combat";
+import type { TreasureSettings } from "../lib/treasure";
+import EndBattleDialog from "./EndBattleDialog";
 import type { PartyMember } from "../models/battle";
 import type { MonsterData } from "../lib/useMonsters";
 import type { Advantage, DiceExpr } from "../lib/dice";
@@ -19,12 +21,15 @@ interface Props {
   canUndo: boolean;
   apply: (change: (b: Battle) => Battle) => void;
   undo: () => void;
-  finish: () => void;
+  finish: (loot?: LootItem[]) => void;
   party: PartyMember[];
   data: MonsterData;
+  treasure: TreasureSettings;
 }
 
-export default function BattleScreen({ battle, canUndo, apply, undo, finish, party, data }: Props) {
+export default function BattleScreen({ battle, canUndo, apply, undo, finish, party, data, treasure }: Props) {
+  const [ending, setEnding] = useState(false);
+  const over = rules.battleOver(battle);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(battle.combatants.length === 0);
   const [physical, setPhysical] = useState(() => { try { return localStorage.getItem(PHYSICAL_KEY) === "1"; } catch { return false; } });
@@ -78,12 +83,19 @@ export default function BattleScreen({ battle, canUndo, apply, undo, finish, par
           ? <button type="button" className="primary" onClick={() => { setSelectedId(null); apply(rules.nextTurn); }} disabled={!order.length}>Next turn ▸</button>
           : <button type="button" className="primary" disabled={!order.length || missingInit.length > 0} title={missingInit.length ? "Enter initiative for: " + missingInit.map(c => c.name).join(", ") : ""}
               onClick={() => { setSelectedId(null); apply(rules.begin); }}>Begin combat</button>}
-        <button type="button" onClick={undo} disabled={!canUndo}>Undo</button>
+        {/* On narrow screens the Log is far below, so Undo also sits here. */}
+        <button type="button" className="undo-narrow" onClick={undo} disabled={!canUndo}>Undo</button>
         <button type="button" aria-pressed={showAdd} onClick={() => setShowAdd(!showAdd)}>{showAdd ? "Hide add" : "+ Add"}</button>
         <label className="check" title="Type in the results of real dice instead of letting the app roll"><input type="checkbox" checked={physical} onChange={e => togglePhysical(e.target.checked)} /> I roll physical dice</label>
-        <button type="button" className="danger" onClick={() => { if (window.confirm("End this battle? It will be saved to battle history.")) finish(); }}>End battle</button>
+        <button type="button" className="danger" onClick={() => setEnding(true)}>End battle</button>
       </div>
     </div>
+
+    {over && <div className="battle-over" role="status">
+      <p><b>{over === "enemies" ? "All enemies are defeated." : "All player characters are down."}</b>{" "}
+        {over === "enemies" ? "Search the bodies and end the battle to save it to history." : "End the battle to save it to history, or keep going if help is on the way."}</p>
+      <button type="button" className="primary" onClick={() => setEnding(true)}>End battle</button>
+    </div>}
 
     {!battle.started && missingInit.length > 0 && order.length > 0 && <p className="muted small-text">Waiting for initiative: {missingInit.map(c => c.name).join(", ")}.</p>}
 
@@ -110,7 +122,7 @@ export default function BattleScreen({ battle, canUndo, apply, undo, finish, par
       </section>
 
       <section className="panel detail">
-        {showAdd && <AddCombatants battle={battle} party={party} monsters={[...data.published, ...data.custom]} apply={apply} onAdded={c => setSelectedId(c.id)} />}
+        {showAdd && <AddCombatants battle={battle} party={party} monsters={[...data.published, ...data.custom]} apply={apply} onAdded={c => setSelectedId(c.id)} onDone={() => setShowAdd(false)} />}
         {selected
           ? <CombatantDetail key={selected.id} combatant={selected} started={battle.started} apply={apply} roller={roller}
               others={order.filter(o => o.id !== selected.id && !(o.kind === "monster" && o.out))}
@@ -125,13 +137,17 @@ export default function BattleScreen({ battle, canUndo, apply, undo, finish, par
       </section>
 
       <section className="panel log" aria-label="Combat log">
-        <h2>Log</h2>
+        <div className="panel-heading log-heading">
+          <h2>Log</h2>
+          <button type="button" className="small" onClick={undo} disabled={!canUndo} title="Undo the last change (the newest log entry)">Undo</button>
+        </div>
         <ol className="log-list">
           {[...battle.log].reverse().slice(0, 100).map(e => <li key={e.id}><span className="muted">{e.round ? "R" + e.round : "—"}</span> {e.text}</li>)}
         </ol>
       </section>
     </div>
     {prompt && <NumberPrompt request={prompt} />}
+    {ending && <EndBattleDialog battle={battle} byId={data.byId} settings={treasure} onCancel={() => setEnding(false)} onFinish={loot => { setEnding(false); finish(loot); }} />}
   </div>;
 }
 

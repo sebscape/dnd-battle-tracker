@@ -25,6 +25,8 @@ export interface Encounter {
   id: string;
   name: string;
   notes?: string;
+  /** Loot the DM planned for this fight; shown when the battle ends. */
+  treasure?: string;
   party_member_ids: string[];
   monsters: EncounterMonster[];
   timestamp_created: string;
@@ -49,6 +51,7 @@ export function isEncounter(value: unknown): value is Encounter {
   const e = value as Partial<Encounter>;
   return isString(e.id) && e.id.length > 0 && isString(e.name)
     && (e.notes === undefined || isString(e.notes))
+    && (e.treasure === undefined || isString(e.treasure))
     && Array.isArray(e.party_member_ids) && e.party_member_ids.every(isString)
     && Array.isArray(e.monsters) && e.monsters.every(m => !!m && isString(m.monster_id) && isString(m.monster_name)
       && isInt(m.count, 1, 99) && typeof m.group_initiative === "boolean")
