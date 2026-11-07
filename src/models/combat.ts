@@ -7,11 +7,30 @@ export interface ConditionEffect {
   on: "attacks" | "saves" | "all" | "attacks_against";
 }
 
+/**
+ * When a condition ends: at the start or end of a combatant's turn, after `count`
+ * more of those. "N rounds" is stored as the start of the turn it was added on,
+ * N times — one full round each, as in the D&D rules.
+ */
+export interface ConditionEnd {
+  when: "start" | "end";
+  /** Combatant whose turn it's measured by. */
+  of: string;
+  count: number;
+  /** How to describe it: "rounds" (N rounds) or "turn" (start/end of X's next turn). */
+  style: "rounds" | "turn";
+}
+
 export interface ActiveCondition {
   id: string;
   name: string;
-  /** Rounds left; counts down at the end of the affected combatant's turn. null = until removed. */
+  /** Older battles only: rounds left, counted at the end of the affected combatant's turn. New conditions use `ends`. */
   rounds: number | null;
+  /** When it ends; absent = until removed. */
+  ends?: ConditionEnd;
+  /** Who caused it (caster, grappler…). Name kept for display if they leave the battle. */
+  source_id?: string;
+  source_name?: string;
   /** Only for custom conditions; standard ones have built-in rules (lib/effects.ts). */
   effect?: ConditionEffect;
   /** Removed after the first roll it affects. */

@@ -187,6 +187,13 @@ button.tiny { padding: 3px 8px; font-size: 12px; border-radius: 6px; }
 .condition-add label:first-child { width: 190px; }
 .hp-block p { margin: 0; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip .chip-used { padding: 0 8px; font-size: 11px; font-weight: 600; background: #2f6b46; color: #e8f7ee; border-radius: 999px; }
+.condition-add label.narrow { width: 80px; }
+.condition-add label.wide { width: 190px; }
+.situations { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+.situation { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+button.toggle { background: #26384e; border-style: dashed; }
+button.toggle.on { background: #2f6b46; border-color: #9be3b4; border-style: solid; }
 .death-save-panel { display: flex; flex-direction: column; gap: 6px; padding: 12px; border: 1px solid #5b4a7a; border-radius: 10px; }
 .death-save-panel h3 { margin: 0; border: 0; padding: 0; }
 .death-save-panel p { margin: 0; }

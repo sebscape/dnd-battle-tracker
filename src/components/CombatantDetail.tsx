@@ -9,8 +9,10 @@ import type { Ability, DamagePart, DamageType } from "../lib/statblock";
 import { ABILITIES, DAMAGE_TYPES, adjustDamage, conditionImmunities, parseDamageTraits, parseFeature, saveBonus } from "../lib/statblock";
 import * as rules from "../lib/combat";
 import { describeEffect, describeRule, resistsAllDamage, rollEffects } from "../lib/effects";
-import type { ConditionEffect } from "../models/combat";
+import type { ActiveCondition, ConditionEffect } from "../models/combat";
 import { clampInt } from "../lib/format";
+import type { Prompt, Situational } from "../lib/traits";
+import { situationalAdvantage } from "../lib/traits";
 
 export interface Roller {
   d20: (title: string, bonus: number, mode: Advantage) => Promise<D20Roll | null>;
@@ -32,6 +34,12 @@ interface Props {
   /** Manual Advantage/Disadvantage for this combatant's next d20; null = automatic from conditions. */
   override: Advantage | null;
   onOverride: (mode: Advantage | null) => void;
+  /** Everyone in the battle in turn order (for "caused by" and "whose turn"). */
+  everyone: Combatant[];
+  activeId: string | null;
+  /** Stat-block situations the DM has said apply to this combatant's next roll (e.g. Pack Tactics). */
+  situational: string[];
+  onSituational: (keys: string[]) => void;
 }
 
 /** Result of the latest attack roll for one feature, used to suggest the next button. */
@@ -39,15 +47,24 @@ interface AttackOutcome { key: string; natural: number; total: number; hit: bool
 
 const FEATURE_SECTIONS = [["traits", "Traits"], ["actions", "Actions"], ["bonus_actions", "Bonus Actions"], ["reactions", "Reactions"], ["legendary_actions", "Legendary Actions"]] as const;
 
-export default function CombatantDetail({ combatant: c, monster, member, artwork, started, apply, roller, others, targetId, onTarget, override, onOverride }: Props) {
+export default function CombatantDetail({ combatant: c, monster, member, artwork, started, apply, roller, others, targetId, onTarget, override, onOverride,
+  everyone, activeId, situational, onSituational }: Props) {
   const [lastRoll, setLastRoll] = useState("");
   const [outcome, setOutcome] = useState<AttackOutcome | null>(null);
   const target = others.find(o => o.id === targetId) ?? null;
-  const attackFx = rollEffects(c, target, "attack");
+  const nameOf = (id: string) => everyone.find(x => x.id === id)?.name;
+  const isOn = (p: Prompt) => situational.includes(p.key);
+  const extrasFrom = (s: Situational) => [...s.auto, ...s.prompts.filter(isOn).map(p => p.label)];
+  const toggle = (key: string) => onSituational(situational.includes(key) ? situational.filter(k => k !== key) : [...situational, key]);
+  // Stat-block rules that apply to all of its attacks (Pack Tactics, Bloodied frenzies…).
+  const generalSit = situationalAdvantage(monster, c, target, "attack");
+  const attackFx = rollEffects(c, target, "attack", undefined, { nameOf, extraAdvantage: extrasFrom(generalSit) });
+  const saveExtras = situationalAdvantage(monster, c, null, "save").auto;
 
-  async function rollD20(label: string, bonus: number, attackKey?: string, ability?: Ability) {
+  async function rollD20(label: string, bonus: number, attackKey?: string, ability?: Ability, feature?: NamedFeature) {
     const isAttack = attackKey !== undefined;
-    const fx = rollEffects(c, isAttack ? target : null, isAttack ? "attack" : "save", ability);
+    const extra = isAttack ? extrasFrom(feature ? situationalAdvantage(monster, c, target, "attack", feature) : generalSit) : saveExtras;
+    const fx = rollEffects(c, isAttack ? target : null, isAttack ? "attack" : "save", ability, { nameOf, extraAdvantage: extra });
     const vs = isAttack && target ? " vs " + target.name + " (AC " + target.armor_class + ")" : "";
     if (fx.autoFail && override === null) {
       const text = c.name + " — " + label + ": automatically fails (" + fx.autoFail + ").";
@@ -60,6 +77,7 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
     const r = await roller.d20(c.name + ": " + label + vs, bonus, mode);
     if (!r) return;
     onOverride(null);
+    onSituational([]);
     // A natural 20 always hits and is a critical hit; a natural 1 always misses.
     const hit = !isAttack ? null : r.natural === 20 ? true : r.natural === 1 ? false : target ? r.total >= target.armor_class : null;
     const nat = r.natural === 20 ? " — natural 20" + (isAttack ? ", a critical hit!" : "!") : r.natural === 1 ? " — natural 1" + (isAttack ? ", an automatic miss." : ".") : "";
@@ -119,7 +137,7 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
 
     {c.kind === "pc" && c.out && <DeathSaves c={c} apply={apply} />}
 
-    <Conditions c={c} monster={monster} apply={apply} />
+    <Conditions c={c} monster={monster} apply={apply} everyone={everyone} activeId={activeId} />
 
     {monster && <>
       <label className="target-pick">Target
@@ -129,6 +147,7 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
         </select>
       </label>
       <RollModeButtons fx={attackFx} override={override} onOverride={onOverride} />
+      <SituationToggles prompts={generalSit.prompts} isOn={isOn} toggle={toggle} />
       <RollHints c={c} override={override} attackFx={attackFx} />
       {lastRoll && <p className="last-roll" role="status">{lastRoll}</p>}
 
@@ -136,7 +155,7 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
       <div className="save-buttons">
         {ABILITIES.map(a => {
           const bonus = saveBonus(monster, a);
-          const fx = rollEffects(c, null, "save", a);
+          const fx = rollEffects(c, null, "save", a, { nameOf, extraAdvantage: saveExtras });
           const mark = override !== null ? "" : fx.autoFail ? " ✕" : fx.mode === "advantage" ? " ▲" : fx.mode === "disadvantage" ? " ▼" : "";
           const tip = a + " saving throw" + (fx.autoFail ? " — automatically fails (" + fx.autoFail + ")" : fx.summary ? " — " + fx.summary : "");
           return <button key={a} type="button" className={"small" + (mark ? " marked" : "")} title={tip} onClick={() => rollD20(a + " saving throw", bonus, undefined, a)}>
@@ -152,8 +171,14 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
         return <section key={key}>
           <h3>{title}</h3>
           {key === "legendary_actions" && monster.legendary_actions_intro && <p className="muted small-text">{monster.legendary_actions_intro}</p>}
-          {features.map((f, i) => { const k = key + ":" + i; return <Feature key={i} feature={f} outcome={outcome?.key === k ? outcome : null}
-            onAttack={(label, bonus) => rollD20(label, bonus, k)} onDamage={rollDamage} />; })}
+          {features.map((f, i) => {
+            const k = key + ":" + i;
+            // Rules written into this attack only (beyond the general ones shown above).
+            const own = situationalAdvantage(monster, c, target, "attack", f);
+            const specific: Situational = { auto: own.auto.filter(x => !generalSit.auto.includes(x)), prompts: own.prompts.filter(p => !generalSit.prompts.some(g => g.key === p.key)) };
+            return <Feature key={i} feature={f} outcome={outcome?.key === k ? outcome : null} specific={specific} isOn={isOn} toggle={toggle}
+              onAttack={(label, bonus) => rollD20(label, bonus, k, undefined, f)} onDamage={rollDamage} />;
+          })}
         </section>;
       })}
       {(monster.spellcasting?.length ?? 0) > 0 && <section><h3>Spellcasting</h3>{monster.spellcasting!.map((f, i) => <p key={i}><b>{f.name}.</b> {f.description}</p>)}</section>}
@@ -165,11 +190,14 @@ export default function CombatantDetail({ combatant: c, monster, member, artwork
 interface FeatureProps {
   feature: NamedFeature;
   outcome: AttackOutcome | null;
+  specific: Situational;
+  isOn: (p: Prompt) => boolean;
+  toggle: (key: string) => void;
   onAttack: (label: string, bonus: number) => void;
   onDamage: (label: string, parts: DamagePart[], crit: boolean) => void;
 }
 
-function Feature({ feature, outcome, onAttack, onDamage }: FeatureProps) {
+function Feature({ feature, outcome, specific, isOn, toggle, onAttack, onDamage }: FeatureProps) {
   const p = parseFeature(feature);
   const hasCrit = !!p.attack?.damage.some(d => d.dice);
   // Which damage button to point at after an attack roll. Nothing is disabled: the DM can always override.
@@ -196,7 +224,21 @@ function Feature({ feature, outcome, onAttack, onDamage }: FeatureProps) {
         {p.save.failureDamage.length > 0 && <button type="button" className="small" title="Damage to a creature that fails the save" onClick={() => onDamage(feature.name + " (failed save)", p.save!.failureDamage, false)}>Damage {dmgLabel(p.save.failureDamage)}</button>}
       </>}
     </div>}
+    {p.attack && specific.auto.map(a => <p key={a} className="roll-note">Advantage on this attack — {a.replace(feature.name + ": ", "")}.</p>)}
+    {p.attack && <SituationToggles prompts={specific.prompts} isOn={isOn} toggle={toggle} />}
     {note && <p className="roll-note" role="status">{note}</p>}
+  </div>;
+}
+
+/** One-click switches for stat-block Advantage the app can't judge (positions, unknown HP). Used for the next roll only. */
+function SituationToggles({ prompts, isOn, toggle }: { prompts: Prompt[]; isOn: (p: Prompt) => boolean; toggle: (key: string) => void }) {
+  if (!prompts.length) return null;
+  return <div className="situations">
+    {prompts.map(p => <div key={p.key} className="situation">
+      <button type="button" className={"small toggle" + (isOn(p) ? " on" : "")} aria-pressed={isOn(p)} onClick={() => toggle(p.key)}>
+        {isOn(p) ? "✓ " : ""}{p.label} applies</button>
+      <span className="small-text muted">{p.note}{isOn(p) ? " Counted for the next roll." : ""}</span>
+    </div>)}
   </div>;
 }
 
@@ -264,36 +306,79 @@ const EFFECT_OPTIONS: { value: string; label: string; effect: ConditionEffect | 
   { value: "dis-against", label: "Attacks against it have Disadvantage", effect: { mode: "disadvantage", on: "attacks_against" } },
 ];
 
-function Conditions({ c, monster, apply }: { c: Combatant; monster?: Monster; apply: Props["apply"] }) {
+type DurationChoice = "until_removed" | "rounds" | "start" | "end";
+
+function Conditions({ c, monster, apply, everyone, activeId }: { c: Combatant; monster?: Monster; apply: Props["apply"]; everyone: Combatant[]; activeId: string | null }) {
   const [name, setName] = useState<string>("");
   const [custom, setCustom] = useState("");
-  const [rounds, setRounds] = useState("");
   const [effectKey, setEffectKey] = useState("");
   const [nextOnly, setNextOnly] = useState(false);
+  const [sourceSel, setSourceSel] = useState<string | null>(null);
+  const [durationType, setDurationType] = useState<DurationChoice>("until_removed");
+  const [rounds, setRounds] = useState("1");
+  const [whoseSel, setWhoseSel] = useState<string | null>(null);
+  const nameOf = (id: string) => everyone.find(x => x.id === id)?.name ?? "?";
+  // Defaults: caused by whoever's turn it is (usually the caster or grappler), timed by that creature's turn.
+  const source = sourceSel ?? (activeId && activeId !== c.id ? activeId : "");
+  const whose = whoseSel ?? (source || activeId || c.id);
   const effect = name === "__custom" ? EFFECT_OPTIONS.find(o => o.value === effectKey)?.effect ?? undefined : undefined;
-  const reset = () => { setName(""); setRounds(""); setCustom(""); setEffectKey(""); setNextOnly(false); };
+  const reset = () => { setName(""); setCustom(""); setEffectKey(""); setNextOnly(false); setSourceSel(null); setDurationType("until_removed"); setRounds("1"); setWhoseSel(null); };
   const chosen = name === "__custom" ? custom.trim() : name;
   const immune = monster ? conditionImmunities(monster).some(x => x.toLowerCase() === chosen.toLowerCase()) : false;
+  const n = clampInt(rounds, 1, 999, 1);
+  const duration: rules.Duration = durationType === "rounds" ? { type: "rounds", rounds: n }
+    : durationType === "start" || durationType === "end" ? { type: "turn", when: durationType, of: whose } : { type: "until_removed" };
+  const roundsFrom = activeId ?? c.id;
+  const explain = durationType === "rounds" ? "Ends when " + nameOf(roundsFrom) + "'s turn comes around " + (n === 1 ? "again" : n + " times") + " (" + n + " round" + (n === 1 ? "" : "s") + ")."
+    : durationType === "start" ? "Ends at the start of " + nameOf(whose) + "'s next turn."
+    : durationType === "end" ? "Ends at the end of " + nameOf(whose) + "'s next turn." : "";
+  const timingOf = (cond: ActiveCondition) => rules.describeTiming(cond, nameOf);
+  const byOf = (cond: ActiveCondition) => cond.source_id && cond.source_id !== c.id ? (everyone.find(x => x.id === cond.source_id)?.name ?? cond.source_name) : null;
+
   return <div className="conditions">
     <h3>Conditions</h3>
     {c.conditions.length === 0 && <p className="muted small-text">No conditions.</p>}
-    <div className="chips">{c.conditions.map(cond => <span key={cond.id} className="chip" title={cond.effect ? describeEffect(cond.effect, cond.next_roll_only) : describeRule(cond.name)}>
-      {cond.name}{cond.effect ? " · " + (cond.effect.mode === "advantage" ? "Adv" : "Dis") + (cond.effect.on === "attacks_against" ? " vs it" : "") + (cond.next_roll_only ? ", next roll" : "") : ""}{cond.rounds !== null ? " · " + cond.rounds + " rd" : ""}
-      <button type="button" aria-label={"Remove " + cond.name} onClick={() => apply(b => rules.removeCondition(b, c.id, cond.id))}>×</button>
-    </span>)}</div>
-    <form className="condition-add" onSubmit={e => { e.preventDefault(); if (!chosen) return; const r = rounds.trim() ? clampInt(rounds, 1, 999, 1) : null; apply(b => rules.addCondition(b, c.id, chosen, r, effect, nextOnly)); reset(); }}>
+    <div className="chips">{c.conditions.map(cond => {
+      const by = byOf(cond);
+      const tip = [cond.effect ? describeEffect(cond.effect, cond.next_roll_only) : describeRule(cond.name), by ? "Caused by " + by : "", rules.describeTiming(cond, nameOf, true)].filter(Boolean).join(" · ");
+      return <span key={cond.id} className="chip" title={tip}>
+        {cond.name}{by ? " (" + by + ")" : ""}
+        {cond.effect ? " · " + (cond.effect.mode === "advantage" ? "Adv" : "Dis") + (cond.effect.on === "attacks_against" ? " vs it" : "") + (cond.next_roll_only ? ", next roll" : "") : ""}
+        {timingOf(cond) ? " · " + timingOf(cond) : ""}
+        {cond.next_roll_only && <button type="button" className="chip-used" title="A player used it on their own roll — remove it" onClick={() => apply(b => rules.consumeConditions(b, [{ combatantId: c.id, condition: cond }]))}>Used</button>}
+        <button type="button" aria-label={"Remove " + cond.name} onClick={() => apply(b => rules.removeCondition(b, c.id, cond.id))}>×</button>
+      </span>;
+    })}</div>
+    <form className="condition-add" onSubmit={e => {
+      e.preventDefault();
+      if (!chosen) return;
+      apply(b => rules.addCondition(b, c.id, chosen, { effect, nextRollOnly: nextOnly, sourceId: source || undefined, duration }));
+      reset();
+    }}>
       <label>Add a condition<select value={name} onChange={e => setName(e.target.value)}>
         <option value="">Choose a condition…</option>
         {CONDITIONS.map(x => <option key={x} value={x}>{x}</option>)}<option value="__custom">Other…</option></select></label>
-      {name === "__custom" && <label>Name<input value={custom} placeholder="e.g. Vicious Mockery" onChange={e => setCustom(e.target.value)} /></label>}
+      {name === "__custom" && <label>Name<input value={custom} placeholder="e.g. Guiding Bolt" onChange={e => setCustom(e.target.value)} /></label>}
       {name === "__custom" && <label className="effect-pick">Effect on rolls<select value={effectKey} onChange={e => setEffectKey(e.target.value)}>
         {EFFECT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></label>}
       {name === "__custom" && effect && <label className="check"><input type="checkbox" checked={nextOnly} onChange={e => setNextOnly(e.target.checked)} /> Next roll only</label>}
-      <label>Rounds<input type="number" min="1" value={rounds} placeholder="Until removed" onChange={e => setRounds(e.target.value)} /></label>
+      {name && <label className="wide">Caused by<select value={source} onChange={e => setSourceSel(e.target.value)}>
+        <option value="">— (no one / not tracked)</option>
+        {everyone.filter(x => x.id !== c.id).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>}
+      {name && <label className="wide">Lasts<select value={durationType} onChange={e => setDurationType(e.target.value as DurationChoice)}>
+        <option value="until_removed">Until removed</option>
+        <option value="rounds">A number of rounds</option>
+        <option value="start">Until the start of a turn</option>
+        <option value="end">Until the end of a turn</option></select></label>}
+      {name && durationType === "rounds" && <label className="narrow">Rounds<input type="number" min="1" value={rounds} onChange={e => setRounds(e.target.value)} /></label>}
+      {name && (durationType === "start" || durationType === "end") && <label className="wide">Whose next turn<select value={whose} onChange={e => setWhoseSel(e.target.value)}>
+        {everyone.map(x => <option key={x.id} value={x.id}>{x.name}{x.id === c.id ? " (this one)" : ""}</option>)}</select></label>}
       <button type="submit" className="small" disabled={!chosen}>Add</button>
     </form>
+    {explain && <p className="small-text muted">{explain}</p>}
     {name && name !== "__custom" && describeRule(name) && <p className="small-text muted">{describeRule(name)}</p>}
-    {name === "__custom" && effect && nextOnly && <p className="small-text muted">Removed after the first roll it affects{rounds.trim() ? ", or when the rounds run out" : ""}.</p>}
+    {name === "Grappled" && <p className="small-text muted">With "Caused by" set, the app applies Disadvantage when it attacks anyone other than its grappler, and Advantage for attacks like the Bugbear's Light Hammer.</p>}
+    {name === "__custom" && effect && nextOnly && <p className="small-text muted">Removed after the first app roll it affects{durationType !== "until_removed" ? ", or when its time runs out" : ""}. If a player uses it on their own roll, click Used on its tag.</p>}
     {immune && <p className="small-text warn-text">{c.name} is immune to {chosen}.</p>}
   </div>;
 }
