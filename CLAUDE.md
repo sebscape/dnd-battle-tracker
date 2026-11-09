@@ -14,7 +14,7 @@ Combat tracker for D&D Dungeon Masters. Full design and agreed decisions: **DESI
 | Path | Purpose |
 |---|---|
 | `src/App.tsx` | Header, tabs, monster data and stored lists |
-| `src/components/` | `Encounters` (list + editor, difficulty), `MonsterPicker`, `PartyRoster`, `BattleScreen` (turn order, log), `CombatantDetail` (HP, conditions, stat block rolls), `AddCombatants`, `NumberPrompt` (physical dice), `EndBattleDialog` (search for loot), `SettingsPanel` (coin table) |
+| `src/components/` | `Encounters` (list + editor, difficulty), `MonsterPicker`, `AutoGenerate`, `PartyRoster`, `BattleScreen` (turn order, log), `CombatantDetail` (HP, conditions, stat block rolls), `AddCombatants`, `NumberPrompt` (physical dice), `EndBattleDialog` (search for loot), `SettingsPanel` (coin table) |
 | `src/lib/bridge.ts` | Client for the reference app's read-only storage bridge |
 | `src/lib/useMonsters.ts` | Bundled published catalog + custom monsters/artwork via the bridge |
 | `src/lib/combat.ts` | Pure battle rules: creating a battle, turn order, HP, conditions. Each function returns a new `Battle`. |
@@ -24,6 +24,7 @@ Combat tracker for D&D Dungeon Masters. Full design and agreed decisions: **DESI
 | `src/lib/traits.ts` | Conditional Advantage read from stat-block text (Pack Tactics, Grappled by, Bloodied, hurt targets) |
 | `src/lib/treasure.ts` | Loot after a battle: stat-block gear, planned treasure, the DM's own coin table (`dnd-battle-tracker-treasure-v1`) |
 | `src/lib/dice.ts` | Dice notation, crypto-random rolls, advantage/disadvantage |
+| `src/lib/generate.ts` | Random encounters by environment (from monster `tags`), difficulty, max CR and kinds; used by `components/AutoGenerate` |
 | `src/lib/difficulty.ts` | SRD 5.2.1 XP budgets and monster XP by CR |
 | `src/lib/storage.ts` | localStorage lists (`dnd-battle-tracker-party-v1`, `dnd-battle-tracker-encounters-v1`) |
 | `src/models/monster.ts` | **Copy** of the reference app's model (schema 1.2.0). Keep in sync. |

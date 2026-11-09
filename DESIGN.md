@@ -69,6 +69,8 @@ Export/import of all battle-app data as JSON for backup, matching the reference 
 - Build ahead of time: choose monsters (published or custom) and counts, choose which party members are present.
 - Or build on the fly when a fight starts.
 - Combatants can be added or removed mid-fight.
+- **Auto generate** (on the encounter editor): pick an Environment (saved on the encounter), Difficulty (Low/Moderate/High), Max CR per monster (recommended = the party's average level, editable, with Reset) and Monster kinds (any, one kind as a pack, or a leader plus followers). Each press replaces the monsters with a new random set that fits the SRD 5.2.1 XP budget (between the next-lower budget and the chosen one), with at most two creatures per character. Undo restores the previous set.
+- Environments come from the monsters' existing `tags` field: Arctic, Coastal, Desert, Forest, Grassland, Hill, Mountain, Swamp, Underdark, Underwater, Urban, Planar. The SRD has no environment data, so these tags were drafted for the reference catalog and are maintained there (`data/environment-tags.csv`). Custom monsters join a pool when tagged with an environment name.
 
 ### Monster setup at battle start
 - **HP rolled** from the stat block's hit dice (e.g. `20d10 + 40`), editable by the DM.
