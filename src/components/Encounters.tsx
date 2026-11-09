@@ -5,6 +5,7 @@ import type { Monster } from "../models/monster";
 import type { MonsterData } from "../lib/useMonsters";
 import { isCustom } from "../lib/format";
 import MonsterPicker from "./MonsterPicker";
+import AutoGenerate from "./AutoGenerate";
 import DifficultyPanel from "./DifficultyPanel";
 import { encounterDifficulty, monsterXp } from "../lib/difficulty";
 
@@ -56,7 +57,7 @@ export default function Encounters({ encounters, onChange, party, data, onStartB
       {sorted.length === 0 && <p className="muted">No saved encounters. Create one to plan a fight ahead of time.</p>}
       {sorted.map(e => <button key={e.id} type="button" className={"list-item " + (e.id === selectedId ? "active" : "")} onClick={() => setSelectedId(e.id)}>
         <strong>{e.name || "Untitled encounter"}</strong>
-        <small>{monsterTotal(e)} monster{monsterTotal(e) === 1 ? "" : "s"} · {e.party_member_ids.length} PC{e.party_member_ids.length === 1 ? "" : "s"}</small>
+        <small>{monsterTotal(e)} monster{monsterTotal(e) === 1 ? "" : "s"} · {e.party_member_ids.length} PC{e.party_member_ids.length === 1 ? "" : "s"}{e.environment ? " · " + e.environment : ""}</small>
       </button>)}
     </section>
     <section className="panel detail">
@@ -114,7 +115,8 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
     {missingPcs > 0 && <p className="muted small-text">{missingPcs} character{missingPcs === 1 ? " is" : "s are"} no longer in the party roster and will be skipped.</p>}
 
     <h3>Monsters</h3>
-    {encounter.monsters.length === 0 && <p className="muted">No monsters yet. Search below to add some.</p>}
+    <AutoGenerate encounter={encounter} levels={presentPcs.map(p => p.level)} monsters={allMonsters} onChange={set} />
+    {encounter.monsters.length === 0 && <p className="muted">No monsters yet. Auto generate some, or search below to add them.</p>}
     <ul className="encounter-monsters">
       {encounter.monsters.map((em, i) => {
         const m = data.byId.get(em.monster_id);

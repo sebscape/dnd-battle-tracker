@@ -22,7 +22,10 @@
         "wis": 15,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -108,7 +111,11 @@
         "wis": 10,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Mountain",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -164,7 +171,10 @@
         "wis": 3,
         "cha": 1
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -209,7 +219,10 @@
         "wis": 5,
         "cha": 1
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -251,7 +264,10 @@
         "wis": 3,
         "cha": 1
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -292,7 +308,11 @@
         "wis": 13,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -341,7 +361,9 @@
         "wis": 11,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -404,7 +426,10 @@
         "wis": 10,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -445,7 +470,9 @@
         "wis": 10,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Forest"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -486,7 +513,10 @@
         "wis": 10,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -525,7 +555,10 @@
         "wis": 13,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -577,7 +610,9 @@
         "wis": 16,
         "cha": 22
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -653,7 +688,14 @@
         "wis": 10,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Desert",
+        "Forest",
+        "Grassland",
+        "Hill",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -697,7 +739,14 @@
         "wis": 11,
         "cha": 14
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Desert",
+        "Forest",
+        "Grassland",
+        "Hill",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -753,7 +802,9 @@
         "wis": 14,
         "cha": 14
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -823,7 +874,12 @@
         "wis": 8,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Hill",
+        "Mountain",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -868,7 +924,9 @@
         "wis": 11,
         "cha": 14
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -925,7 +983,10 @@
         "wis": 14,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Mountain",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -984,7 +1045,12 @@
         "wis": 11,
         "cha": 9
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Forest",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1030,7 +1096,9 @@
         "wis": 11,
         "cha": 13
       },
-      "tags": [],
+      "tags": [
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1086,7 +1154,9 @@
         "wis": 11,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1142,7 +1212,9 @@
         "wis": 13,
         "cha": 19
       },
-      "tags": [],
+      "tags": [
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1221,7 +1293,9 @@
         "wis": 15,
         "cha": 22
       },
-      "tags": [],
+      "tags": [
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1300,7 +1374,9 @@
         "wis": 6,
         "cha": 1
       },
-      "tags": [],
+      "tags": [
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1361,7 +1437,11 @@
         "wis": 13,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1407,7 +1487,10 @@
         "wis": 11,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Desert"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1457,7 +1540,10 @@
         "wis": 13,
         "cha": 17
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Desert"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1507,7 +1593,10 @@
         "wis": 15,
         "cha": 20
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Desert"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1582,7 +1671,10 @@
         "wis": 17,
         "cha": 25
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Desert"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1657,7 +1749,9 @@
         "wis": 14,
         "cha": 16
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1719,7 +1813,9 @@
         "wis": 11,
         "cha": 13
       },
-      "tags": [],
+      "tags": [
+        "Desert"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1769,7 +1865,9 @@
         "wis": 11,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Desert"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1823,7 +1921,9 @@
         "wis": 13,
         "cha": 17
       },
-      "tags": [],
+      "tags": [
+        "Desert"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1902,7 +2002,9 @@
         "wis": 15,
         "cha": 22
       },
-      "tags": [],
+      "tags": [
+        "Desert"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -1981,7 +2083,10 @@
         "wis": 11,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2041,7 +2146,10 @@
         "wis": 13,
         "cha": 17
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2101,7 +2209,10 @@
         "wis": 15,
         "cha": 20
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2184,7 +2295,10 @@
         "wis": 17,
         "cha": 25
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2267,7 +2381,11 @@
         "wis": 12,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Hill",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2329,7 +2447,11 @@
         "wis": 11,
         "cha": 9
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Hill",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2380,7 +2502,11 @@
         "wis": 10,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2434,7 +2560,10 @@
         "wis": 13,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2489,7 +2618,10 @@
         "wis": 12,
         "cha": 14
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2556,7 +2688,10 @@
         "wis": 14,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2612,7 +2747,12 @@
         "wis": 11,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Swamp",
+        "Underdark",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2672,7 +2812,10 @@
         "wis": 8,
         "cha": 1
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2742,7 +2885,9 @@
         "wis": 14,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2807,7 +2952,9 @@
         "wis": 16,
         "cha": 16
       },
-      "tags": [],
+      "tags": [
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2866,7 +3013,11 @@
         "wis": 13,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2906,7 +3057,10 @@
         "wis": 10,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -2952,7 +3106,10 @@
         "wis": 11,
         "cha": 13
       },
-      "tags": [],
+      "tags": [
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3002,7 +3159,10 @@
         "wis": 13,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3056,7 +3216,10 @@
         "wis": 15,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3135,7 +3298,10 @@
         "wis": 17,
         "cha": 22
       },
-      "tags": [],
+      "tags": [
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3214,7 +3380,10 @@
         "wis": 20,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3276,7 +3445,10 @@
         "wis": 10,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3324,7 +3496,10 @@
         "wis": 11,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3366,7 +3541,10 @@
         "wis": 14,
         "cha": 13
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3418,7 +3596,9 @@
         "wis": 10,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3462,7 +3642,10 @@
         "wis": 13,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3507,7 +3690,9 @@
         "wis": 20,
         "cha": 20
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3574,7 +3759,10 @@
         "wis": 16,
         "cha": 20
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3645,7 +3833,10 @@
         "wis": 12,
         "cha": 14
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3704,7 +3895,10 @@
         "wis": 12,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3763,7 +3957,10 @@
         "wis": 8,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3809,7 +4006,9 @@
         "wis": 16,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3877,7 +4076,12 @@
         "wis": 16,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3930,7 +4134,9 @@
         "wis": 15,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Forest"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -3998,7 +4204,11 @@
         "wis": 10,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Mountain",
+        "Underdark",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4058,7 +4268,10 @@
         "wis": 15,
         "cha": 19
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4125,7 +4338,9 @@
         "wis": 14,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4197,7 +4412,9 @@
         "wis": 12,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Forest"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4265,7 +4482,11 @@
         "wis": 10,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Hill",
+        "Mountain",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4315,7 +4536,12 @@
         "wis": 10,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Mountain",
+        "Underdark",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4379,7 +4605,10 @@
         "wis": 14,
         "cha": 13
       },
-      "tags": [],
+      "tags": [
+        "Mountain",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4429,7 +4658,10 @@
         "wis": 10,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4496,7 +4728,10 @@
         "wis": 10,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4552,7 +4787,9 @@
         "wis": 3,
         "cha": 1
       },
-      "tags": [],
+      "tags": [
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4592,7 +4829,9 @@
         "wis": 3,
         "cha": 1
       },
-      "tags": [],
+      "tags": [
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4636,7 +4875,11 @@
         "wis": 11,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Mountain",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4688,7 +4931,9 @@
         "wis": 6,
         "cha": 1
       },
-      "tags": [],
+      "tags": [
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4743,7 +4988,11 @@
         "wis": 10,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Swamp",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4796,7 +5045,10 @@
         "wis": 12,
         "cha": 17
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4864,7 +5116,11 @@
         "wis": 10,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Swamp",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4913,7 +5169,10 @@
         "wis": 10,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Swamp",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -4967,7 +5226,9 @@
         "wis": 17,
         "cha": 16
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5033,7 +5294,9 @@
         "wis": 12,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5089,7 +5352,11 @@
         "wis": 10,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5138,7 +5405,12 @@
         "wis": 8,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Hill",
+        "Mountain",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5185,7 +5457,12 @@
         "wis": 8,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Hill",
+        "Mountain",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5236,7 +5513,12 @@
         "wis": 8,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Hill",
+        "Mountain",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5297,7 +5579,11 @@
         "wis": 11,
         "cha": 16
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5357,7 +5643,11 @@
         "wis": 13,
         "cha": 20
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5417,7 +5707,11 @@
         "wis": 15,
         "cha": 24
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5500,7 +5794,11 @@
         "wis": 17,
         "cha": 28
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5583,7 +5881,11 @@
         "wis": 12,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5634,7 +5936,10 @@
         "wis": 6,
         "cha": 2
       },
-      "tags": [],
+      "tags": [
+        "Swamp",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5686,7 +5991,9 @@
         "wis": 11,
         "cha": 13
       },
-      "tags": [],
+      "tags": [
+        "Forest"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5743,7 +6050,9 @@
         "wis": 13,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Forest"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5800,7 +6109,9 @@
         "wis": 15,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Forest"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5880,7 +6191,9 @@
         "wis": 17,
         "cha": 22
       },
-      "tags": [],
+      "tags": [
+        "Forest"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -5960,7 +6273,10 @@
         "wis": 14,
         "cha": 14
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6022,7 +6338,10 @@
         "wis": 14,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6070,7 +6389,11 @@
         "wis": 13,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6114,7 +6437,9 @@
         "wis": 8,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6154,7 +6479,11 @@
         "wis": 19,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Underdark",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6215,7 +6544,9 @@
         "wis": 11,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6256,7 +6587,9 @@
         "wis": 14,
         "cha": 13
       },
-      "tags": [],
+      "tags": [
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6305,7 +6638,12 @@
         "wis": 15,
         "cha": 14
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Mountain",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6367,7 +6705,12 @@
         "wis": 10,
         "cha": 13
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Forest",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6410,7 +6753,11 @@
         "wis": 13,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Mountain",
+        "Underdark",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6465,7 +6812,10 @@
         "wis": 12,
         "cha": 13
       },
-      "tags": [],
+      "tags": [
+        "Swamp",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6532,7 +6882,10 @@
         "wis": 9,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6580,7 +6933,11 @@
         "wis": 12,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6630,7 +6987,12 @@
         "wis": 10,
         "cha": 9
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6680,7 +7042,12 @@
         "wis": 10,
         "cha": 13
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6734,7 +7101,10 @@
         "wis": 10,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6782,7 +7152,9 @@
         "wis": 16,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6847,7 +7219,10 @@
         "wis": 10,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6906,7 +7281,10 @@
         "wis": 15,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -6971,7 +7349,10 @@
         "wis": 12,
         "cha": 14
       },
-      "tags": [],
+      "tags": [
+        "Urban",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7028,7 +7409,10 @@
         "wis": 12,
         "cha": 20
       },
-      "tags": [],
+      "tags": [
+        "Urban",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7089,7 +7473,10 @@
         "wis": 15,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Urban",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7150,7 +7537,11 @@
         "wis": 11,
         "cha": 1
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7217,7 +7608,11 @@
         "wis": 11,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Hill",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7273,7 +7668,12 @@
         "wis": 7,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Hill",
+        "Mountain",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7323,7 +7723,9 @@
         "wis": 18,
         "cha": 20
       },
-      "tags": [],
+      "tags": [
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7407,7 +7809,9 @@
         "wis": 15,
         "cha": 16
       },
-      "tags": [],
+      "tags": [
+        "Desert"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7465,7 +7869,9 @@
         "wis": 11,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7513,7 +7919,10 @@
         "wis": 14,
         "cha": 16
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7601,7 +8010,9 @@
         "wis": 12,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7663,7 +8074,10 @@
         "wis": 15,
         "cha": 16
       },
-      "tags": [],
+      "tags": [
+        "Urban",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7733,7 +8147,11 @@
         "wis": 11,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Mountain",
+        "Underdark",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7785,7 +8203,11 @@
         "wis": 12,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7832,7 +8254,9 @@
         "wis": 16,
         "cha": 20
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7910,7 +8334,11 @@
         "wis": 13,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Desert",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -7969,7 +8397,10 @@
         "wis": 11,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8026,7 +8457,10 @@
         "wis": 11,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8083,7 +8517,11 @@
         "wis": 10,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Mountain",
+        "Underdark",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8136,7 +8574,11 @@
         "wis": 10,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Swamp",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8192,7 +8634,10 @@
         "wis": 14,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8237,7 +8682,10 @@
         "wis": 10,
         "cha": 9
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8294,7 +8742,10 @@
         "wis": 13,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8352,7 +8803,9 @@
         "wis": 16,
         "cha": 9
       },
-      "tags": [],
+      "tags": [
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8396,7 +8849,10 @@
         "wis": 12,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8447,7 +8903,10 @@
         "wis": 19,
         "cha": 16
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8542,7 +9001,9 @@
         "wis": 12,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8615,7 +9076,11 @@
         "wis": 14,
         "cha": 16
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Swamp",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8685,7 +9150,9 @@
         "wis": 13,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8739,7 +9206,9 @@
         "wis": 14,
         "cha": 16
       },
-      "tags": [],
+      "tags": [
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8786,7 +9255,10 @@
         "wis": 6,
         "cha": 1
       },
-      "tags": [],
+      "tags": [
+        "Swamp",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8844,7 +9316,12 @@
         "wis": 7,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Hill",
+        "Mountain",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8888,7 +9365,12 @@
         "wis": 12,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Hill",
+        "Mountain",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -8958,7 +9440,11 @@
         "wis": 13,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Swamp",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9010,7 +9496,9 @@
         "wis": 12,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Forest"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9054,7 +9542,12 @@
         "wis": 15,
         "cha": 13
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9095,7 +9588,11 @@
         "wis": 10,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Underdark",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9159,7 +9656,10 @@
         "wis": 12,
         "cha": 14
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9208,7 +9708,10 @@
         "wis": 14,
         "cha": 17
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9270,7 +9773,9 @@
         "wis": 18,
         "cha": 24
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9348,7 +9853,9 @@
         "wis": 22,
         "cha": 25
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9423,7 +9930,9 @@
         "wis": 14,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9478,7 +9987,9 @@
         "wis": 16,
         "cha": 13
       },
-      "tags": [],
+      "tags": [
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9537,7 +10048,11 @@
         "wis": 12,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Mountain",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9591,7 +10106,10 @@
         "wis": 8,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9651,7 +10169,11 @@
         "wis": 10,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9712,7 +10234,10 @@
         "wis": 16,
         "cha": 20
       },
-      "tags": [],
+      "tags": [
+        "Urban",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9776,7 +10301,10 @@
         "wis": 11,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9826,7 +10354,10 @@
         "wis": 11,
         "cha": 19
       },
-      "tags": [],
+      "tags": [
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9876,7 +10407,10 @@
         "wis": 13,
         "cha": 23
       },
-      "tags": [],
+      "tags": [
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -9951,7 +10485,10 @@
         "wis": 15,
         "cha": 27
       },
-      "tags": [],
+      "tags": [
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10026,7 +10563,9 @@
         "wis": 10,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Arctic"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10078,7 +10617,11 @@
         "wis": 10,
         "cha": 9
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Desert",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10133,7 +10676,9 @@
         "wis": 16,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10191,7 +10736,9 @@
         "wis": 13,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10254,7 +10801,10 @@
         "wis": 13,
         "cha": 9
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10319,7 +10869,10 @@
         "wis": 10,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10374,7 +10927,10 @@
         "wis": 10,
         "cha": 14
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10424,7 +10980,14 @@
         "wis": 13,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Forest",
+        "Grassland",
+        "Hill",
+        "Mountain",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10473,7 +11036,10 @@
         "wis": 12,
         "cha": 13
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10534,7 +11100,10 @@
         "wis": 10,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10594,7 +11163,10 @@
         "wis": 10,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10651,7 +11223,10 @@
         "wis": 10,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10716,7 +11291,10 @@
         "wis": 11,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10770,7 +11348,10 @@
         "wis": 11,
         "cha": 19
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10824,7 +11405,10 @@
         "wis": 13,
         "cha": 22
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10903,7 +11487,10 @@
         "wis": 15,
         "cha": 26
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -10982,7 +11569,11 @@
         "wis": 8,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11029,7 +11620,11 @@
         "wis": 8,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11071,7 +11666,9 @@
         "wis": 8,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11117,7 +11714,9 @@
         "wis": 25,
         "cha": 30
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11206,7 +11805,10 @@
         "wis": 10,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11258,7 +11860,11 @@
         "wis": 12,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Urban",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11311,7 +11917,10 @@
         "wis": 18,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11387,7 +11996,10 @@
         "wis": 23,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11468,7 +12080,10 @@
         "wis": 15,
         "cha": 16
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11528,7 +12143,9 @@
         "wis": 13,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Forest"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11580,7 +12197,9 @@
         "wis": 14,
         "cha": 16
       },
-      "tags": [],
+      "tags": [
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11631,7 +12250,11 @@
         "wis": 8,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Swamp",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11670,7 +12293,11 @@
         "wis": 12,
         "cha": 9
       },
-      "tags": [],
+      "tags": [
+        "Hill",
+        "Mountain",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11725,7 +12352,11 @@
         "wis": 11,
         "cha": 1
       },
-      "tags": [],
+      "tags": [
+        "Mountain",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11790,7 +12421,11 @@
         "wis": 20,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Mountain",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11855,7 +12490,10 @@
         "wis": 12,
         "cha": 20
       },
-      "tags": [],
+      "tags": [
+        "Urban",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -11920,7 +12558,11 @@
         "wis": 11,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Hill",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12015,7 +12657,9 @@
         "wis": 10,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12065,7 +12709,9 @@
         "wis": 10,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12120,7 +12766,9 @@
         "wis": 16,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Forest"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12179,7 +12827,13 @@
         "wis": 9,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Forest",
+        "Hill",
+        "Mountain",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12239,7 +12893,13 @@
         "wis": 9,
         "cha": 1
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Forest",
+        "Hill",
+        "Mountain",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12288,7 +12948,9 @@
         "wis": 17,
         "cha": 16
       },
-      "tags": [],
+      "tags": [
+        "Forest"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12368,7 +13030,10 @@
         "wis": 10,
         "cha": 14
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12428,7 +13093,10 @@
         "wis": 10,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12498,7 +13166,11 @@
         "wis": 15,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Mountain",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12591,7 +13263,9 @@
         "wis": 13,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12656,7 +13330,11 @@
         "wis": 11,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Hill",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12702,7 +13380,11 @@
         "wis": 11,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Hill",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12757,7 +13439,12 @@
         "wis": 10,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Swamp",
+        "Underwater",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12817,7 +13504,11 @@
         "wis": 12,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Forest",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12876,7 +13567,10 @@
         "wis": 11,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12935,7 +13629,10 @@
         "wis": 10,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -12990,7 +13687,10 @@
         "wis": 13,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13053,7 +13753,11 @@
         "wis": 11,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Hill",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13118,7 +13822,10 @@
         "wis": 10,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13174,7 +13881,10 @@
         "wis": 11,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13230,7 +13940,10 @@
         "wis": 12,
         "cha": 12
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13305,7 +14018,10 @@
         "wis": 13,
         "cha": 18
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13380,7 +14096,12 @@
         "wis": 13,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Hill",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13442,7 +14163,10 @@
         "wis": 14,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13508,7 +14232,9 @@
         "wis": 12,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Arctic"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13559,7 +14285,11 @@
         "wis": 11,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13599,7 +14329,11 @@
         "wis": 14,
         "cha": 15
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Urban",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13655,7 +14389,11 @@
         "wis": 12,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13703,7 +14441,10 @@
         "wis": 10,
         "cha": 11
       },
-      "tags": [],
+      "tags": [
+        "Underdark",
+        "Planar"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13769,7 +14510,11 @@
         "wis": 6,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Swamp",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13817,7 +14562,11 @@
         "wis": 6,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Swamp",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13865,7 +14614,10 @@
         "wis": 12,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13909,7 +14661,10 @@
         "wis": 12,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -13953,7 +14708,9 @@
         "wis": 12,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Forest"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14001,7 +14758,10 @@
         "wis": 14,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14051,7 +14811,11 @@
         "wis": 12,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14096,7 +14860,11 @@
         "wis": 12,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14137,7 +14905,11 @@
         "wis": 12,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14176,7 +14948,10 @@
         "wis": 12,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14220,7 +14995,11 @@
         "wis": 14,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14266,7 +15045,11 @@
         "wis": 9,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14311,7 +15094,12 @@
         "wis": 13,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Forest",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14359,7 +15147,9 @@
         "wis": 11,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Desert"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14399,7 +15189,10 @@
         "wis": 12,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14446,7 +15239,10 @@
         "wis": 10,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14490,7 +15286,10 @@
         "wis": 8,
         "cha": 2
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14536,7 +15335,10 @@
         "wis": 10,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14583,7 +15385,10 @@
         "wis": 14,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14629,7 +15434,11 @@
         "wis": 12,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Forest",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14675,7 +15484,10 @@
         "wis": 11,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14714,7 +15526,12 @@
         "wis": 14,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Grassland",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14754,7 +15571,9 @@
         "wis": 11,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14803,7 +15622,12 @@
         "wis": 10,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Forest",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14843,7 +15667,11 @@
         "wis": 12,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Forest",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14888,7 +15716,10 @@
         "wis": 8,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14938,7 +15769,10 @@
         "wis": 12,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -14992,7 +15826,11 @@
         "wis": 12,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15033,7 +15871,11 @@
         "wis": 12,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Mountain",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15072,7 +15914,11 @@
         "wis": 7,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15118,7 +15964,12 @@
         "wis": 7,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Forest",
+        "Swamp",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15157,7 +16008,10 @@
         "wis": 10,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15205,7 +16059,10 @@
         "wis": 9,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15251,7 +16108,10 @@
         "wis": 10,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15305,7 +16165,12 @@
         "wis": 14,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Grassland",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15350,7 +16215,12 @@
         "wis": 14,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Forest",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15392,7 +16262,9 @@
         "wis": 7,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15438,7 +16310,10 @@
         "wis": 10,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15492,7 +16367,10 @@
         "wis": 12,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15533,7 +16411,11 @@
         "wis": 12,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15579,7 +16461,12 @@
         "wis": 10,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Forest",
+        "Swamp",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15625,7 +16512,10 @@
         "wis": 10,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15677,7 +16567,10 @@
         "wis": 14,
         "cha": 10
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Forest"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15729,7 +16622,11 @@
         "wis": 10,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Swamp",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15776,7 +16673,9 @@
         "wis": 9,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Desert"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15823,7 +16722,9 @@
         "wis": 12,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15874,7 +16775,9 @@
         "wis": 10,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15924,7 +16827,10 @@
         "wis": 11,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -15978,7 +16884,10 @@
         "wis": 10,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16031,7 +16940,12 @@
         "wis": 10,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Forest",
+        "Grassland",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16071,7 +16985,11 @@
         "wis": 12,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Grassland",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16118,7 +17036,11 @@
         "wis": 10,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16163,7 +17085,11 @@
         "wis": 12,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16203,7 +17129,13 @@
         "wis": 12,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Forest",
+        "Grassland",
+        "Hill",
+        "Underdark"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16249,7 +17181,11 @@
         "wis": 10,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16290,7 +17226,12 @@
         "wis": 14,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16330,7 +17271,10 @@
         "wis": 12,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16381,7 +17325,10 @@
         "wis": 10,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16427,7 +17374,10 @@
         "wis": 12,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16473,7 +17423,10 @@
         "wis": 12,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16513,7 +17466,11 @@
         "wis": 12,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16559,7 +17516,10 @@
         "wis": 12,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16617,7 +17577,12 @@
         "wis": 8,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Forest",
+        "Grassland",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16662,7 +17627,9 @@
         "wis": 11,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Arctic"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16712,7 +17679,11 @@
         "wis": 12,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Hill",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16753,7 +17724,12 @@
         "wis": 10,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Hill",
+        "Mountain",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16799,7 +17775,10 @@
         "wis": 10,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16855,7 +17834,11 @@
         "wis": 12,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Forest",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16901,7 +17884,10 @@
         "wis": 14,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16947,7 +17933,10 @@
         "wis": 7,
         "cha": 2
       },
-      "tags": [],
+      "tags": [
+        "Swamp",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -16992,7 +17981,10 @@
         "wis": 12,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17038,7 +18030,9 @@
         "wis": 13,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Arctic"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17083,7 +18077,11 @@
         "wis": 11,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Hill",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17123,7 +18121,11 @@
         "wis": 9,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Grassland",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17169,7 +18171,11 @@
         "wis": 10,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Swamp",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17215,7 +18221,12 @@
         "wis": 13,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Hill",
+        "Mountain",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17261,7 +18272,10 @@
         "wis": 10,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Coastal",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17311,7 +18325,9 @@
         "wis": 12,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17350,7 +18366,10 @@
         "wis": 11,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17389,7 +18408,11 @@
         "wis": 12,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Forest",
+        "Mountain"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17446,7 +18469,9 @@
         "wis": 8,
         "cha": 2
       },
-      "tags": [],
+      "tags": [
+        "Desert"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17485,7 +18510,9 @@
         "wis": 10,
         "cha": 2
       },
-      "tags": [],
+      "tags": [
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17531,7 +18558,12 @@
         "wis": 10,
         "cha": 2
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Swamp",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17581,7 +18613,11 @@
         "wis": 12,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17628,7 +18664,12 @@
         "wis": 7,
         "cha": 1
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Forest",
+        "Grassland",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17679,7 +18720,10 @@
         "wis": 7,
         "cha": 2
       },
-      "tags": [],
+      "tags": [
+        "Swamp",
+        "Underwater"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17730,7 +18774,11 @@
         "wis": 10,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Swamp",
+        "Underdark",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17778,7 +18826,11 @@
         "wis": 12,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Hill",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17830,7 +18882,11 @@
         "wis": 10,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Forest",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17877,7 +18933,10 @@
         "wis": 12,
         "cha": 8
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17923,7 +18982,10 @@
         "wis": 11,
         "cha": 5
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -17966,7 +19028,10 @@
         "wis": 12,
         "cha": 9
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -18015,7 +19080,12 @@
         "wis": 10,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Forest",
+        "Grassland",
+        "Swamp"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -18054,7 +19124,10 @@
         "wis": 12,
         "cha": 4
       },
-      "tags": [],
+      "tags": [
+        "Desert",
+        "Grassland"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -18100,7 +19173,10 @@
         "wis": 12,
         "cha": 7
       },
-      "tags": [],
+      "tags": [
+        "Grassland",
+        "Urban"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -18140,7 +19216,11 @@
         "wis": 12,
         "cha": 3
       },
-      "tags": [],
+      "tags": [
+        "Forest",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -18180,7 +19260,12 @@
         "wis": 12,
         "cha": 6
       },
-      "tags": [],
+      "tags": [
+        "Arctic",
+        "Forest",
+        "Grassland",
+        "Hill"
+      ],
       "source": {
         "type": "official_srd",
         "name": "System Reference Document 5.2.1",
@@ -18213,6 +19298,6 @@
     "license": "CC BY 4.0",
     "license_url": "https://creativecommons.org/licenses/by/4.0/legalcode",
     "attribution": "This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.",
-    "modifications": "SRD 5.2.1 stat-block text extracted and reorganized into structured JSON; PDF line wraps and hyphenation normalized; non-stat-block headings removed; four text-wrap artifacts corrected; 36 alternative size descriptions restored. Young White Dragon Intelligence saving throw printed unsigned 2 on PDF printed page 340 and provisionally interpreted as +2."
+    "modifications": "SRD 5.2.1 stat-block text extracted and reorganized into structured JSON; PDF line wraps and hyphenation normalized; non-stat-block headings removed; four text-wrap artifacts corrected; 36 alternative size descriptions restored. Young White Dragon Intelligence saving throw printed unsigned 2 on PDF printed page 340 and provisionally interpreted as +2. Environment tags in the tags field were added by this project; they are not part of the SRD."
   }
 }

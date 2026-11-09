@@ -281,3 +281,13 @@ button.marked { border-color: #f2cf8a; }
 .coin-table .row-problem { padding-top: 10px; }
 .wide-modal > button { align-self: flex-start; }
 .coin-table select { min-width: 84px; }
+
+/* Encounter generator */
+.auto-generate { border: 1px solid #4f9a6c; border-radius: 10px; padding: 12px 14px; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.auto-generate legend { padding: 0 6px; font-weight: 600; color: #9be3b4; }
+.auto-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.cr-pick { display: flex; gap: 6px; }
+.cr-pick select { flex: 1; }
+.auto-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.auto-generate p { margin: 0; }
+@media (max-width: 900px) { .auto-fields { grid-template-columns: 1fr 1fr; } }
