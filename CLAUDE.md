@@ -14,7 +14,7 @@ Combat tracker for D&D Dungeon Masters. Full design and agreed decisions: **DESI
 | Path | Purpose |
 |---|---|
 | `src/App.tsx` | Header, tabs, monster data and stored lists |
-| `src/components/` | `Encounters` (list + editor, difficulty), `MonsterPicker`, `AutoGenerate`, `PartyRoster`, `BattleScreen` (turn order, log), `CombatantDetail` (HP, conditions, stat block rolls), `AddCombatants`, `NumberPrompt` (physical dice), `EndBattleDialog` (search for loot), `SettingsPanel` (coin table) |
+| `src/components/` | `Encounters` (list + editor, difficulty), `MonsterPicker`, `MonsterDetails` (read-only copy of the reference app's detail view — keep in step), `AutoGenerate`, `PartyRoster`, `BattleScreen` (turn order, log), `CombatantDetail` (HP, conditions, stat block rolls), `AddCombatants`, `NumberPrompt` (physical dice), `EndBattleDialog` (search for loot), `SettingsPanel` (coin table) |
 | `src/lib/bridge.ts` | Client for the reference app's read-only storage bridge |
 | `src/lib/useMonsters.ts` | Bundled published catalog + custom monsters/artwork via the bridge |
 | `src/lib/combat.ts` | Pure battle rules: creating a battle, turn order, HP, conditions. Each function returns a new `Battle`. |

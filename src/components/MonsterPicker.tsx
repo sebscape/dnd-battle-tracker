@@ -3,19 +3,27 @@ import type { Monster } from "../models/monster";
 import { crValue, isCustom } from "../lib/format";
 import { monsterXp } from "../lib/difficulty";
 import { environmentsOf } from "../lib/generate";
+import MonsterDetails from "./MonsterDetails";
 
 interface Props {
   monsters: Monster[];
   onAdd: (monster: Monster) => void;
+  artwork?: Record<string, string>;
+  /** Set both to share "one open monster" with another list; otherwise the picker tracks it itself. */
+  expandedId?: string | null;
+  onToggle?: (id: string) => void;
 }
 
 const MAX_RESULTS = 40;
 
-export default function MonsterPicker({ monsters, onAdd }: Props) {
+export default function MonsterPicker({ monsters, onAdd, artwork = {}, expandedId: sharedId, onToggle: sharedToggle }: Props) {
   const [query, setQuery] = useState("");
   const [source, setSource] = useState("all");
   const [minCr, setMinCr] = useState("");
   const [maxCr, setMaxCr] = useState("");
+  const [ownId, setOwnId] = useState<string | null>(null);
+  const expandedId = sharedToggle ? sharedId ?? null : ownId;
+  const onToggle = sharedToggle ?? ((id: string) => setOwnId(v => v === id ? null : id));
   const matches = useMemo(() => {
     const words = query.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
     const lo = minCr ? crValue(minCr) : NaN, hi = maxCr ? crValue(maxCr) : NaN;
@@ -40,9 +48,10 @@ export default function MonsterPicker({ monsters, onAdd }: Props) {
     </div>
     <p className="muted small-text" role="status">{matches.length} match{matches.length === 1 ? "" : "es"}{matches.length > MAX_RESULTS ? " — showing the first " + MAX_RESULTS + ", refine your search to see more" : ""}</p>
     <ul className="picker-results">
-      {matches.slice(0, MAX_RESULTS).map(m => <li key={m.id}>
-        <span><strong>{m.name}</strong><small>{m.size} {m.type} · CR {m.challenge_rating}{monsterXp(m.challenge_rating) !== null ? " (" + monsterXp(m.challenge_rating)!.toLocaleString("en-US") + " XP)" : ""} · HP {m.hit_points} · AC {m.armor_class}{isCustom(m) ? " · Custom" : ""}{environmentsOf(m).length ? " · " + environmentsOf(m).join(", ") : ""}</small></span>
+      {matches.slice(0, MAX_RESULTS).map(m => <li key={m.id} className={expandedId === m.id ? "expanded" : ""}>
+        <button type="button" className="monster-toggle" aria-expanded={expandedId === m.id} title={expandedId === m.id ? "Hide details" : "Show details"} onClick={() => onToggle(m.id)}><strong>{m.name}</strong><small>{m.size} {m.type} · CR {m.challenge_rating}{monsterXp(m.challenge_rating) !== null ? " (" + monsterXp(m.challenge_rating)!.toLocaleString("en-US") + " XP)" : ""} · HP {m.hit_points} · AC {m.armor_class}{isCustom(m) ? " · Custom" : ""}{environmentsOf(m).length ? " · " + environmentsOf(m).join(", ") : ""}</small></button>
         <button type="button" className="small" onClick={() => onAdd(m)} aria-label={"Add " + m.name}>Add</button>
+        {expandedId === m.id && <MonsterDetails monster={m} artwork={artwork[m.id]} />}
       </li>)}
     </ul>
   </div>;
