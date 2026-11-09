@@ -5,6 +5,7 @@ import type { Monster } from "../models/monster";
 import type { MonsterData } from "../lib/useMonsters";
 import { isCustom } from "../lib/format";
 import MonsterPicker from "./MonsterPicker";
+import MonsterDetails from "./MonsterDetails";
 import AutoGenerate from "./AutoGenerate";
 import DifficultyPanel from "./DifficultyPanel";
 import { encounterDifficulty, monsterXp } from "../lib/difficulty";
@@ -79,6 +80,9 @@ interface EditorProps {
 }
 
 function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDelete, onStart }: EditorProps) {
+  // One monster's details open at a time, in either list: "encounter:<id>" or "picker:<id>".
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const toggle = (key: string) => setExpanded(k => k === key ? null : key);
   const set = (patch: Partial<Encounter>) => onChange({ ...encounter, ...patch });
   const setMonster = (index: number, patch: Partial<EncounterMonster>) =>
     set({ monsters: encounter.monsters.map((m, i) => i === index ? { ...m, ...patch } : m) });
@@ -121,11 +125,14 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
       {encounter.monsters.map((em, i) => {
         const m = data.byId.get(em.monster_id);
         const unavailable = !m && !data.loading && data.bridge !== "connecting";
-        return <li key={em.monster_id} className={unavailable ? "unavailable" : ""}>
-          <div className="em-name">
-            <strong>{m?.name ?? em.monster_name}</strong>
-            <small>{m ? m.size + " " + m.type + " · CR " + m.challenge_rating + xpText(m.challenge_rating, em.count) + (isCustom(m) ? " · Custom" : "") : unavailable ? "Unavailable: custom monster not found in Monster Reference" : "Loading…"}</small>
-          </div>
+        const open = !!m && expanded === "encounter:" + m.id;
+        const summary = m ? m.size + " " + m.type + " · CR " + m.challenge_rating + xpText(m.challenge_rating, em.count) + (isCustom(m) ? " · Custom" : "") : unavailable ? "Unavailable: custom monster not found in Monster Reference" : "Loading…";
+        return <li key={em.monster_id} className={(unavailable ? "unavailable" : "") + (open ? " expanded" : "")}>
+          {m
+            ? <button type="button" className="monster-toggle em-name" aria-expanded={open} title={open ? "Hide details" : "Show details"} onClick={() => toggle("encounter:" + m.id)}>
+                <strong>{m.name}</strong><small>{summary}</small>
+              </button>
+            : <div className="em-name"><strong>{em.monster_name}</strong><small>{summary}</small></div>}
           <div className="stepper" role="group" aria-label={"Number of " + em.monster_name}>
             <button type="button" className="small" aria-label="One fewer" disabled={em.count <= 1} onClick={() => setMonster(i, { count: em.count - 1 })}>−</button>
             <span aria-live="polite">{em.count}</span>
@@ -135,13 +142,15 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
             <input type="checkbox" checked={em.group_initiative} disabled={em.count < 2} onChange={e => setMonster(i, { group_initiative: e.target.checked })} /> Group initiative
           </label>
           <button type="button" className="danger small" onClick={() => set({ monsters: encounter.monsters.filter((_, j) => j !== i) })}>Remove</button>
+          {open && <MonsterDetails monster={m} artwork={data.artwork[m.id]} />}
         </li>;
       })}
     </ul>
 
     <DifficultyPanel difficulty={difficulty} partySize={presentPcs.length} />
 
-    <MonsterPicker monsters={allMonsters} onAdd={addMonster} />
+    <MonsterPicker monsters={allMonsters} onAdd={addMonster} artwork={data.artwork}
+      expandedId={expanded?.startsWith("picker:") ? expanded.slice(7) : null} onToggle={id => toggle("picker:" + id)} />
 
     <div className="actions">
       <button type="button" className="primary" disabled={data.loading || (encounter.monsters.length === 0 && encounter.party_member_ids.length === 0)} onClick={onStart}>Start battle ▸</button>

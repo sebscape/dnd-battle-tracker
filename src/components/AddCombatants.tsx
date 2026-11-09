@@ -7,6 +7,7 @@ import { clampInt } from "../lib/format";
 import MonsterPicker from "./MonsterPicker";
 
 interface Props {
+  artwork?: Record<string, string>;
   battle: Battle;
   party: PartyMember[];
   monsters: Monster[];
@@ -16,7 +17,7 @@ interface Props {
 }
 
 /** Adds monsters, party members or one-off characters to a battle, including mid-fight. */
-export default function AddCombatants({ battle, party, monsters, apply, onAdded, onDone }: Props) {
+export default function AddCombatants({ battle, party, monsters, artwork, apply, onAdded, onDone }: Props) {
   const [count, setCount] = useState("1");
   const [group, setGroup] = useState(false);
   const [pcName, setPcName] = useState("");
@@ -58,6 +59,6 @@ export default function AddCombatants({ battle, party, monsters, apply, onAdded,
       <label>Monsters per add<input type="number" min="1" max="20" value={count} onChange={e => setCount(e.target.value)} /></label>
       <label className="check"><input type="checkbox" checked={group} disabled={n < 2} onChange={e => setGroup(e.target.checked)} /> Group initiative</label>
     </div>
-    <MonsterPicker monsters={monsters} onAdd={m => add(rules.monsterCombatants(m, n, group && n > 1, battle.combatants))} />
+    <MonsterPicker monsters={monsters} artwork={artwork} onAdd={m => add(rules.monsterCombatants(m, n, group && n > 1, battle.combatants))} />
   </div>;
 }

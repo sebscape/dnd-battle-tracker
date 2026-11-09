@@ -291,3 +291,30 @@ button.marked { border-color: #f2cf8a; }
 .auto-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .auto-generate p { margin: 0; }
 @media (max-width: 900px) { .auto-fields { grid-template-columns: 1fr 1fr; } }
+
+/* ---------- Monster details (expand a monster in the encounter editor) ---------- */
+.monster-toggle { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; padding: 0; background: none; border: 0; color: inherit; text-align: left; cursor: pointer; font: inherit; }
+.monster-toggle:hover strong, .monster-toggle:focus-visible strong { text-decoration: underline; }
+.monster-toggle strong::before { content: "▸ "; color: #9ec5fe; }
+.monster-toggle[aria-expanded="true"] strong::before { content: "▾ "; }
+.monster-toggle small { color: #b2c2d8; }
+.encounter-monsters li.expanded, .picker-results li.expanded { background: #22344d; outline: 1px solid #93c5fd; }
+.encounter-monsters li > .monster-details { grid-column: 1 / -1; }
+.picker-results li { flex-wrap: wrap; }
+.picker-results li > .monster-details { flex-basis: 100%; }
+.picker-results:has(li.expanded) { max-height: 75vh; }
+.monster-details { border-top: 1px solid #334155; padding-top: 12px; margin-top: 4px; font-size: 14px; line-height: 1.45; }
+.monster-details p { margin: 6px 0; }
+.monster-details h4 { font-size: 15px; border-bottom: 1px solid #475569; padding-bottom: 5px; margin: 16px 0 6px; }
+.md-top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-bottom: 8px; }
+.md-art { width: 160px; flex: 0 0 160px; aspect-ratio: 1 / 2; border: 1px solid #9ca3af; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 12px; }
+.md-art img { width: 100%; height: 100%; object-fit: contain; }
+.md-summary { flex: 1 1 300px; min-width: 0; }
+.md-stats { display: flex; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
+.md-stats span { padding: 12px; background: #26384e; border-radius: 8px; }
+.md-stats b { font-size: 20px; margin-left: 6px; }
+.md-abilities { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin: 14px 0; }
+.md-abilities > div { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 2px; background: #26384e; border-radius: 6px; font-size: 12px; }
+.spell-line { display: block; }
+.spell-line + .spell-line { margin-top: 0.35rem; }
+@media (max-width: 800px) { .md-abilities { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

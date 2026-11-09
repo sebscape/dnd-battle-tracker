@@ -122,7 +122,7 @@ export default function BattleScreen({ battle, canUndo, apply, undo, finish, par
       </section>
 
       <section className="panel detail">
-        {showAdd && <AddCombatants battle={battle} party={party} monsters={[...data.published, ...data.custom]} apply={apply} onAdded={c => setSelectedId(c.id)} onDone={() => setShowAdd(false)} />}
+        {showAdd && <AddCombatants battle={battle} party={party} monsters={[...data.published, ...data.custom]} artwork={data.artwork} apply={apply} onAdded={c => setSelectedId(c.id)} onDone={() => setShowAdd(false)} />}
         {selected
           ? <CombatantDetail key={selected.id} combatant={selected} started={battle.started} apply={apply} roller={roller}
               others={order.filter(o => o.id !== selected.id && !(o.kind === "monster" && o.out))}
