@@ -2,24 +2,13 @@ import type { Monster, NamedFeature } from "../models/monster";
 import { ABILITY_KEYS } from "../models/monster";
 
 // Read-only copy of the Monster Reference app's detail view (src/App.tsx `Detail`,
-// src/MonsterArtwork.tsx), without the artwork editing, download and monster editing buttons.
+// src/MonsterArtwork.tsx), without the artwork editing, download and monster editing buttons, and
+// without the AI image-prompt description.
 // Keep the sections in step with that app.
 const FEATURE_KEYS = ["traits", "actions", "bonus_actions", "reactions", "legendary_actions", "spellcasting"] as const;
 const TEXT_KEYS = ["alignment", "armor_description", "hit_dice", "saving_throws", "skills", "damage_vulnerabilities", "damage_resistances", "damage_immunities", "condition_immunities", "senses", "languages", "gear", "legendary_actions_intro"] as const;
 const titleCase = (s: string) => s.replaceAll("_", " ").replace(/\b\w/g, c => c.toUpperCase());
 const modifier = (n: number) => { const m = Math.floor((n - 10) / 2); return (m >= 0 ? "+" : "") + m; };
-
-const VISUAL_DESCRIPTIONS: Record<string, string> = {
-  aboleth: "An ancient, terrifying aquatic aberration: a huge elongated fishlike body, three vertically arranged eyes, a broad tooth-filled mouth, long grasping tentacles, ridged fins, and slick mucus-coated skin. Pose the entire body and tentacles in a readable vertical composition.",
-};
-/** Same text as the reference app's monsterVisualDescription(). */
-export function monsterVisualDescription(monster: Monster): string {
-  return VISUAL_DESCRIPTIONS[monster.name.trim().toLowerCase()] ?? [
-    "Depict a recognizable " + monster.name + ", a " + monster.size.toLowerCase() + " " + monster.type.toLowerCase() + " fantasy creature.",
-    "Use distinctive physical features associated with this creature, emphasizing silhouette, anatomy, textures, and a clear miniature-friendly pose.",
-    "Do not depict game rules, statistics, text, symbols, or magical effects unless they are essential to the creature's visible appearance."
-  ].join(" ");
-}
 
 const SPELL_FREQUENCY = /(?=At Will:|\b\d+\/Day(?: Each)?:)/g;
 function FeatureDescription({ feature }: { feature: NamedFeature }) {
@@ -37,7 +26,6 @@ export default function MonsterDetails({ monster, artwork }: { monster: Monster;
         ? <img src={artwork} alt={monster.name + " artwork"} />
         : <span className="muted small-text">No artwork</span>}</div>
       <div className="md-summary">
-        <p className="md-visual">{monsterVisualDescription(monster)}</p>
         <p>{monster.size} {monster.type} · CR {monster.challenge_rating} · {custom ? "Custom" : "Published"}</p>
         <div className="md-stats"><span>AC <b>{monster.armor_class}</b></span><span>HP <b>{monster.hit_points}</b></span><span>Initiative <b>{monster.initiative_bonus >= 0 ? "+" : ""}{monster.initiative_bonus}</b></span></div>
         {monster.speed && <p><b>Speed:</b> {monster.speed}</p>}
