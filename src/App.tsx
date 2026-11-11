@@ -42,7 +42,7 @@ export default function App() {
   return <main>
     <header>
       <div className="app-brand">
-        <img className="app-brand-logo" src="/images/battle-tracker-logo.webp" alt="" width="296" height="320" />
+        <img className="app-brand-logo" src="/images/logo.webp" alt="" width="512" height="512" />
         <div><h1>Scrap Sheet</h1><p className="muted">A 5E-compatible battle tracker</p></div>
       </div>
       <div className="header-status">
