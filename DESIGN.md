@@ -1,4 +1,6 @@
-# dnd-battle-tracker — Design
+# Scrap Sheet — Design
+
+Formerly dnd-battle-tracker; the reference app is now Critter Codex (formerly dnd-monster-reference). See CLAUDE.md, "Name and addresses".
 
 Status: agreed design, pre-implementation (2026-11-05).
 
@@ -12,17 +14,17 @@ A web tool for Dungeon Masters to run combat: initiative order, monster hit poin
 |---|---|
 | Repo | `sebscape/dnd-battle-tracker` |
 | Hosting | Netlify, auto-deploy from `main` |
-| Address | https://dnd-battle-tracker.c2ma.com |
+| Address | https://scrap-sheet.c2ma.com |
 | Stack | React + TypeScript + Vite (same as dnd-monster-reference) |
 | Users | Single DM per browser; no accounts |
 
 ## Monster data and the storage bridge
 
 - **Published monsters** (SRD 5.2.1, 330 monsters) are bundled with the battle app, so it works without the reference app.
-- **Custom monsters and artwork** live in the reference app's browser storage on `dnd-monster-ref.c2ma.com`. Browsers isolate storage per subdomain, so the battle app reads them through a **storage bridge**:
+- **Custom monsters and artwork** live in the reference app's browser storage on `critter-codex.c2ma.com`. Browsers isolate storage per subdomain, so the battle app reads them through a **storage bridge**:
   - The reference app hosts a small bridge page, `public/bridge.html` (served at `/bridge.html`), with no UI.
   - The battle app loads it in a hidden iframe and requests data with `postMessage`.
-  - The bridge only answers requests from `https://dnd-battle-tracker.c2ma.com` (and `http://localhost:5174`, the battle app's dev server) and checks the message origin on both sides. The reference app's dev server stays on port 5173.
+  - The bridge only answers requests from `https://scrap-sheet.c2ma.com` (and `http://localhost:5174`, the battle app's dev server) and checks the message origin on both sides. The reference app's dev server stays on port 5173.
   - Both sites are under `c2ma.com` (same site), so browsers should give the iframe the same storage the reference app sees. **This must be verified in Chrome, Firefox and Safari before other work is built on it.**
 - **Read-only.** The battle app never changes custom monsters or artwork. All editing stays in the reference app.
 - **Fallback.** If the bridge doesn't respond within a few seconds, the battle app continues with published monsters only and says so in the UI.
@@ -47,7 +49,7 @@ The bridge never writes to storage and never creates the artwork database if it 
 
 ## Battle app storage
 
-Browser storage on `dnd-battle-tracker.c2ma.com` (localStorage for small records, IndexedDB if size requires):
+Browser storage on `scrap-sheet.c2ma.com` (localStorage for small records, IndexedDB if size requires):
 
 - **Party roster:** saved PCs.
 - **Encounters:** saved encounter templates.

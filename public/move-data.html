@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="robots" content="noindex" />
+<title>Scrap Sheet — move data</title>
+</head>
+<body>
+<!--
+  One-time move of this app's saved data from its old web address to its new one.
+  The app at the NEW address loads this page (served from the OLD address) in a
+  hidden iframe and asks for the data with postMessage. This page is READ-ONLY and
+  answers only the origins in ALLOWED_ORIGINS. Remove it once the old address
+  redirects to the new one.
+-->
+<script>
+(() => {
+  "use strict";
+  const PROTOCOL = "dnd-move";
+  const ALLOWED_ORIGINS = new Set(["https://scrap-sheet.c2ma.com"]);
+  // Must match src/lib/moveData.ts.
+  const PREFIX = "dnd-battle-tracker";
+  const STORES = [];
+
+  const allowedStore = p => STORES.find(s => p && s.db === p.db && s.store === p.store);
+  function openDb(name) {
+    return new Promise((resolve, reject) => {
+      // Open without a version so this page never creates or upgrades a database.
+      const req = indexedDB.open(name);
+      req.onupgradeneeded = () => { req.transaction.abort(); };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => { if (req.error && req.error.name === "AbortError") resolve(null); else reject(req.error); };
+    });
+  }
+  async function withStore(s, fn) {
+    const db = await openDb(s.db);
+    if (!db) return null;
+    try {
+      if (!db.objectStoreNames.contains(s.store)) return null;
+      const store = db.transaction(s.store, "readonly").objectStore(s.store);
+      return await new Promise((resolve, reject) => { const req = fn(store); req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error); });
+    } finally { db.close(); }
+  }
+  const items = () => Object.fromEntries(Object.keys(localStorage).filter(k => k.startsWith(PREFIX)).sort().map(k => [k, localStorage.getItem(k)]));
+
+  const handlers = {
+    async hello() { return { version: 1 }; },
+    async getLocalStorage() { return { items: items() }; },
+    async listKeys(p) {
+      const s = allowedStore(p); if (!s) throw new Error("Unknown store.");
+      return { keys: (await withStore(s, store => store.getAllKeys())) ?? [] };
+    },
+    async getRecord(p) {
+      const s = allowedStore(p); if (!s) throw new Error("Unknown store.");
+      return { record: (await withStore(s, store => store.get(p.key))) ?? null };
+    },
+  };
+
+  window.addEventListener("message", async event => {
+    if (!ALLOWED_ORIGINS.has(event.origin) || event.source !== window.parent) return;
+    const msg = event.data;
+    if (!msg || msg.protocol !== PROTOCOL || typeof msg.id !== "string" || typeof msg.type !== "string") return;
+    const reply = body => event.source.postMessage({ protocol: PROTOCOL, id: msg.id, ...body }, event.origin);
+    const handler = Object.prototype.hasOwnProperty.call(handlers, msg.type) ? handlers[msg.type] : null;
+    if (!handler) { reply({ ok: false, error: "Unknown request type: " + msg.type }); return; }
+    try { reply({ ok: true, result: await handler(msg.payload) }); }
+    catch (e) { reply({ ok: false, error: e && e.message ? e.message : String(e) }); }
+  });
+})();
+</script>
+</body>
+</html>

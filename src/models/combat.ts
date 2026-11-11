@@ -10,7 +10,7 @@ export interface ConditionEffect {
 /**
  * When a condition ends: at the start or end of a combatant's turn, after `count`
  * more of those. "N rounds" is stored as the start of the turn it was added on,
- * N times — one full round each, as in the D&D rules.
+ * N times — one full round each, as in the SRD rules.
  */
 export interface ConditionEnd {
   when: "start" | "end";

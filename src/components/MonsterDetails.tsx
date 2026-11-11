@@ -1,7 +1,7 @@
 import type { Monster, NamedFeature } from "../models/monster";
 import { ABILITY_KEYS } from "../models/monster";
 
-// Read-only copy of the Monster Reference app's detail view (src/App.tsx `Detail`,
+// Read-only copy of the Critter Codex app's detail view (src/App.tsx `Detail`,
 // src/MonsterArtwork.tsx), without the artwork editing, download and monster editing buttons, and
 // without the AI image-prompt description.
 // Keep the sections in step with that app.

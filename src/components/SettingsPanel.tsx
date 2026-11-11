@@ -1,6 +1,7 @@
 import type { CoinRow, TreasureSettings } from "../lib/treasure";
 import { COINS, rowProblem } from "../lib/treasure";
 import { clampInt } from "../lib/format";
+import MoveData from "./MoveData";
 
 interface Props {
   settings: TreasureSettings;
@@ -15,9 +16,10 @@ export default function SettingsPanel({ settings, onChange }: Props) {
     onChange({ ...settings, rows: [...settings.rows, { id: crypto.randomUUID(), min_cr: last ? last.max_cr : "0", max_cr: "", dice: "", multiplier: 1, coin: "GP" }] });
   };
   return <section className="panel settings">
+    <MoveData />
     <h2>Treasure</h2>
     <p className="muted">When a battle ends, the app lists the gear from each defeated monster's stat block and the treasure you planned for the encounter.
-      It can also roll coins for each monster from a table you enter here — for example the individual treasure table in your copy of the Dungeon Master's Guide.
+      It can also roll coins for each monster from a table you enter here — for example an individual treasure table from your own rulebooks.
       The SRD 5.2.1 doesn't include one, so the app doesn't ship one. Leave it empty to skip coins.</p>
 
     {settings.rows.length > 0 && <table className="coin-table">

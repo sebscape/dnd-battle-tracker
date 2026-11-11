@@ -1,10 +1,10 @@
-// Client for the read-only storage bridge hosted by dnd-monster-reference.
+// Client for the read-only storage bridge hosted by Critter Codex.
 // Protocol: see DESIGN.md, "Bridge messages (version 1)".
 
 const PROTOCOL = "dnd-bridge";
 export const BRIDGE_URL = import.meta.env.DEV
   ? "http://localhost:5173/bridge.html"
-  : "https://dnd-monster-ref.c2ma.com/bridge.html";
+  : "https://critter-codex.c2ma.com/bridge.html";
 const TIMEOUT_MS = 5000;
 
 interface BridgeReply { protocol: string; id: string; ok: boolean; result?: unknown; error?: string }
@@ -41,7 +41,7 @@ export class BridgeClient {
   static async connect(url = BRIDGE_URL): Promise<{ client: BridgeClient; hello: BridgeHello }> {
     const frame = document.createElement("iframe");
     frame.src = url;
-    frame.title = "Monster Reference bridge";
+    frame.title = "Critter Codex bridge";
     frame.setAttribute("aria-hidden", "true");
     frame.tabIndex = -1;
     frame.style.cssText = "position:absolute;width:0;height:0;border:0;visibility:hidden";
