@@ -1,4 +1,4 @@
-// Copied from dnd-monster-reference src/models/monster.ts (schema 1.2.0). Keep in sync.
+// Copied from Critter Codex (sebscape/critter-codex) src/models/monster.ts (schema 1.2.0). Keep in sync.
 export type SourceType = "official_srd" | "third_party" | "homebrew";
 export interface NamedFeature { name: string; description: string; }
 export interface Abilities { str: number; dex: number; con: number; int: number; wis: number; cha: number; }

@@ -126,7 +126,7 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
         const m = data.byId.get(em.monster_id);
         const unavailable = !m && !data.loading && data.bridge !== "connecting";
         const open = !!m && expanded === "encounter:" + m.id;
-        const summary = m ? m.size + " " + m.type + " · CR " + m.challenge_rating + xpText(m.challenge_rating, em.count) + (isCustom(m) ? " · Custom" : "") : unavailable ? "Unavailable: custom monster not found in Monster Reference" : "Loading…";
+        const summary = m ? m.size + " " + m.type + " · CR " + m.challenge_rating + xpText(m.challenge_rating, em.count) + (isCustom(m) ? " · Custom" : "") : unavailable ? "Unavailable: custom monster not found in Critter Codex" : "Loading…";
         return <li key={em.monster_id} className={(unavailable ? "unavailable" : "") + (open ? " expanded" : "")}>
           {m
             ? <button type="button" className="monster-toggle em-name" aria-expanded={open} title={open ? "Hide details" : "Show details"} onClick={() => toggle("encounter:" + m.id)}>

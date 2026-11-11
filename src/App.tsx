@@ -3,6 +3,8 @@ import BattleScreen from "./components/BattleScreen";
 import Encounters from "./components/Encounters";
 import PartyRoster from "./components/PartyRoster";
 import SettingsPanel from "./components/SettingsPanel";
+import { MovedNotice } from "./components/MoveData";
+import { OLD_HOST, OLD_ORIGIN, thisSiteIsEmpty } from "./lib/moveData";
 import { useTreasureSettings } from "./lib/treasure";
 import type { Encounter } from "./models/battle";
 import { isEncounter, isPartyMember } from "./models/battle";
@@ -30,23 +32,27 @@ export default function App() {
     setTab("battle");
   }
 
-  const bridgeText = data.bridge === "connecting" ? "Checking Monster Reference…"
-    : data.bridge === "connected" ? data.custom.length + " custom monster" + (data.custom.length === 1 ? "" : "s") + " from Monster Reference"
-    : "Published monsters only — Monster Reference not reachable";
+  const bridgeText = data.bridge === "connecting" ? "Checking Critter Codex…"
+    : data.bridge === "connected" ? data.custom.length + " custom monster" + (data.custom.length === 1 ? "" : "s") + " from Critter Codex"
+    : "Published monsters only — Critter Codex not reachable";
+  // Offered once per visit on the new address while nothing is saved here yet.
+  const [showMoveHint, setShowMoveHint] = useState(() => location.origin !== OLD_ORIGIN && !import.meta.env.DEV && thisSiteIsEmpty());
   const saveError = partyError || encounterError || battle.error || treasureError;
 
   return <main>
     <header>
       <div className="app-brand">
-        <img className="app-brand-logo" src="/images/battle-tracker-logo.webp" alt="" width="296" height="320" />
-        <div><h1>D&amp;D Battle Tracker</h1><p className="muted">Plan encounters and run combat.</p></div>
+        <img className="app-brand-logo" src="/images/logo.webp" alt="" width="512" height="512" />
+        <div><h1>Scrap Sheet</h1><p className="muted">A 5E-compatible battle tracker</p></div>
       </div>
       <div className="header-status">
         <span>{data.loading ? "Loading monsters…" : data.published.length + " published monsters"}</span>
-        <span className={"bridge-status " + data.bridge} title="Custom monsters and artwork come from the Monster Reference app in this browser">{bridgeText}</span>
+        <span className={"bridge-status " + data.bridge} title="Custom monsters and artwork come from the Critter Codex app in this browser">{bridgeText}</span>
       </div>
     </header>
 
+    <MovedNotice />
+    {showMoveHint && tab !== "settings" && <p className="moved-notice" role="status">Used this app at {OLD_HOST}? <button type="button" className="small" onClick={() => { setTab("settings"); setShowMoveHint(false); }}>Bring over my data</button> <button type="button" className="small" onClick={() => setShowMoveHint(false)}>Not now</button></p>}
     <nav className="tabs" aria-label="Sections">
       {(["battle", "encounters", "party", "settings"] as const).map(t => <button key={t} type="button" className="tab" aria-current={tab === t ? "page" : undefined} onClick={() => setTab(t)}>
         {t === "battle" ? (battle.battle ? "Battle · round " + battle.battle.round : "Battle") : t === "encounters" ? "Encounters" : t === "party" ? "Party (" + party.length + ")" : "Settings"}
@@ -72,7 +78,7 @@ export default function App() {
     {tab === "settings" && <SettingsPanel settings={treasure} onChange={setTreasure} />}
 
     <footer>
-      <p>Party and encounters are saved in this browser. Custom monsters and artwork are read from <a href="https://dnd-monster-ref.c2ma.com/">Monster Reference</a> in this same browser and are never changed here.</p>
+      <p>Party and encounters are saved in this browser. Custom monsters and artwork are read from <a href="https://critter-codex.c2ma.com/">Critter Codex</a> in this same browser and are never changed here.</p>
       <p>This work includes material from the System Reference Document 5.2.1 ("SRD 5.2.1") by Wizards of the Coast LLC, available at <a href="https://www.dndbeyond.com/srd">https://www.dndbeyond.com/srd</a>. The SRD 5.2.1 is licensed under the <a href="https://creativecommons.org/licenses/by/4.0/legalcode">Creative Commons Attribution 4.0 International License</a>.</p>
     </footer>
   </main>;

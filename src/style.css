@@ -1,4 +1,4 @@
-/* Palette and base styles match dnd-monster-reference. */
+/* Palette and base styles match Critter Codex. */
 :root { color-scheme: dark; }
 * { box-sizing: border-box; }
 body { margin: 0; background: #101827; color: #e8edf6; font: 15px system-ui, Arial, sans-serif; }
@@ -318,3 +318,12 @@ button.marked { border-color: #f2cf8a; }
 .spell-line { display: block; }
 .spell-line + .spell-line { margin-top: 0.35rem; }
 @media (max-width: 800px) { .md-abilities { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* One-time move from the old web address (remove with MoveData once the old address redirects). */
+.moved-notice{border:1px solid #93c5fd;background:#22344d;border-radius:8px;padding:10px 14px;margin:0 0 18px}
+.moved-notice a{color:#9ec5fe}
+.moved-notice button{padding:5px 10px;margin-left:8px}
+.move-data p{margin:8px 0}
+.move-warning{color:#fde68a}
+.move-done{color:#bbf7d0}
+.move-actions{display:flex;gap:10px;flex-wrap:wrap}

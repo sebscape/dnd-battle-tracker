@@ -31,7 +31,7 @@
 <body>
 <main>
   <h1>Storage Bridge Test</h1>
-  <p class="muted">Checks whether this site can read custom monsters and artwork saved in the Monster Reference app in this same browser.</p>
+  <p class="muted">Checks whether this site can read custom monsters and artwork saved in the Critter Codex app in this same browser.</p>
 
   <section>
     <p id="status" class="status">Connecting…</p>
@@ -56,7 +56,7 @@
 
   <section>
     <h2>How to check the result</h2>
-    <p>Open <a id="ref-link" href="#" target="_blank" rel="noopener">the Monster Reference app</a> in this same browser and compare its custom monster count and artwork with what's shown here. They should match.</p>
+    <p>Open <a id="ref-link" href="#" target="_blank" rel="noopener">the Critter Codex app</a> in this same browser and compare its custom monster count and artwork with what's shown here. They should match.</p>
     <p class="muted">If the bridge connects but shows 0 custom monsters when the reference app has some, this browser is keeping the two sites' storage apart. Note which browser that happens in.</p>
   </section>
 </main>
@@ -67,7 +67,7 @@
   const TIMEOUT_MS = 5000;
   // Known bridge locations only; ?bridge=local is for development.
   const BRIDGES = {
-    production: "https://dnd-monster-ref.c2ma.com/bridge.html",
+    production: "https://critter-codex.c2ma.com/bridge.html",
     local: "http://localhost:5173/bridge.html",
   };
   const params = new URLSearchParams(location.search);
@@ -103,7 +103,7 @@
       if (frame) frame.remove();
       frame = document.createElement("iframe");
       frame.src = bridgeUrl;
-      frame.title = "Monster Reference bridge";
+      frame.title = "Critter Codex bridge";
       frame.setAttribute("aria-hidden", "true");
       frame.style.cssText = "position:absolute;width:0;height:0;border:0;visibility:hidden";
       const timer = setTimeout(() => reject(new Error("timeout")), TIMEOUT_MS);

@@ -2,12 +2,20 @@
 
 Combat tracker for D&D Dungeon Masters. Full design and agreed decisions: **DESIGN.md** (read it before changing behavior).
 
+## Name and addresses (renamed November 2026)
+
+- The app is **Scrap Sheet** — "a 5E-compatible battle tracker" — at https://scrap-sheet.c2ma.com. Its companion is **Critter Codex** (formerly dnd-monster-reference, the "reference app" in these notes) at https://critter-codex.c2ma.com.
+- **Never put "D&D" or "Dungeons & Dragons" in names, titles, logos or headings.** They are Wizards of the Coast trademarks, which the SRD's CC BY licence does not cover. "5E-compatible" and the SRD attribution line in the footer are the only references.
+- Old address: https://dnd-battle-tracker.c2ma.com. The GitHub repo may still be named `dnd-battle-tracker` until it is renamed.
+- **Storage keys keep the old `dnd-battle-tracker-…` names on purpose.** Renaming them would lose users' data.
+- **Moving data from the old address:** browser storage belongs to one address. `public/move-data.html` (served from the old address, read-only, answers only the new origin), `src/lib/moveData.ts` and `src/components/MoveData.tsx` copy the party, encounters, battle history, any battle in progress and settings into the new address from the Settings tab. Remove all three once the old address redirects.
+
 ## Stack and commands
 
 - React 18 + TypeScript + Vite, same conventions as [dnd-monster-reference](https://github.com/sebscape/dnd-monster-reference).
 - `npm run dev` serves on **port 5174** (the reference app uses 5173; its bridge allows `http://localhost:5174`).
 - `npm run build` runs `tsc -b` then `vite build` into `dist/`. Netlify settings are in `netlify.toml`.
-- Live: https://dnd-battle-tracker.c2ma.com, auto-deployed from `main`.
+- Live: https://scrap-sheet.c2ma.com, auto-deployed from `main`.
 
 ## Layout
 
