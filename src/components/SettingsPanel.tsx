@@ -2,6 +2,7 @@ import type { CoinRow, TreasureSettings } from "../lib/treasure";
 import { COINS, rowProblem } from "../lib/treasure";
 import { clampInt } from "../lib/format";
 import MoveData from "./MoveData";
+import AiSettingsSection from "./AiSettingsSection";
 
 interface Props {
   settings: TreasureSettings;
@@ -17,6 +18,7 @@ export default function SettingsPanel({ settings, onChange }: Props) {
   };
   return <section className="panel settings">
     <MoveData />
+    <AiSettingsSection />
     <h2>Treasure</h2>
     <p className="muted">When a battle ends, the app lists the gear from each defeated monster's stat block and the treasure you planned for the encounter.
       It can also roll coins for each monster from a table you enter here — for example an individual treasure table from your own rulebooks.

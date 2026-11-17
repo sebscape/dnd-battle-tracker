@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Encounter, EncounterMonster, PartyMember } from "../models/battle";
+import type { AvoidOption, Encounter, EncounterMonster, PartyMember } from "../models/battle";
 import { newEncounter } from "../models/battle";
 import type { Monster } from "../models/monster";
 import type { MonsterData } from "../lib/useMonsters";
@@ -7,6 +7,7 @@ import { isCustom } from "../lib/format";
 import MonsterPicker from "./MonsterPicker";
 import MonsterDetails from "./MonsterDetails";
 import AutoGenerate from "./AutoGenerate";
+import AiGenerate from "./AiGenerate";
 import DifficultyPanel from "./DifficultyPanel";
 import { encounterDifficulty, monsterXp } from "../lib/difficulty";
 
@@ -106,8 +107,7 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
 
   return <div className="editor">
     <label>Encounter name<input value={encounter.name} onChange={e => set({ name: e.target.value })} /></label>
-    <label>Notes<textarea value={encounter.notes ?? ""} placeholder="Location, tactics…" onChange={e => set({ notes: e.target.value || undefined })} /></label>
-    <label>Treasure<textarea value={encounter.treasure ?? ""} placeholder="What the party can find, e.g. Bugbear's pouch: 14 GP and a silver locket" onChange={e => set({ treasure: e.target.value || undefined })} /></label>
+    <label>Notes<textarea value={encounter.notes ?? ""} placeholder="Anything else: location, reminders…" onChange={e => set({ notes: e.target.value || undefined })} /></label>
 
     <h3>Party</h3>
     {party.length === 0
@@ -117,6 +117,9 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
           {p.name || "Unnamed character"} <small className="muted">(level {p.level})</small>
         </label>)}</div>}
     {missingPcs > 0 && <p className="muted small-text">{missingPcs} character{missingPcs === 1 ? " is" : "s are"} no longer in the party roster and will be skipped.</p>}
+
+    <AiGenerate encounter={encounter} party={presentPcs} monsters={allMonsters} byId={data.byId}
+      catalogReady={!data.loading && data.bridge !== "connecting"} onChange={set} />
 
     <h3>Monsters</h3>
     <AutoGenerate encounter={encounter} levels={presentPcs.map(p => p.level)} monsters={allMonsters} onChange={set} />
@@ -152,6 +155,8 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
     <MonsterPicker monsters={allMonsters} onAdd={addMonster} artwork={data.artwork}
       expandedId={expanded?.startsWith("picker:") ? expanded.slice(7) : null} onToggle={id => toggle("picker:" + id)} />
 
+    <StoryFields encounter={encounter} set={set} />
+
     <div className="actions">
       <button type="button" className="primary" disabled={data.loading || (encounter.monsters.length === 0 && encounter.party_member_ids.length === 0)} onClick={onStart}>Start battle ▸</button>
       <span className="actions-right">
@@ -161,4 +166,32 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
     </div>
     <p className="muted small-text">Changes save automatically.</p>
   </div>;
+}
+
+/** Read-aloud, motivation, ways to avoid combat, tactics and treasure — filled by "Generate with AI" or by hand. */
+function StoryFields({ encounter, set }: { encounter: Encounter; set: (patch: Partial<Encounter>) => void }) {
+  const options = encounter.avoiding_combat ?? [];
+  const setOption = (i: number, patch: Partial<AvoidOption>) => set({ avoiding_combat: options.map((o, j) => j === i ? { ...o, ...patch } : o) });
+  const text = (key: "read_aloud" | "motivation" | "dm_tactics" | "treasure", label: string, placeholder: string, tall = false) =>
+    <label>{label}<textarea className={tall ? "tall" : undefined} value={encounter[key] ?? ""} placeholder={placeholder} onChange={e => set({ [key]: e.target.value || undefined })} /></label>;
+  return <>
+    <h3>Story and tactics</h3>
+    {text("read_aloud", "Read-aloud", "What the characters see and hear, ending with a question to the players.", true)}
+    {text("motivation", "Opponent motivation", "Why the opponents are here and why it might come to a fight.")}
+    <div className="avoid-list" role="group" aria-label="Ways to avoid combat">
+      <span className="field-label">Ways to avoid combat</span>
+      {options.length === 0 && <p className="muted small-text">None yet.</p>}
+      {options.map((o, i) => <div key={i} className="avoid-option">
+        <label className="grow">Action<input value={o.action} placeholder="Offer food" onChange={e => setOption(i, { action: e.target.value })} /></label>
+        <label className="grow">Check<input value={o.check} placeholder="Wisdom (Animal Handling)" onChange={e => setOption(i, { check: e.target.value })} /></label>
+        <label className="dc">DC<input type="number" min={0} max={40} value={o.dc} onChange={e => setOption(i, { dc: Math.max(0, Math.min(40, Math.round(Number(e.target.value) || 0))) })} /></label>
+        <label className="wide">Success<input value={o.success} onChange={e => setOption(i, { success: e.target.value })} /></label>
+        <label className="wide">Failure<input value={o.failure} onChange={e => setOption(i, { failure: e.target.value })} /></label>
+        <button type="button" className="danger small" aria-label={"Remove way to avoid combat " + (i + 1)} onClick={() => set({ avoiding_combat: options.filter((_, j) => j !== i) })}>Remove</button>
+      </div>)}
+      <div><button type="button" className="small" onClick={() => set({ avoiding_combat: [...options, { action: "", check: "", dc: 12, success: "", failure: "" }] })}>+ Add a way to avoid combat</button></div>
+    </div>
+    {text("dm_tactics", "DM tactics", "How the opponents fight, when they flee…")}
+    {text("treasure", "Treasure", "What the party can find, e.g. Bugbear's pouch: 14 GP and a silver locket")}
+  </>;
 }

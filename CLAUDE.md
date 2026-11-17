@@ -14,7 +14,8 @@ Combat tracker for D&D Dungeon Masters. Full design and agreed decisions: **DESI
 
 - React 18 + TypeScript + Vite, same conventions as [dnd-monster-reference](https://github.com/sebscape/dnd-monster-reference).
 - `npm run dev` serves on **port 5174** (the reference app uses 5173; its bridge allows `http://localhost:5174`).
-- `npm run build` runs `tsc -b` then `vite build` into `dist/`. Netlify settings are in `netlify.toml`.
+- `npm run build` runs `tsc -b` then `vite build` into `dist/`. Netlify settings are in `netlify.toml` (build, and the `netlify/functions` directory).
+- `npm test` runs the unit tests in `tests/` with Node's built-in test runner (Node 22.18+; no extra packages). `tests/resolve-ts.mjs` lets Node load the app's extensionless TypeScript imports, so tested modules must be plain TypeScript (no JSX, enums or constructor parameter properties) and must not touch `import.meta.env` at load time.
 - Live: https://scrap-sheet.c2ma.com, auto-deployed from `main`.
 
 ## Layout
@@ -32,6 +33,9 @@ Combat tracker for D&D Dungeon Masters. Full design and agreed decisions: **DESI
 | `src/lib/traits.ts` | Conditional Advantage read from stat-block text (Pack Tactics, Grappled by, Bloodied, hurt targets) |
 | `src/lib/treasure.ts` | Loot after a battle: stat-block gear, planned treasure, the DM's own coin table (`dnd-battle-tracker-treasure-v1`) |
 | `src/lib/dice.ts` | Dice notation, crypto-random rolls, advantage/disadvantage |
+| `src/lib/aiEncounter.ts` | "Generate with AI $": settings (`dnd-battle-tracker-ai-v1`), compact catalog, request, response validation (unknown monster IDs rejected), mapping onto an encounter. UI: `components/AiGenerate.tsx`, `components/AiSettingsSection.tsx` |
+| `src/lib/credentials.ts` | This app's own OpenAI token (`dnd-battle-tracker-api-token-v1`), encrypted like Critter Codex's; the one unlock state shared by every AI feature here; plaintext in memory only |
+| `netlify/functions/generate-encounter.mjs` | Netlify Function calling the OpenAI Responses API with a strict JSON Schema; normalized JSON errors; token never stored or logged |
 | `src/lib/generate.ts` | Random encounters by environment (from monster `tags`), difficulty, max CR and kinds; used by `components/AutoGenerate` |
 | `src/lib/difficulty.ts` | SRD 5.2.1 XP budgets and monster XP by CR |
 | `src/lib/storage.ts` | localStorage lists (`dnd-battle-tracker-party-v1`, `dnd-battle-tracker-encounters-v1`) |
@@ -43,6 +47,7 @@ Combat tracker for D&D Dungeon Masters. Full design and agreed decisions: **DESI
 ## Rules
 
 - Never write to the reference app's data; the bridge is read-only by design.
+- **API token:** Scrap Sheet has its own token setup (Settings → AI Encounter Generation), independent of Critter Codex so each app works alone. Every AI feature in this app uses `src/lib/credentials.ts`; never add a second token setting. Never store the password or the plaintext token, and never put the token in logs, error messages or URLs. Never make a paid OpenAI request in tests.
 - Saved encounters reference monsters by UUID and must handle a missing custom monster gracefully.
 - Keep the SRD 5.2.1 CC BY 4.0 attribution in the app footer.
 - Changes to stored record shapes need a new storage key version or a migration, so existing users' data still loads.

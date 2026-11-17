@@ -1,3 +1,8 @@
 [build]
   command = "npm run build"
   publish = "dist"
+
+[functions]
+  # generate-encounter.mjs (AI encounter generation). Needs no environment variables:
+  # the user's own OpenAI token is sent with each request and never stored.
+  directory = "netlify/functions"
