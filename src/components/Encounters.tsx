@@ -118,7 +118,7 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
     {missingPcs > 0 && <p className="muted small-text">{missingPcs} character{missingPcs === 1 ? " is" : "s are"} no longer in the party roster and will be skipped.</p>}
 
     <h3>Auto Generate</h3>
-    <GenerateTabs encounter={encounter} party={presentPcs} monsters={allMonsters} byId={data.byId}
+    <GenerateTabs encounter={encounter} party={presentPcs} monsters={allMonsters} byId={data.byId} artwork={data.artwork}
       catalogReady={!data.loading && data.bridge !== "connecting"} onChange={set} />
 
     <h3>Monsters</h3>

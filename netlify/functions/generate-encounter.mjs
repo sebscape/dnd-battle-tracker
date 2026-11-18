@@ -58,7 +58,7 @@ export const ENCOUNTER_SCHEMA = {
     treasure: text("Treasure appropriate to the creatures and setting; may say there is none."),
     monsters: {
       type: "array",
-      description: "Opponents, chosen only from the supplied catalog.",
+      description: "Every person or creature the characters meet, hostile or not, chosen only from the supplied catalog (e.g. a traveling merchant as a Commoner), so the DM has a stat block for each.",
       items: {
         type: "object",
         additionalProperties: false,
@@ -75,8 +75,7 @@ export const ENCOUNTER_SCHEMA = {
 const json = (body, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
 });
-/** `answer` is the model's output (no secrets), returned so the user can see why it was rejected. */
-const fail = (status, code, message, answer) => json({ error: answer === undefined ? { code, message } : { code, message, answer } }, status);
+const fail = (status, code, message) => json({ error: { code, message } }, status);
 const MAX_ANSWER_ECHO = 30000;
 /** OpenAI's own messages can quote part of the key ("Incorrect API key provided: sk-ab***yz"). */
 const redact = s => String(s).replace(/sk-[A-Za-z0-9_*.-]{4,}/g, "sk-…").slice(0, 400);
@@ -119,10 +118,11 @@ export function buildInput(b) {
     "",
     "## Desired difficulty: " + b.difficulty,
     "Using the SRD 5.2.1 XP budget, this party's budgets are Low " + b.budget.low + " XP, Moderate " + b.budget.moderate + " XP, High " + b.budget.high + " XP.",
-    "Choose monsters whose total XP (XP × count, added up) is between " + floor + " and " + target + " XP. Use at most two monsters per character unless the situation calls for a swarm of weak creatures.",
+    "If the encounter may turn into a fight, choose monsters whose total XP (XP × count, added up) is between " + floor + " and " + target + " XP. Use at most two monsters per character unless the situation calls for a swarm of weak creatures. A peaceful encounter may come in under this budget.",
     b.environment ? "\n## Environment\n" + clean(b.environment, 40) : "",
     "",
     "## Monster catalog",
+    "List EVERY person or creature in the encounter in `monsters`, even those who are friendly or need no roll to deal with, so the DM has a stat block if the characters attack. Pick the closest catalog entry for each (for example, a merchant or farmer as a Commoner, soldiers as Guards). Never describe a person or creature in the encounter without listing it.",
     "Use ONLY monster_id values from this list, copied exactly. Columns: monster_id | name | CR | XP each | size and type | environments",
     ...b.catalog.map(m => [m.id, clean(m.name, 120), m.cr, m.xp, clean(m.size + " " + m.type, 90), m.environments.map(e => clean(e, 30)).join(", ") || "any"].join(" | ")),
   ].join("\n");
@@ -203,6 +203,18 @@ export function extractOutput(result) {
   return { error: "The answer contained no text." };
 }
 
+/**
+ * What was sent and received, returned with every answer after the request was accepted,
+ * so the app can show the conversation (the spyglass). Never contains the token.
+ */
+function conversationOf(b, input, extra = {}) {
+  return { model: b.model, instructions: b.instructions, input, ...extra };
+}
+const usageOf = r => r && r.usage && typeof r.usage === "object"
+  ? { input_tokens: r.usage.input_tokens, output_tokens: r.usage.output_tokens, total_tokens: r.usage.total_tokens } : undefined;
+const errorWith = (status, code, message, conversation, answer) =>
+  json({ error: answer === undefined ? { code, message } : { code, message, answer }, conversation }, status);
+
 /** `deps` exists for tests (a fake fetch, a short timeout); Netlify passes only (request, context). */
 export default async function handler(request, _context, deps = {}) {
   const fetchImpl = deps.fetch || fetch;
@@ -221,6 +233,8 @@ export default async function handler(request, _context, deps = {}) {
   const problem = checkRequest(b);
   if (problem) return fail(400, problem.includes("token") ? "invalid_token" : "bad_request", problem);
 
+  const input = buildInput(b);
+  const convo = extra => conversationOf(b, input, extra);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   let response;
@@ -231,7 +245,7 @@ export default async function handler(request, _context, deps = {}) {
       body: JSON.stringify({
         model: b.model,
         instructions: b.instructions,
-        input: buildInput(b),
+        input,
         max_output_tokens: MAX_OUTPUT_TOKENS,
         store: false,
         text: { format: { type: "json_schema", name: "encounter", strict: true, schema: ENCOUNTER_SCHEMA } },
@@ -239,8 +253,8 @@ export default async function handler(request, _context, deps = {}) {
       signal: controller.signal,
     });
   } catch {
-    if (controller.signal.aborted) return fail(504, "timeout", "OpenAI took longer than " + Math.round(timeoutMs / 1000) + " seconds. Try again, or choose a faster model in Settings → AI Encounter Generation.");
-    return fail(502, "network", "Couldn't reach OpenAI. Try again in a moment.");
+    if (controller.signal.aborted) return errorWith(504, "timeout", "OpenAI took longer than " + Math.round(timeoutMs / 1000) + " seconds. Try again, or choose a faster model in Settings → AI Encounter Generation.", convo());
+    return errorWith(502, "network", "Couldn't reach OpenAI. Try again in a moment.", convo());
   } finally {
     clearTimeout(timer);
   }
@@ -249,21 +263,23 @@ export default async function handler(request, _context, deps = {}) {
   try { result = await response.json(); } catch { /* handled below */ }
   if (!response.ok) {
     const e = mapOpenAiError(response.status, result);
-    return fail(e.status, e.code, e.message);
+    const raw = result && result.error && typeof result.error.message === "string" ? redact(result.error.message) : undefined;
+    return errorWith(e.status, e.code, e.message, convo({ openai_status: response.status, openai_error: raw }));
   }
-  if (!result) return fail(502, "invalid_response", "OpenAI's answer wasn't valid JSON.");
+  if (!result) return errorWith(502, "invalid_response", "OpenAI's answer wasn't valid JSON.", convo({ openai_status: response.status }));
   const out = extractOutput(result);
-  if (out.refusal) return fail(422, "refused", "The model declined to write this encounter: " + out.refusal);
-  if (out.error) return fail(502, "invalid_response", out.error);
+  const seen = convo({ openai_status: response.status, status: result.status, usage: usageOf(result), output: out.text, refusal: out.refusal });
+  if (out.refusal) return errorWith(422, "refused", "The model declined to write this encounter: " + out.refusal, seen);
+  if (out.error) return errorWith(502, "invalid_response", out.error, seen);
   let encounter;
-  try { encounter = JSON.parse(out.text); } catch { return fail(502, "invalid_response", "The model's answer wasn't valid JSON.", out.text.slice(0, MAX_ANSWER_ECHO)); }
+  try { encounter = JSON.parse(out.text); } catch { return errorWith(502, "invalid_response", "The model's answer wasn't valid JSON.", seen, out.text.slice(0, MAX_ANSWER_ECHO)); }
   const bad = checkEncounter(encounter, new Set(b.catalog.map(m => m.id)));
   if (bad) {
     // Shows up in Netlify's function log (or the npm run dev terminal). Never log the request: it holds the token.
     console.warn("generate-encounter: rejected the model's answer: " + bad);
-    return fail(502, "invalid_response", bad, JSON.stringify(encounter, null, 2).slice(0, MAX_ANSWER_ECHO));
+    return errorWith(502, "invalid_response", bad, seen, JSON.stringify(encounter, null, 2).slice(0, MAX_ANSWER_ECHO));
   }
-  return json({ encounter });
+  return json({ encounter, conversation: seen });
 }
 
 export const config = { path: "/.netlify/functions/generate-encounter" };

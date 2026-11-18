@@ -9,6 +9,7 @@ interface Props {
   party: PartyMember[];
   monsters: Monster[];
   byId: ReadonlyMap<string, Monster>;
+  artwork?: Record<string, string>;
   catalogReady: boolean;
   onChange: (patch: Partial<Encounter>) => void;
 }
@@ -23,7 +24,7 @@ const loadTab = (): TabId => { try { return localStorage.getItem(TAB_KEY) === "a
  * (Generate with AI $). Both panels stay mounted while hidden, so switching tabs never
  * loses a setting, an AI result under review, or a request in progress.
  */
-export default function GenerateTabs({ encounter, party, monsters, byId, catalogReady, onChange }: Props) {
+export default function GenerateTabs({ encounter, party, monsters, byId, artwork, catalogReady, onChange }: Props) {
   const [tab, setTab] = useState<TabId>(loadTab);
   const buttons = useRef<Record<string, HTMLButtonElement | null>>({});
   const choose = (id: TabId, focus = false) => {
@@ -50,7 +51,7 @@ export default function GenerateTabs({ encounter, party, monsters, byId, catalog
       <AutoGenerate encounter={encounter} levels={party.map(p => p.level)} monsters={monsters} onChange={onChange} />
     </div>
     <div className="gen-panel" role="tabpanel" id={id("ai")} aria-labelledby={id("ai") + "-tab"} hidden={tab !== "ai"}>
-      <AiGenerate encounter={encounter} party={party} monsters={monsters} byId={byId} catalogReady={catalogReady} onChange={onChange} />
+      <AiGenerate encounter={encounter} party={party} monsters={monsters} byId={byId} artwork={artwork} catalogReady={catalogReady} onChange={onChange} />
     </div>
   </div>;
 }

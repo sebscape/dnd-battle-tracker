@@ -113,7 +113,7 @@ test("the token is sent in the POST body, never in the URL", async () => {
     return new Response(JSON.stringify({ encounter: goodAnswer() }), { status: 200 });
   }) as unknown as typeof fetch;
   const out = await requestEncounter(request(), "sk-secret-123456", new AbortController().signal, fakeFetch);
-  assert.deepEqual(out, goodAnswer());
+  assert.deepEqual(out.encounter, goodAnswer());
   assert.equal(seen!.url, FUNCTION_URL);
   assert.ok(!seen!.url.includes("sk-"));
   assert.equal(seen!.body.token, "sk-secret-123456");
@@ -162,4 +162,15 @@ test("a rejected answer from the server carries the AI's answer, redacted", asyn
   const fakeFetch = (async () => new Response(JSON.stringify({ error: { code: "invalid_response", message: "Read-aloud: empty.", answer: '{"note":"sk-proj-ABCDEF123456"}' } }), { status: 502 })) as unknown as typeof fetch;
   await assert.rejects(requestEncounter(request(), "sk-x-123456", new AbortController().signal, fakeFetch),
     (e: any) => e.code === "invalid_response" && e.answer === '{"note":"sk-…"}');
+});
+
+test("the server's record of the conversation is passed on, with key fragments removed", async () => {
+  const conversation = { model: "m", instructions: "Be a DM.", input: "## Situation", output: '{"a":1}', usage: { input_tokens: 10, output_tokens: 5, total_tokens: 15 }, openai_status: 200 };
+  const ok = (async () => new Response(JSON.stringify({ encounter: goodAnswer(), conversation }), { status: 200 })) as unknown as typeof fetch;
+  const out = await requestEncounter(request(), "sk-x-123456", new AbortController().signal, ok);
+  assert.equal(out.exchange!.input, "## Situation");
+  assert.equal(out.exchange!.usage!.output_tokens, 5);
+  const bad = (async () => new Response(JSON.stringify({ error: { code: "invalid_token", message: "OpenAI rejected the API token" }, conversation: { input: "x", openai_status: 401, openai_error: "Incorrect API key provided: sk-abcd****wxyz" } }), { status: 401 })) as unknown as typeof fetch;
+  await assert.rejects(requestEncounter(request(), "sk-x-123456", new AbortController().signal, bad),
+    (e: any) => e.exchange.openai_status === 401 && !e.exchange.openai_error.includes("abcd"));
 });

@@ -387,3 +387,19 @@ textarea.instructions { min-height: 320px; font-size: 14px; line-height: 1.45; }
 .ai-answer { width: 100%; }
 .ai-answer summary { cursor: pointer; color: #9ec5fe; font-size: 13px; }
 .ai-answer pre { max-height: 320px; overflow: auto; white-space: pre-wrap; word-break: break-word; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px; font-size: 12px; margin: 8px 0 0; }
+
+/* ---------- Spyglass: latest AI conversation ---------- */
+.situation-tools { display: flex; align-items: center; gap: 8px; margin-top: -4px; }
+.icon-button.small-icon { width: 32px; height: 32px; padding: 5px; }
+.conversation { width: min(900px, 100%); gap: 12px; }
+.conversation h3 { margin: 4px 0; }
+.conversation details { border: 1px solid #334155; border-radius: 8px; padding: 8px 10px; }
+.conversation summary { cursor: pointer; color: #9ec5fe; }
+.conversation pre { max-height: 40vh; overflow: auto; white-space: pre-wrap; word-break: break-word; background: #0f172a; border-radius: 6px; padding: 10px; font-size: 12px; margin: 8px 0 0; }
+.convo-outcome { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #26384e; font-weight: 600; }
+.convo-outcome.received { color: #9be3b4; }
+.convo-outcome.rejected, .convo-outcome.error { color: #fecaca; }
+.convo-outcome.canceled, .convo-outcome.waiting { color: #f2cf8a; }
+.convo-errors p { margin: 4px 0; }
+.ai-monsters li { list-style: none; margin-left: -20px; }
+.ai-monsters li.expanded { background: #22344d; outline: 1px solid #93c5fd; border-radius: 8px; padding: 6px 8px; }

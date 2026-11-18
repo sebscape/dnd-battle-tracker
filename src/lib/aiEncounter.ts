@@ -240,7 +240,69 @@ export class AiError extends Error {
   readonly code: AiErrorCode;
   /** The model's answer, when it was rejected (for "Show the AI's answer"). */
   readonly answer?: string;
-  constructor(code: AiErrorCode, message: string, answer?: string) { super(message); this.code = code; this.answer = answer; this.name = "AiError"; }
+  /** What the server sent to and got back from OpenAI, when it got that far. */
+  readonly exchange?: ServerExchange;
+  constructor(code: AiErrorCode, message: string, answer?: string, exchange?: ServerExchange) {
+    super(message); this.code = code; this.answer = answer; this.exchange = exchange; this.name = "AiError";
+  }
+}
+
+/** The server's record of one exchange with OpenAI (never contains the token). */
+export interface ServerExchange {
+  model?: string;
+  instructions?: string;
+  /** The full prompt sent: situation, party, budget and monster catalog. */
+  input?: string;
+  /** HTTP status OpenAI answered with. */
+  openai_status?: number;
+  /** OpenAI's own error message, key fragments removed. */
+  openai_error?: string;
+  /** The Responses API status, e.g. "completed" or "incomplete". */
+  status?: string;
+  usage?: { input_tokens?: number; output_tokens?: number; total_tokens?: number };
+  /** The model's raw reply text. */
+  output?: string;
+  refusal?: string;
+}
+function asExchange(v: unknown): ServerExchange | undefined {
+  if (!isObj(v)) return undefined;
+  const str = (k: string) => typeof v[k] === "string" ? redact(v[k] as string) : undefined;
+  const num = (k: string) => typeof v[k] === "number" ? v[k] as number : undefined;
+  const u = isObj(v.usage) ? v.usage : null;
+  return {
+    model: str("model"), instructions: str("instructions"), input: str("input"), openai_status: num("openai_status"),
+    openai_error: str("openai_error"), status: str("status"), output: str("output"), refusal: str("refusal"),
+    usage: u ? { input_tokens: typeof u.input_tokens === "number" ? u.input_tokens : undefined, output_tokens: typeof u.output_tokens === "number" ? u.output_tokens : undefined, total_tokens: typeof u.total_tokens === "number" ? u.total_tokens : undefined } : undefined,
+  };
+}
+
+// ---------- The latest conversation with the AI (the spyglass) ----------
+
+export type ConversationOutcome = "waiting" | "received" | "rejected" | "error" | "canceled";
+/** The most recent request, kept in memory for this page only (never the token). */
+export interface Conversation {
+  startedAt: string;
+  finishedAt?: string;
+  request: { model: string; difficulty: TargetDifficulty; environment: string; situation: string; party: { name: string; level: number }[]; catalogSize: number; instructions: string };
+  outcome: ConversationOutcome;
+  /** What the server reported, once it answered. */
+  exchange?: ServerExchange;
+  /** The error shown to the user, if any. */
+  error?: string;
+  /** Problems the app found in the AI's answer. */
+  problems?: string[];
+}
+export const OUTCOME_LABEL: Record<ConversationOutcome, string> = {
+  waiting: "waiting", received: "answer received", rejected: "answer rejected", error: "error", canceled: "canceled",
+};
+let latest: Conversation | null = null;
+const convoListeners = new Set<() => void>();
+export function setLatestConversation(c: Conversation | null) { latest = c; convoListeners.forEach(l => l()); }
+export const getLatestConversation = () => latest;
+export function useLatestConversation(): Conversation | null {
+  const [c, setC] = useState(latest);
+  useEffect(() => { const l = () => setC(latest); convoListeners.add(l); setC(latest); return () => { convoListeners.delete(l); }; }, []);
+  return c;
 }
 
 /** Redacts anything that looks like an OpenAI key from text shown to the user. */
@@ -251,7 +313,7 @@ export const redact = (text: string) => text.replace(/sk-[A-Za-z0-9_*.-]{4,}/g, 
  * (not yet validated against the catalog). Rejects with AiError; canceled requests
  * reject with code "canceled" and must not change the interface.
  */
-export async function requestEncounter(req: GenerateRequest, token: string, signal: AbortSignal, fetchImpl: typeof fetch = fetch): Promise<unknown> {
+export async function requestEncounter(req: GenerateRequest, token: string, signal: AbortSignal, fetchImpl: typeof fetch = fetch): Promise<{ encounter: unknown; exchange?: ServerExchange }> {
   const timeout = new AbortController();
   const timer = setTimeout(() => timeout.abort(), CLIENT_TIMEOUT_MS);
   const onAbort = () => timeout.abort();
@@ -283,13 +345,14 @@ export async function requestEncounter(req: GenerateRequest, token: string, sign
     const code = err && typeof err.code === "string" ? err.code as AiErrorCode : null;
     const message = err && typeof err.message === "string" ? redact(err.message) : null;
     const answer = err && typeof err.answer === "string" ? redact(err.answer) : undefined;
-    if (code && message) throw new AiError(code, message, answer);
+    const exchange = isObj(body) ? asExchange(body.conversation) : undefined;
+    if (code && message) throw new AiError(code, message, answer, exchange);
     if (response.status === 504 || response.status === 502) throw new AiError("timeout", "The server took too long to answer (Netlify allows about 30 seconds). Try again, or choose a faster model in Settings.");
     if (response.status === 404) throw new AiError("server", "The AI function isn't available on this site. If you're running locally, use npm run dev (not npm run preview).");
     throw new AiError("server", "Unexpected server response (HTTP " + response.status + "). Try again later.");
   }
   if (!isObj(body) || !("encounter" in body)) throw new AiError("invalid_response", "The server's answer wasn't in the expected format.");
-  return body.encounter;
+  return { encounter: body.encounter, exchange: asExchange(body.conversation) };
 }
 
 // ---------- Applying ----------

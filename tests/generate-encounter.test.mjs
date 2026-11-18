@@ -119,3 +119,25 @@ test("rejections name the item and field, and return the AI's answer for inspect
   const r3 = await call(body(), ok(answer({ read_aloud: "" })));
   assert.equal((await err(r3)).message, "Read-aloud: empty.");
 });
+
+test("every response after the request carries the conversation, never the token", async () => {
+  const r = await call(body(), ok(answer()));
+  const j = await r.json();
+  assert.equal(j.conversation.model, "gpt-6.1-terra");
+  assert.equal(j.conversation.instructions, "Be a DM.");
+  assert.match(j.conversation.input, /## Monster catalog/);
+  assert.equal(JSON.parse(j.conversation.output).encounter_name, "Eyes in the Dark");
+  assert.ok(!JSON.stringify(j).includes("sk-test"));
+  const e = await call(body(), openai(401, { error: { message: "Incorrect API key provided: sk-test****7890." } }));
+  const ej = await e.json();
+  assert.equal(ej.conversation.openai_status, 401);
+  assert.ok(!JSON.stringify(ej).includes("sk-test"));
+  const t = await call(body(), (u, init) => new Promise((_, rej) => init.signal.addEventListener("abort", () => rej(new Error("x")))), { timeoutMs: 30 });
+  assert.match((await t.json()).conversation.input, /## Party/);
+});
+
+test("the prompt requires every person or creature to be listed, for stat blocks", async () => {
+  let sent;
+  await call(body(), async (url, init) => { sent = JSON.parse(init.body); return ok(answer())(); });
+  assert.match(sent.input, /List EVERY person or creature in the encounter/);
+});
