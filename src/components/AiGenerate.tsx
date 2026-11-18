@@ -21,7 +21,7 @@ type Phase =
   | { at: "idle" }
   | { at: "working"; step: "unlocking" | "generating" }
   | { at: "review"; result: AiEncounter; picks: ValidPick[] }
-  | { at: "error"; message: string; canRetry: boolean };
+  | { at: "error"; message: string; answer?: string };
 
 const RATING_ORDER = ["none", "low", "moderate", "high", "beyond"] as const;
 const DEFAULT_NAME = /^Encounter \d+$/;
@@ -62,7 +62,7 @@ export default function AiGenerate({ encounter, party, monsters, byId, catalogRe
   async function generate() {
     setNotice("");
     const built = buildRequest({ settings, situation, party: party.map(p => ({ name: p.name, level: p.level })), difficulty, environment: encounter.environment, monsters });
-    if ("error" in built) { setPhase({ at: "error", message: built.error, canRetry: false }); return; }
+    if ("error" in built) { setPhase({ at: "error", message: built.error }); return; }
     inFlight.current?.abort();
     const controller = new AbortController();
     inFlight.current = controller;
@@ -81,15 +81,17 @@ export default function AiGenerate({ encounter, party, monsters, byId, catalogRe
       if (!current()) return;
       reportOpenAiResult(true);
       const v = validateAiEncounter(raw, byId);
-      if (!v.ok) { setPhase({ at: "error", message: "The AI's answer couldn't be used: " + v.errors.join(" "), canRetry: true }); return; }
+      if (!v.ok) { setPhase({ at: "error", message: "The AI's answer couldn't be used: " + v.errors.join(" "), answer: JSON.stringify(raw, null, 2) }); return; }
       setPhase({ at: "review", result: v.encounter, picks: v.picks });
     } catch (e) {
       if (!current()) return;
       if (e instanceof AiError && e.code === "canceled") return;
       if (e instanceof AiError && e.code === "invalid_token") reportOpenAiResult(false);
+      // OpenAI answered (even if the answer was unusable), so it accepted the token.
+      if (e instanceof AiError && (e.code === "invalid_response" || e.code === "refused")) reportOpenAiResult(true);
       const message = e instanceof IncorrectPasswordError || e instanceof NoTokenError || e instanceof AiError ? e.message : "Something went wrong. Try again.";
       // A wrong password made no paid request; asking again is free.
-      setPhase({ at: "error", message, canRetry: e instanceof AiError && !["invalid_token", "unsupported_model", "insufficient_quota", "bad_request"].includes(e.code) });
+      setPhase({ at: "error", message: e instanceof AiError && e.code === "invalid_response" ? "The AI's answer couldn't be used: " + message : message, answer: e instanceof AiError ? e.answer : undefined });
     } finally {
       if (inFlight.current === controller) inFlight.current = null;
     }
@@ -148,7 +150,7 @@ export default function AiGenerate({ encounter, party, monsters, byId, catalogRe
     {notice && <p className="small-text" role="status">{notice}</p>}
     {phase.at === "error" && <div className="ai-error" role="alert">
       <p className="error">{phase.message}</p>
-      {phase.canRetry && <button type="button" className="small" onClick={regenerate}>Try again ($)</button>}
+      {phase.answer && <details className="ai-answer"><summary>Show the AI's answer</summary><pre>{phase.answer}</pre></details>}
     </div>}
     {phase.at === "review" && <Review result={phase.result} picks={phase.picks} party={party} target={difficulty}
       onUse={() => use(phase.result, phase.picks)} onRegenerate={regenerate}
@@ -171,7 +173,7 @@ function Review({ result, picks, party, target, onUse, onRegenerate, onCancel }:
     <h5>Read-aloud</h5><p className="read-aloud">{result.read_aloud}</p>
     <h5>Motivation</h5><p>{result.motivation}</p>
     {result.avoiding_combat.length > 0 && <><h5>Ways to avoid combat</h5>
-      <ul className="ai-options">{result.avoiding_combat.map((o, i) => <li key={i}><strong>{o.action}</strong> — {o.check}, DC {o.dc}
+      <ul className="ai-options">{result.avoiding_combat.map((o, i) => <li key={i}><strong>{o.action}</strong> — {o.check && o.dc ? o.check + ", DC " + o.dc : "no check needed"}
         <br /><span className="muted">Success:</span> {o.success}<br /><span className="muted">Failure:</span> {o.failure}</li>)}</ul></>}
     <h5>DM tactics</h5><p>{result.dm_tactics}</p>
     <h5>Treasure</h5><p>{result.treasure || "None."}</p>

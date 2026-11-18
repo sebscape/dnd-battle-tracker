@@ -148,3 +148,18 @@ test("server errors become readable messages without secrets or HTML", async () 
 test("redact hides API keys", () => {
   assert.equal(redact("bad key sk-proj-ABCDEF123456 here"), "bad key sk-… here");
 });
+
+test("an option that needs no roll is accepted; a bad DC names the option", () => {
+  const a = goodAnswer() as any;
+  a.avoiding_combat.push({ action: "Chat", check: "", dc: 0, success: "They share news.", failure: "They leave." });
+  assert.ok(validateAiEncounter(a, byId).ok);
+  a.avoiding_combat[1].dc = "none";
+  const v = validateAiEncounter(a, byId);
+  assert.ok(!v.ok && v.errors.join(" ").includes('Way to avoid combat 2: DC must be a whole number from 0 to 40 (got "none")'));
+});
+
+test("a rejected answer from the server carries the AI's answer, redacted", async () => {
+  const fakeFetch = (async () => new Response(JSON.stringify({ error: { code: "invalid_response", message: "Read-aloud: empty.", answer: '{"note":"sk-proj-ABCDEF123456"}' } }), { status: 502 })) as unknown as typeof fetch;
+  await assert.rejects(requestEncounter(request(), "sk-x-123456", new AbortController().signal, fakeFetch),
+    (e: any) => e.code === "invalid_response" && e.answer === '{"note":"sk-…"}');
+});

@@ -75,7 +75,7 @@ test("refusals, incomplete, malformed and unknown-monster answers are rejected",
   r = await call(body(), ok("{not json"));
   assert.equal((await err(r)).code, "invalid_response");
   r = await call(body(), ok(answer({ monsters: [{ monster_id: "11111111-1111-4111-8111-111111111111", count: 2 }] })));
-  assert.match((await err(r)).message, /isn't in your catalog/);
+  assert.match((await err(r)).message, /isn't in your catalog \("11111111/);
   r = await call(body(), ok(answer({ monsters: [{ monster_id: IDS[0], count: 0 }] })));
   assert.equal((await err(r)).code, "invalid_response");
   r = await call(body(), ok(answer({ read_aloud: "" })));
@@ -100,4 +100,22 @@ test("a slow OpenAI answer becomes a clear timeout", async () => {
   const r = await call(body(), slow, { timeoutMs: 50 });
   assert.equal(r.status, 504);
   assert.equal((await err(r)).code, "timeout");
+});
+
+test("an option that needs no roll (DC 0, no check) is accepted", async () => {
+  const r = await call(body(), ok(answer({ avoiding_combat: [{ action: "Chat with the merchant", check: "", dc: 0, success: "They trade news.", failure: "They move on." }] })));
+  assert.equal(r.status, 200);
+});
+
+test("rejections name the item and field, and return the AI's answer for inspection", async () => {
+  const bad = answer({ avoiding_combat: [answer().avoiding_combat[0], { action: "Talk", check: "Charisma (Persuasion)", dc: "none", success: "Ok.", failure: "No." }] });
+  const r = await call(body(), ok(bad));
+  const e = await err(r);
+  assert.equal(e.code, "invalid_response");
+  assert.equal(e.message, 'Way to avoid combat 2: DC must be a whole number from 0 to 40 (got "none").');
+  assert.deepEqual(JSON.parse(e.answer), bad);
+  const r2 = await call(body(), ok(answer({ monsters: [] })));
+  assert.match((await err(r2)).message, /^Monsters: the answer chose no monsters/);
+  const r3 = await call(body(), ok(answer({ read_aloud: "" })));
+  assert.equal((await err(r3)).message, "Read-aloud: empty.");
 });

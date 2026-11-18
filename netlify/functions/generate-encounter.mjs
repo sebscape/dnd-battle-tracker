@@ -47,8 +47,8 @@ export const ENCOUNTER_SCHEMA = {
         required: ["action", "check", "dc", "success", "failure"],
         properties: {
           action: text("What the characters do, e.g. 'Offer food'."),
-          check: text("The ability check, e.g. 'Wisdom (Animal Handling)'."),
-          dc: { type: "integer", description: "Difficulty class, usually 10 to 25." },
+          check: text("The ability check, e.g. 'Wisdom (Animal Handling)'. An empty string if no roll is needed."),
+          dc: { type: "integer", description: "Difficulty class, usually 10 to 25. 0 if no roll is needed." },
           success: text("What happens on a success."),
           failure: text("What happens on a failure."),
         },
@@ -75,7 +75,9 @@ export const ENCOUNTER_SCHEMA = {
 const json = (body, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
 });
-const fail = (status, code, message) => json({ error: { code, message } }, status);
+/** `answer` is the model's output (no secrets), returned so the user can see why it was rejected. */
+const fail = (status, code, message, answer) => json({ error: answer === undefined ? { code, message } : { code, message, answer } }, status);
+const MAX_ANSWER_ECHO = 30000;
 /** OpenAI's own messages can quote part of the key ("Incorrect API key provided: sk-ab***yz"). */
 const redact = s => String(s).replace(/sk-[A-Za-z0-9_*.-]{4,}/g, "sk-…").slice(0, 400);
 
@@ -126,19 +128,45 @@ export function buildInput(b) {
   ].join("\n");
 }
 
-/** Shape and length check of the model's JSON (monster IDs are checked against the catalog sent). */
+const shown = v => v === undefined ? "nothing" : JSON.stringify(v).slice(0, 60);
+/** Describes a text field's problem, or null when it's fine. */
+function textProblem(v, max, allowEmpty) {
+  if (typeof v !== "string") return "missing (got " + shown(v) + ")";
+  if (!allowEmpty && !v.trim()) return "empty";
+  if (v.length > max) return "too long (" + v.length + " characters; limit " + max + ")";
+  return null;
+}
+const LABEL = { encounter_name: "Encounter name", read_aloud: "Read-aloud", motivation: "Motivation", dm_tactics: "DM tactics", treasure: "Treasure" };
+
+/**
+ * Shape and length check of the model's JSON (monster IDs are checked against the catalog
+ * sent). Returns a message naming the exact item and field that failed, or null.
+ * Keep in step with validateAiEncounter in src/lib/aiEncounter.ts.
+ */
 export function checkEncounter(e, catalogIds) {
   if (!e || typeof e !== "object" || Array.isArray(e)) return "The answer wasn't a JSON object.";
-  for (const k of ["encounter_name", "read_aloud", "motivation", "dm_tactics"]) if (!isStr(e[k], LIMITS[k])) return "The answer's " + k.replace("_", " ") + " is missing or too long.";
-  if (!isStr(e.treasure, LIMITS.treasure, 0)) return "The answer's treasure is missing or too long.";
-  if (!Array.isArray(e.avoiding_combat) || e.avoiding_combat.length > LIMITS.options_max
-    || !e.avoiding_combat.every(o => o && ["action", "check", "success", "failure"].every(k => isStr(o[k], LIMITS.option_text)) && isInt(o.dc, 1, 40)))
-    return "The answer's ways to avoid combat are malformed.";
-  if (!Array.isArray(e.monsters) || e.monsters.length < 1 || e.monsters.length > LIMITS.monsters_max
-    || !e.monsters.every(m => m && typeof m.monster_id === "string" && isInt(m.count, 1, LIMITS.count_max)))
-    return "The answer's monster list is malformed.";
+  for (const k of ["encounter_name", "read_aloud", "motivation", "dm_tactics", "treasure"]) {
+    const p = textProblem(e[k], LIMITS[k], k === "treasure");
+    if (p) return LABEL[k] + ": " + p + ".";
+  }
+  if (!Array.isArray(e.avoiding_combat)) return "Ways to avoid combat: missing (got " + shown(e.avoiding_combat) + ").";
+  if (e.avoiding_combat.length > LIMITS.options_max) return "Ways to avoid combat: too many (" + e.avoiding_combat.length + "; limit " + LIMITS.options_max + ").";
+  for (const [i, o] of e.avoiding_combat.entries()) {
+    const n = "Way to avoid combat " + (i + 1);
+    if (!o || typeof o !== "object") return n + ": not an object.";
+    for (const k of ["action", "success", "failure"]) { const p = textProblem(o[k], LIMITS.option_text, false); if (p) return n + ": " + k + " is " + p + "."; }
+    const pc = textProblem(o.check, LIMITS.option_text, true); if (pc) return n + ": check is " + pc + ".";
+    if (!isInt(o.dc, 0, 40)) return n + ": DC must be a whole number from 0 to 40 (got " + shown(o.dc) + ").";
+  }
+  if (!Array.isArray(e.monsters)) return "Monsters: missing (got " + shown(e.monsters) + ").";
+  if (e.monsters.length < 1) return "Monsters: the answer chose no monsters. An encounter needs at least one creature (for a peaceful meeting, the people or creatures met).";
+  if (e.monsters.length > LIMITS.monsters_max) return "Monsters: too many different monsters (" + e.monsters.length + "; limit " + LIMITS.monsters_max + ").";
+  for (const [i, m] of e.monsters.entries()) {
+    if (!m || typeof m.monster_id !== "string") return "Monster " + (i + 1) + ": monster_id is missing.";
+    if (!isInt(m.count, 1, LIMITS.count_max)) return "Monster " + (i + 1) + ": count must be a whole number from 1 to " + LIMITS.count_max + " (got " + shown(m.count) + ").";
+  }
   const unknown = e.monsters.filter(m => !catalogIds.has(m.monster_id));
-  if (unknown.length) return "The answer used " + (unknown.length === 1 ? "a monster ID that isn't" : unknown.length + " monster IDs that aren't") + " in your catalog. No substitutes were chosen; try again.";
+  if (unknown.length) return "Monsters: the answer used " + (unknown.length === 1 ? "a monster ID that isn't" : unknown.length + " monster IDs that aren't") + " in your catalog (" + unknown.map(m => shown(m.monster_id)).join(", ") + "). No substitutes were chosen.";
   return null;
 }
 
@@ -228,9 +256,13 @@ export default async function handler(request, _context, deps = {}) {
   if (out.refusal) return fail(422, "refused", "The model declined to write this encounter: " + out.refusal);
   if (out.error) return fail(502, "invalid_response", out.error);
   let encounter;
-  try { encounter = JSON.parse(out.text); } catch { return fail(502, "invalid_response", "The model's answer wasn't valid JSON. Try again."); }
+  try { encounter = JSON.parse(out.text); } catch { return fail(502, "invalid_response", "The model's answer wasn't valid JSON.", out.text.slice(0, MAX_ANSWER_ECHO)); }
   const bad = checkEncounter(encounter, new Set(b.catalog.map(m => m.id)));
-  if (bad) return fail(502, "invalid_response", bad);
+  if (bad) {
+    // Shows up in Netlify's function log (or the npm run dev terminal). Never log the request: it holds the token.
+    console.warn("generate-encounter: rejected the model's answer: " + bad);
+    return fail(502, "invalid_response", bad, JSON.stringify(encounter, null, 2).slice(0, MAX_ANSWER_ECHO));
+  }
   return json({ encounter });
 }
 

@@ -120,11 +120,18 @@ export function validateAiEncounter(raw: unknown, byId: ReadonlyMap<string, Mons
     raw.avoiding_combat.slice(0, LIMITS.options_max).forEach((o, i) => {
       const n = "Way to avoid combat " + (i + 1);
       if (!isObj(o)) { errors.push(n + " is malformed."); return; }
-      const f = (k: string) => typeof o[k] === "string" && (o[k] as string).trim() && (o[k] as string).length <= LIMITS.option_text ? (o[k] as string).trim() : null;
-      const [action, check, success, failure] = ["action", "check", "success", "failure"].map(f);
+      const f = (k: string, allowEmpty = false) => {
+        const v = o[k];
+        if (typeof v !== "string") { errors.push(n + ": " + k + " is missing."); return null; }
+        if (!allowEmpty && !v.trim()) { errors.push(n + ": " + k + " is empty."); return null; }
+        if (v.length > LIMITS.option_text) { errors.push(n + ": " + k + " is too long."); return null; }
+        return v.trim();
+      };
+      // A check of "" with DC 0 means no roll is needed (e.g. simply talking).
+      const [action, check, success, failure] = [f("action"), f("check", true), f("success"), f("failure")];
       const dc = o.dc;
-      if (!action || !check || !success || !failure) { errors.push(n + " is missing text or has text that is too long."); return; }
-      if (typeof dc !== "number" || !Number.isInteger(dc) || dc < 1 || dc > 40) { errors.push(n + " has an invalid DC."); return; }
+      if (action === null || check === null || success === null || failure === null) return;
+      if (typeof dc !== "number" || !Number.isInteger(dc) || dc < 0 || dc > 40) { errors.push(n + ": DC must be a whole number from 0 to 40 (got " + JSON.stringify(dc) + ")."); return; }
       avoiding_combat.push({ action, check, dc, success, failure });
     });
   }
@@ -231,7 +238,9 @@ export type AiErrorCode =
   | "network" | "invalid_response" | "refused" | "bad_request" | "server" | "canceled";
 export class AiError extends Error {
   readonly code: AiErrorCode;
-  constructor(code: AiErrorCode, message: string) { super(message); this.code = code; this.name = "AiError"; }
+  /** The model's answer, when it was rejected (for "Show the AI's answer"). */
+  readonly answer?: string;
+  constructor(code: AiErrorCode, message: string, answer?: string) { super(message); this.code = code; this.answer = answer; this.name = "AiError"; }
 }
 
 /** Redacts anything that looks like an OpenAI key from text shown to the user. */
@@ -273,7 +282,8 @@ export async function requestEncounter(req: GenerateRequest, token: string, sign
     const err = isObj(body) && isObj(body.error) ? body.error : null;
     const code = err && typeof err.code === "string" ? err.code as AiErrorCode : null;
     const message = err && typeof err.message === "string" ? redact(err.message) : null;
-    if (code && message) throw new AiError(code, message);
+    const answer = err && typeof err.answer === "string" ? redact(err.answer) : undefined;
+    if (code && message) throw new AiError(code, message, answer);
     if (response.status === 504 || response.status === 502) throw new AiError("timeout", "The server took too long to answer (Netlify allows about 30 seconds). Try again, or choose a faster model in Settings.");
     if (response.status === 404) throw new AiError("server", "The AI function isn't available on this site. If you're running locally, use npm run dev (not npm run preview).");
     throw new AiError("server", "Unexpected server response (HTTP " + response.status + "). Try again later.");

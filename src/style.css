@@ -384,3 +384,6 @@ textarea.instructions { min-height: 320px; font-size: 14px; line-height: 1.45; }
 .password-field .eye:hover, .password-field .eye:focus-visible { color: #fff; background: #26384e; }
 .password-field .eye[aria-pressed="true"] { color: #9ec5fe; }
 .token-fields { align-items: end; }
+.ai-answer { width: 100%; }
+.ai-answer summary { cursor: pointer; color: #9ec5fe; font-size: 13px; }
+.ai-answer pre { max-height: 320px; overflow: auto; white-space: pre-wrap; word-break: break-word; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px; font-size: 12px; margin: 8px 0 0; }
