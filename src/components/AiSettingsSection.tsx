@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AI_DEFAULTS, DEFAULT_INSTRUCTIONS, MAX_INSTRUCTIONS, MODEL_PATTERN, SUGGESTED_MODELS, saveAiSettings, useAiSettings } from "../lib/aiEncounter";
 import { MIN_PASSWORD, removeToken, saveToken, useCredentials } from "../lib/credentials";
 import { CredentialStatus } from "./AiGenerate";
+import PasswordInput from "./PasswordInput";
 
 /**
  * Settings → AI Encounter Generation: this app's own OpenAI API token (same workflow
@@ -17,6 +18,8 @@ export default function AiSettingsSection() {
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [replaceToken, setReplaceToken] = useState(false);
+  // Eye button: while the password is shown, the confirmation box is hidden and not needed.
+  const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -26,13 +29,13 @@ export default function AiSettingsSection() {
   const dirty = settingsDirty || enteringToken;
   const modelOk = MODEL_PATTERN.test(model.trim());
   const instructionsOk = !!instructions.trim() && instructions.length <= MAX_INSTRUCTIONS;
-  const clearTokenFields = () => { setToken(""); setPassword(""); setConfirmation(""); setReplaceToken(false); };
+  const clearTokenFields = () => { setToken(""); setPassword(""); setConfirmation(""); setReplaceToken(false); setShowPassword(false); };
 
   async function save() {
     if (saving) return;
     setSaving(true); setError(""); setMessage("");
     try {
-      if (enteringToken) await saveToken(token, password, confirmation);
+      if (enteringToken) await saveToken(token, password, showPassword ? password : confirmation);
       if (settingsDirty) saveAiSettings({ instructions, model: model.trim() });
       setModel(model.trim());
       clearTokenFields();
@@ -66,8 +69,10 @@ export default function AiSettingsSection() {
     </> : <>
       <div className="token-fields">
         <label>{hasToken ? "Replacement API Token" : "API Token"}<input type="password" autoComplete="off" spellCheck={false} value={token} placeholder="Enter API token" onChange={e => { setToken(e.target.value); setMessage(""); }} /></label>
-        <label>Encryption password (minimum {MIN_PASSWORD} characters)<input type="password" autoComplete="new-password" placeholder="Enter encryption password" value={password} onChange={e => { setPassword(e.target.value); setMessage(""); }} /></label>
-        <label>Confirm encryption password<input type="password" autoComplete="new-password" placeholder="Confirm encryption password" value={confirmation} onChange={e => { setConfirmation(e.target.value); setMessage(""); }} /></label>
+        <label>Encryption password ({MIN_PASSWORD}+ characters)
+          <PasswordInput value={password} visible={showPassword} onToggle={() => setShowPassword(v => !v)} autoComplete="new-password" placeholder="Enter encryption password" onChange={v => { setPassword(v); setMessage(""); }} /></label>
+        {!showPassword && <label>Confirm encryption password
+          <PasswordInput value={confirmation} visible={false} onToggle={() => setShowPassword(true)} autoComplete="new-password" placeholder="Confirm encryption password" onChange={v => { setConfirmation(v); setMessage(""); }} /></label>}
       </div>
       {replaceToken && <div className="actions-left"><button type="button" onClick={clearTokenFields}>Cancel token replacement</button></div>}
     </>}

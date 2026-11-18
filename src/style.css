@@ -371,3 +371,18 @@ textarea.instructions { min-height: 320px; font-size: 14px; line-height: 1.45; }
 .gen-panel { border: 1px solid #40516a; border-top: 0; border-radius: 0 0 10px 10px; padding: 14px; }
 .gen-panel[hidden] { display: none; }
 .gen-panel .auto-generate { border: 0; padding: 0; }
+
+/* ---------- Header gear button (Settings), as in Critter Codex ---------- */
+.header-right { display: flex; align-items: center; gap: 16px; }
+.icon-button { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 8px; flex: 0 0 auto; }
+.icon-button[aria-pressed="true"] { background: #346393; border-color: #93c5fd; }
+@media (max-width: 800px) { .header-right { width: 100%; justify-content: space-between; } }
+
+/* ---------- Password box with a show/hide eye ---------- */
+.password-field { position: relative; display: block; }
+.password-field input { width: 100%; padding-right: 44px; }
+.password-field .eye { position: absolute; top: 50%; right: 4px; transform: translateY(-50%); width: 36px; height: 36px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 0; color: #9aa9bd; }
+.password-field .eye:hover, .password-field .eye:focus-visible { color: #fff; background: #26384e; }
+.password-field .eye[aria-pressed="true"] { color: #9ec5fe; }
+.token-fields { align-items: end; }

@@ -38,7 +38,7 @@ export default function EndBattleDialog({ battle, byId, settings, onFinish, onCa
             </label>)}
           </fieldset>)}
           {empty.length > 0 && <p className="muted small-text">Nothing listed for: {empty.map(c => c.name).join(", ")}.</p>}
-          {!hasCoinTable && <p className="muted small-text">No coins are rolled: the SRD has no treasure table. You can enter your own coin table on the Settings tab.</p>}
+          {!hasCoinTable && <p className="muted small-text">No coins are rolled: the SRD has no treasure table. You can enter your own coin table in Settings (the gear button at the top).</p>}
           {hasCoinTable && <button type="button" className="small" onClick={() => setItems(findLoot(battle, byId, settings))}>Roll coins again</button>}
         </>
         : <p className="muted">No monsters were defeated, so there's nothing to search.</p>}

@@ -5,6 +5,7 @@ import type { AiEncounter, TargetDifficulty, ValidPick } from "../lib/aiEncounte
 import { AiError, MAX_SITUATION, buildRequest, fieldsToReplace, requestEncounter, toEncounterPatch, useAiSettings, validateAiEncounter } from "../lib/aiEncounter";
 import { IncorrectPasswordError, NoTokenError, getToken, lock, reportOpenAiResult, unlock, useCredentials } from "../lib/credentials";
 import { encounterDifficulty } from "../lib/difficulty";
+import PasswordInput from "./PasswordInput";
 
 interface Props {
   encounter: Encounter;
@@ -46,6 +47,7 @@ export default function AiGenerate({ encounter, party, monsters, byId, catalogRe
   const cred = useCredentials();
   const [difficulty, setDifficulty] = useState<TargetDifficulty>("moderate");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [phase, setPhase] = useState<Phase>({ at: "idle" });
   const [notice, setNotice] = useState("");
   // The request in flight. Anything that arrives after Cancel, a newer request or
@@ -131,8 +133,8 @@ export default function AiGenerate({ encounter, party, monsters, byId, catalogRe
       <label>Difficulty<select value={difficulty} disabled={working} onChange={e => setDifficulty(e.target.value as TargetDifficulty)}>
         <option value="low">Low</option><option value="moderate">Moderate</option><option value="high">High</option></select></label>
       {locked && cred.status !== "missing" && <label className="grow">Encryption password (unlocks your API token)
-        <input type="password" autoComplete="current-password" value={password} disabled={working}
-          onChange={e => setPassword(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && canGenerate) void generate(); }} /></label>}
+        <PasswordInput value={password} visible={showPassword} onToggle={() => setShowPassword(v => !v)} autoComplete="current-password" disabled={working}
+          onChange={setPassword} onEnter={() => { if (canGenerate) void generate(); }} /></label>}
     </div>
     <div className="auto-actions">
       <button type="button" className="primary" disabled={!canGenerate} title={why || "Sends the situation, party and monster list to OpenAI. Each request is charged to your OpenAI account."} onClick={() => void generate()}>Generate with AI $</button>
@@ -140,7 +142,7 @@ export default function AiGenerate({ encounter, party, monsters, byId, catalogRe
       <CredentialStatus />
     </div>
     <p className="muted small-text">
-      {why ? why + " " : ""}Uses your instructions and model from Settings ({settings.model}){encounter.environment ? ", the " + encounter.environment + " environment" : ""} and the monsters in your catalog. Nothing changes until you choose Use This Encounter.
+      {why ? why + " " : ""}Uses your instructions and model from Settings, the gear button ({settings.model}){encounter.environment ? ", the " + encounter.environment + " environment" : ""} and the monsters in your catalog. Nothing changes until you choose Use This Encounter.
     </p>
     {working && <p className="ai-progress" role="status"><span className="spinner" aria-hidden="true" />{phase.step === "unlocking" ? "Unlocking the API token…" : "Asking OpenAI for an encounter… this usually takes 10–30 seconds."}</p>}
     {notice && <p className="small-text" role="status">{notice}</p>}

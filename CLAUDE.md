@@ -22,8 +22,8 @@ Combat tracker for D&D Dungeon Masters. Full design and agreed decisions: **DESI
 
 | Path | Purpose |
 |---|---|
-| `src/App.tsx` | Header, tabs, monster data and stored lists |
-| `src/components/` | `Encounters` (list + editor, difficulty), `MonsterPicker`, `MonsterDetails` (read-only copy of the reference app's detail view — keep in step), `GenerateTabs` (the editor's "Auto Generate" section: **Auto Search** tab = `AutoGenerate`, **AI** tab = `AiGenerate`; both stay mounted while hidden), `PartyRoster`, `BattleScreen` (turn order, log), `CombatantDetail` (HP, conditions, stat block rolls), `AddCombatants`, `NumberPrompt` (physical dice), `EndBattleDialog` (search for loot), `SettingsPanel` (coin table) |
+| `src/App.tsx` | Header (with the gear button that opens Settings, as in Critter Codex), tabs (Battle, Encounters, Party), monster data and stored lists |
+| `src/components/` | `Encounters` (list + editor, difficulty), `MonsterPicker`, `MonsterDetails` (read-only copy of the reference app's detail view — keep in step), `GenerateTabs` (the editor's "Auto Generate" section: **Auto Search** tab = `AutoGenerate`, **AI** tab = `AiGenerate`; both stay mounted while hidden), `PartyRoster`, `BattleScreen` (turn order, log), `CombatantDetail` (HP, conditions, stat block rolls), `AddCombatants`, `NumberPrompt` (physical dice), `EndBattleDialog` (search for loot), `SettingsPanel` (opened by the header gear: data move, AI Encounter Generation, coin table), `PasswordInput` (password box with a show/hide eye) |
 | `src/lib/bridge.ts` | Client for the reference app's read-only storage bridge |
 | `src/lib/useMonsters.ts` | Bundled published catalog + custom monsters/artwork via the bridge |
 | `src/lib/combat.ts` | Pure battle rules: creating a battle, turn order, HP, conditions. Each function returns a new `Battle`. |

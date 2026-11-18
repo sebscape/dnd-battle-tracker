@@ -22,6 +22,9 @@ export default function App() {
   const battle = useBattle(party);
   const [treasure, setTreasure, treasureError] = useTreasureSettings();
   const [tab, setTab] = useState<Tab>(() => battle.battle ? "battle" : "encounters");
+  // The gear button opens Settings and, pressed again, returns to where you were.
+  const [lastTab, setLastTab] = useState<Exclude<Tab, "settings">>("encounters");
+  const toggleSettings = () => { if (tab === "settings") setTab(lastTab); else { setLastTab(tab); setTab("settings"); } };
 
   function startBattle(encounter: Encounter | null) {
     if (battle.battle && !window.confirm("A battle is already in progress. End it (saving it to history) and start a new one?")) return;
@@ -45,17 +48,23 @@ export default function App() {
         <img className="app-brand-logo" src="/images/logo.webp" alt="" width="512" height="512" />
         <div><h1>Scrap Sheet</h1><p className="muted">A 5E-compatible battle tracker</p></div>
       </div>
-      <div className="header-status">
-        <span>{data.loading ? "Loading monsters…" : data.published.length + " published monsters"}</span>
-        <span className={"bridge-status " + data.bridge} title="Custom monsters and artwork come from the Critter Codex app in this browser">{bridgeText}</span>
+      <div className="header-right">
+        <div className="header-status">
+          <span>{data.loading ? "Loading monsters…" : data.published.length + " published monsters"}</span>
+          <span className={"bridge-status " + data.bridge} title="Custom monsters and artwork come from the Critter Codex app in this browser">{bridgeText}</span>
+        </div>
+        <button type="button" className="icon-button" aria-label={tab === "settings" ? "Close settings" : "Settings"} title={tab === "settings" ? "Close settings" : "Settings"}
+          aria-pressed={tab === "settings"} onClick={toggleSettings}>
+          <svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06-1.87 1.87-.06-.06A1.7 1.7 0 0 0 16 18.4a1.7 1.7 0 0 0-1 .98V21h-6v-1.62a1.7 1.7 0 0 0-1-.98 1.7 1.7 0 0 0-1.87.34l-.06.06-1.87-1.87.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.98-1H2v-4h1.62a1.7 1.7 0 0 0 .98-1 1.7 1.7 0 0 0-.34-1.87L4.2 7.07 6.07 5.2l.06.06A1.7 1.7 0 0 0 8 5.6a1.7 1.7 0 0 0 1-.98V3h6v1.62a1.7 1.7 0 0 0 1 .98 1.7 1.7 0 0 0 1.87-.34l.06-.06 1.87 1.87-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 .98 1H22v4h-1.62a1.7 1.7 0 0 0-.98 1Z"/></svg>
+        </button>
       </div>
     </header>
 
     <MovedNotice />
-    {showMoveHint && tab !== "settings" && <p className="moved-notice" role="status">Used this app at {OLD_HOST}? <button type="button" className="small" onClick={() => { setTab("settings"); setShowMoveHint(false); }}>Bring over my data</button> <button type="button" className="small" onClick={() => setShowMoveHint(false)}>Not now</button></p>}
+    {showMoveHint && tab !== "settings" && <p className="moved-notice" role="status">Used this app at {OLD_HOST}? <button type="button" className="small" onClick={() => { setLastTab(tab); setTab("settings"); setShowMoveHint(false); }}>Bring over my data</button> <button type="button" className="small" onClick={() => setShowMoveHint(false)}>Not now</button></p>}
     <nav className="tabs" aria-label="Sections">
-      {(["battle", "encounters", "party", "settings"] as const).map(t => <button key={t} type="button" className="tab" aria-current={tab === t ? "page" : undefined} onClick={() => setTab(t)}>
-        {t === "battle" ? (battle.battle ? "Battle · round " + battle.battle.round : "Battle") : t === "encounters" ? "Encounters" : t === "party" ? "Party (" + party.length + ")" : "Settings"}
+      {(["battle", "encounters", "party"] as const).map(t => <button key={t} type="button" className="tab" aria-current={tab === t ? "page" : undefined} onClick={() => setTab(t)}>
+        {t === "battle" ? (battle.battle ? "Battle · round " + battle.battle.round : "Battle") : t === "encounters" ? "Encounters" : "Party (" + party.length + ")"}
       </button>)}
     </nav>
 
