@@ -86,7 +86,7 @@ export default function AiSettingsSection() {
       <input list="ai-models" value={model} spellCheck={false} onChange={e => { setModel(e.target.value); setMessage(""); }} aria-invalid={!modelOk} />
       <datalist id="ai-models">{SUGGESTED_MODELS.map(m => <option key={m} value={m} />)}</datalist>
     </label>
-    <p className="muted small-text">Any OpenAI text model that supports structured JSON output. Faster models are safer: the server allows about 30 seconds per request. Default: {AI_DEFAULTS.model}.</p>
+    <p className="muted small-text">Any OpenAI text model that supports structured JSON output. Requests run in the background on Netlify, so slower models are fine (up to 5 minutes). Default: {AI_DEFAULTS.model}.</p>
     <label>Default Encounter Instructions
       <textarea className="instructions" value={instructions} onChange={e => { setInstructions(e.target.value); setMessage(""); }} aria-invalid={!instructionsOk} />
     </label>

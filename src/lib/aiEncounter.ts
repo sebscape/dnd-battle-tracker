@@ -230,8 +230,24 @@ export function buildRequest(o: {
 // ---------- Calling the function ----------
 
 export const FUNCTION_URL = "/.netlify/functions/generate-encounter";
-/** Give up a little after Netlify's ~30-second limit for synchronous functions. */
-export const CLIENT_TIMEOUT_MS = 45000;
+export const JOB_URL = "/.netlify/functions/encounter-job";
+export const BACKGROUND_URL = "/.netlify/functions/generate-encounter-background";
+/**
+ * How the request reaches OpenAI (the same design as Critter Codex's artwork):
+ * - "background" (on Netlify): create a job, start the -background function (Netlify
+ *   answers 202 at once and lets it run up to 15 minutes), then poll the job until the
+ *   result is saved. Avoids the ~30-second limit for ordinary functions.
+ * - "direct" (npm run dev): call the function and wait; the dev server has no time limit
+ *   and Netlify Blobs isn't available locally.
+ */
+export type Transport = "direct" | "background";
+export const defaultTransport = (): Transport =>
+  typeof location === "undefined" || ["localhost", "127.0.0.1"].includes(location.hostname) ? "direct" : "background";
+/** Direct calls: the dev server gives OpenAI up to 5 minutes. */
+export const CLIENT_TIMEOUT_MS = 6 * 60 * 1000;
+export const POLL_MS = 2500;
+/** Background jobs: Netlify stops them at 15 minutes. */
+export const JOB_WAIT_MS = 14 * 60 * 1000;
 
 export type AiErrorCode =
   | "invalid_token" | "insufficient_quota" | "rate_limited" | "unsupported_model" | "timeout"
@@ -313,46 +329,113 @@ export const redact = (text: string) => text.replace(/sk-[A-Za-z0-9_*.-]{4,}/g, 
  * (not yet validated against the catalog). Rejects with AiError; canceled requests
  * reject with code "canceled" and must not change the interface.
  */
-export async function requestEncounter(req: GenerateRequest, token: string, signal: AbortSignal, fetchImpl: typeof fetch = fetch): Promise<{ encounter: unknown; exchange?: ServerExchange }> {
-  const timeout = new AbortController();
-  const timer = setTimeout(() => timeout.abort(), CLIENT_TIMEOUT_MS);
-  const onAbort = () => timeout.abort();
-  signal.addEventListener("abort", onAbort);
-  let response: Response;
-  try {
-    response = await fetchImpl(FUNCTION_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      // The token travels in the HTTPS request body only, never in the URL.
-      body: JSON.stringify({ ...req, token }),
-      signal: timeout.signal,
-    });
-  } catch {
-    if (signal.aborted) throw new AiError("canceled", "Canceled.");
-    if (timeout.signal.aborted) throw new AiError("timeout", "No answer after " + CLIENT_TIMEOUT_MS / 1000 + " seconds. Try again, or choose a faster model in Settings.");
-    throw new AiError("network", "Couldn't reach the Scrap Sheet server. Check your internet connection and try again.");
-  } finally {
-    clearTimeout(timer);
-    signal.removeEventListener("abort", onAbort);
-  }
+export async function requestEncounter(req: GenerateRequest, token: string, signal: AbortSignal, fetchImpl: typeof fetch = fetch,
+  transport: Transport = defaultTransport(), pollMs = POLL_MS): Promise<{ encounter: unknown; exchange?: ServerExchange }> {
+  const { status, body } = transport === "background"
+    ? await viaBackgroundJob(req, token, signal, fetchImpl, pollMs)
+    : await viaDirectCall(req, token, signal, fetchImpl);
   if (signal.aborted) throw new AiError("canceled", "Canceled.");
-  const raw = await response.text().catch(() => "");
-  if (signal.aborted) throw new AiError("canceled", "Canceled.");
-  let body: unknown = null;
-  try { body = JSON.parse(raw); } catch { /* not JSON: e.g. an HTML error page */ }
-  if (!response.ok) {
+  if (status < 200 || status >= 300) {
     const err = isObj(body) && isObj(body.error) ? body.error : null;
     const code = err && typeof err.code === "string" ? err.code as AiErrorCode : null;
     const message = err && typeof err.message === "string" ? redact(err.message) : null;
     const answer = err && typeof err.answer === "string" ? redact(err.answer) : undefined;
     const exchange = isObj(body) ? asExchange(body.conversation) : undefined;
     if (code && message) throw new AiError(code, message, answer, exchange);
-    if (response.status === 504 || response.status === 502) throw new AiError("timeout", "The server took too long to answer (Netlify allows about 30 seconds). Try again, or choose a faster model in Settings.");
-    if (response.status === 404) throw new AiError("server", "The AI function isn't available on this site. If you're running locally, use npm run dev (not npm run preview).");
-    throw new AiError("server", "Unexpected server response (HTTP " + response.status + "). Try again later.");
+    if (status === 504 || status === 502) throw new AiError("timeout", "The server took too long to answer. Try again, or choose a faster model in Settings.");
+    if (status === 404) throw new AiError("server", "The AI function isn't available on this site. If you're running locally, use npm run dev (not npm run preview).");
+    throw new AiError("server", "Unexpected server response (HTTP " + status + "). Try again later.");
   }
   if (!isObj(body) || !("encounter" in body)) throw new AiError("invalid_response", "The server's answer wasn't in the expected format.");
   return { encounter: body.encounter, exchange: asExchange(body.conversation) };
+}
+
+const parseJson = (text: string): unknown => { try { return JSON.parse(text); } catch { return null; /* e.g. an HTML error page */ } };
+
+async function viaDirectCall(req: GenerateRequest, token: string, signal: AbortSignal, fetchImpl: typeof fetch): Promise<{ status: number; body: unknown }> {
+  const timeout = new AbortController();
+  const timer = setTimeout(() => timeout.abort(), CLIENT_TIMEOUT_MS);
+  const onAbort = () => timeout.abort();
+  signal.addEventListener("abort", onAbort);
+  try {
+    const response = await fetchImpl(FUNCTION_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      // The token travels in the HTTPS request body only, never in the URL.
+      body: JSON.stringify({ ...req, token }),
+      signal: timeout.signal,
+    });
+    const text = await response.text().catch(() => "");
+    return { status: response.status, body: parseJson(text) };
+  } catch {
+    if (signal.aborted) throw new AiError("canceled", "Canceled.");
+    if (timeout.signal.aborted) throw new AiError("timeout", "No answer after " + CLIENT_TIMEOUT_MS / 60000 + " minutes. Try again, or choose a faster model in Settings.");
+    throw new AiError("network", "Couldn't reach the Scrap Sheet server. Check your internet connection and try again.");
+  } finally {
+    clearTimeout(timer);
+    signal.removeEventListener("abort", onAbort);
+  }
+}
+
+/** Waits, but stops early (rejecting with "canceled") when the request is canceled. */
+function pause(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) { reject(new AiError("canceled", "Canceled.")); return; }
+    const done = () => { clearTimeout(t); signal.removeEventListener("abort", stop); };
+    const stop = () => { done(); reject(new AiError("canceled", "Canceled.")); };
+    const t = setTimeout(() => { done(); resolve(); }, ms);
+    signal.addEventListener("abort", stop);
+  });
+}
+
+async function viaBackgroundJob(req: GenerateRequest, token: string, signal: AbortSignal, fetchImpl: typeof fetch, pollMs: number): Promise<{ status: number; body: unknown }> {
+  const id = crypto.randomUUID();
+  const secret = crypto.randomUUID();
+  const statusUrl = JOB_URL + "?id=" + encodeURIComponent(id);
+  const headers = { "X-Encounter-Job-Secret": secret };
+  // Cancels a pending job, or removes a finished one from Netlify Blobs. Best-effort.
+  const removeJob = () => { void fetchImpl(statusUrl, { method: "DELETE", headers }).catch(() => undefined); };
+  const network = () => new AiError("network", "Couldn't reach the Scrap Sheet server. Check your internet connection and try again.");
+  let created: Response;
+  try { created = await fetchImpl(statusUrl, { method: "POST", headers }); } catch { throw signal.aborted ? new AiError("canceled", "Canceled.") : network(); }
+  if (created.status === 404) throw new AiError("server", "The AI function isn't available on this site yet. Check that the latest version is deployed on Netlify.");
+  if (!created.ok) throw new AiError("server", "Couldn't start the generation job (HTTP " + created.status + "). Try again.");
+  const onAbort = () => removeJob();
+  signal.addEventListener("abort", onAbort);
+  try {
+    if (signal.aborted) throw new AiError("canceled", "Canceled.");
+    let started: Response;
+    try {
+      started = await fetchImpl(BACKGROUND_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // The token travels in the HTTPS request body only, never in the URL, and is never stored.
+        body: JSON.stringify({ ...req, token, id, secret }),
+      });
+    } catch { throw signal.aborted ? new AiError("canceled", "Canceled.") : network(); }
+    if (!started.ok) { removeJob(); throw new AiError("server", "Couldn't start background generation (HTTP " + started.status + "). Try again."); }
+    const deadline = Date.now() + JOB_WAIT_MS;
+    let missing = 0;
+    while (Date.now() < deadline) {
+      await pause(pollMs, signal);
+      let response: Response;
+      try { response = await fetchImpl(statusUrl, { headers }); } catch { continue; /* a dropped poll; try again */ }
+      if (signal.aborted) throw new AiError("canceled", "Canceled.");
+      if (response.status === 404 && missing++ < 5) continue;
+      const job = parseJson(await response.text().catch(() => ""));
+      if (!response.ok || !isObj(job)) throw new AiError("server", "Couldn't check on the generation job (HTTP " + response.status + "). Try again.");
+      missing = 0;
+      if (job.state === "done" || job.state === "error") {
+        if (job.state === "done") removeJob();
+        return { status: typeof job.status === "number" ? job.status : 500, body: job.body };
+      }
+      if (job.state === "canceled") throw new AiError("canceled", "Canceled.");
+    }
+    removeJob();
+    throw new AiError("timeout", "No answer after " + JOB_WAIT_MS / 60000 + " minutes. Try again, or choose a faster model in Settings.");
+  } finally {
+    signal.removeEventListener("abort", onAbort);
+  }
 }
 
 // ---------- Applying ----------

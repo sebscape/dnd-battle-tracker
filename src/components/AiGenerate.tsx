@@ -181,7 +181,7 @@ export default function AiGenerate({ encounter, party, monsters, byId, artwork, 
     <p className="muted small-text">
       {why ? why + " " : ""}Uses your instructions and model from Settings, the gear button ({settings.model}){encounter.environment ? ", the " + encounter.environment + " environment" : ""} and the monsters in your catalog. Nothing changes until you choose Use This Encounter.
     </p>
-    {working && <p className="ai-progress" role="status"><span className="spinner" aria-hidden="true" />{phase.step === "unlocking" ? "Unlocking the API token…" : "Asking OpenAI for an encounter… this usually takes 10–30 seconds."}</p>}
+    {working && <p className="ai-progress" role="status"><span className="spinner" aria-hidden="true" />{phase.step === "unlocking" ? "Unlocking the API token…" : "Asking OpenAI for an encounter… this usually takes 10–60 seconds."}</p>}
     {notice && <p className="small-text" role="status">{notice}</p>}
     {phase.at === "error" && <div className="ai-error" role="alert">
       <p className="error">{phase.message}</p>

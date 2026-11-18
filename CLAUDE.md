@@ -35,7 +35,8 @@ Combat tracker for D&D Dungeon Masters. Full design and agreed decisions: **DESI
 | `src/lib/dice.ts` | Dice notation, crypto-random rolls, advantage/disadvantage |
 | `src/lib/aiEncounter.ts` | "Generate with AI $": settings (`dnd-battle-tracker-ai-v1`), compact catalog, request, response validation (unknown monster IDs rejected), mapping onto an encounter. UI: `components/AiGenerate.tsx`, `components/AiSettingsSection.tsx` |
 | `src/lib/credentials.ts` | This app's own OpenAI token (`dnd-battle-tracker-api-token-v1`), encrypted like Critter Codex's; the one unlock state shared by every AI feature here; plaintext in memory only |
-| `netlify/functions/generate-encounter.mjs` | Netlify Function calling the OpenAI Responses API with a strict JSON Schema; normalized JSON errors; token never stored or logged |
+| `netlify/functions/generate-encounter.mjs` | Calls the OpenAI Responses API with a strict JSON Schema; normalized JSON errors; token never stored or logged. Called directly in local dev |
+| `netlify/functions/generate-encounter-background.mjs`, `encounter-job.mjs` | On Netlify: background job (up to 15 min) + job status in Netlify Blobs (`@netlify/blobs`), polled by the browser — same design as Critter Codex's artwork jobs |
 | `src/lib/generate.ts` | Random encounters by environment (from monster `tags`), difficulty, max CR and kinds; used by `components/AutoGenerate` |
 | `src/lib/difficulty.ts` | SRD 5.2.1 XP budgets and monster XP by CR |
 | `src/lib/storage.ts` | localStorage lists (`dnd-battle-tracker-party-v1`, `dnd-battle-tracker-encounters-v1`) |

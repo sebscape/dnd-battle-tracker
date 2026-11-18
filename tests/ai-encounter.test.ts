@@ -174,3 +174,50 @@ test("the server's record of the conversation is passed on, with key fragments r
   await assert.rejects(requestEncounter(request(), "sk-x-123456", new AbortController().signal, bad),
     (e: any) => e.exchange.openai_status === 401 && !e.exchange.openai_error.includes("abcd"));
 });
+
+test("background transport: creates a job, starts the background function, polls, collects and cleans up", async () => {
+  const { memoryStore } = await import("./memory-store.mjs");
+  const jobHandler = (await import("../netlify/functions/encounter-job.mjs")).default;
+  const backgroundHandler = (await import("../netlify/functions/generate-encounter-background.mjs")).default;
+  const store = memoryStore();
+  const calls: string[] = [];
+  let pending: Promise<unknown> = Promise.resolve();
+  const openai = async () => new Response(JSON.stringify({ status: "completed", output: [{ type: "message", content: [{ type: "output_text", text: JSON.stringify(goodAnswer()) }] }] }), { status: 200 });
+  const fakeFetch = (async (url: string, init: RequestInit = {}) => {
+    const req = new Request("http://x" + url, init);
+    calls.push((init.method || "GET") + " " + url.split("?")[0]);
+    assert.ok(!url.includes("sk-"), "the token is never in a URL");
+    if (url.startsWith("/.netlify/functions/encounter-job")) return jobHandler(req, undefined, { store });
+    if (url === "/.netlify/functions/generate-encounter-background") {
+      pending = backgroundHandler(req, undefined, { store, fetch: openai });   // Netlify answers 202 and runs it
+      return new Response(null, { status: 202 });
+    }
+    throw new Error("unexpected " + url);
+  }) as unknown as typeof fetch;
+  const out = await requestEncounter(request(), "sk-x-123456", new AbortController().signal, fakeFetch, "background", 5);
+  await pending;
+  assert.deepEqual(out.encounter, goodAnswer());
+  assert.match(out.exchange!.input!, /## Party/);
+  assert.equal(calls[0], "POST /.netlify/functions/encounter-job");
+  assert.equal(calls[1], "POST /.netlify/functions/generate-encounter-background");
+  assert.ok(calls.includes("GET /.netlify/functions/encounter-job"));
+  await new Promise(r => setTimeout(r, 10));
+  assert.equal(calls.at(-1), "DELETE /.netlify/functions/encounter-job");
+  assert.equal(store.data.size, 0, "the finished job is removed");
+});
+
+test("background transport: Cancel stops polling and cancels the job", async () => {
+  const { memoryStore } = await import("./memory-store.mjs");
+  const jobHandler = (await import("../netlify/functions/encounter-job.mjs")).default;
+  const store = memoryStore();
+  const fakeFetch = (async (url: string, init: RequestInit = {}) => {
+    if (url.startsWith("/.netlify/functions/encounter-job")) return jobHandler(new Request("http://x" + url, init), undefined, { store });
+    return new Response(null, { status: 202 });                                 // background never finishes
+  }) as unknown as typeof fetch;
+  const controller = new AbortController();
+  const pending = requestEncounter(request(), "sk-x-123456", controller.signal, fakeFetch, "background", 20);
+  setTimeout(() => controller.abort(), 50);
+  await assert.rejects(pending, (e: unknown) => e instanceof AiError && e.code === "canceled");
+  await new Promise(r => setTimeout(r, 10));
+  assert.equal(JSON.parse([...store.data.values()][0]).state, "canceled");
+});

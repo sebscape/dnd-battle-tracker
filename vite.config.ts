@@ -2,8 +2,9 @@ import { defineConfig, type Plugin } from "vite";
 import generateEncounter from "./netlify/functions/generate-encounter.mjs";
 
 // Serves the Netlify function at the same path during `npm run dev`, so AI encounter
-// generation works locally without the Netlify CLI. (Critter Codex does the same for
-// its artwork function.)
+// generation works locally without the Netlify CLI. Locally the browser calls it
+// directly; on Netlify it runs as a background job (Netlify Blobs isn't available
+// here). Critter Codex does the same for its artwork function.
 function localEncounterApi(): Plugin {
   return {
     name: "local-encounter-api",
@@ -30,7 +31,8 @@ function localEncounterApi(): Plugin {
             headers: { "content-type": req.headers["content-type"] || "application/json" },
             body: req.method === "POST" ? Buffer.concat(chunks) : undefined,
           });
-          const result = await generateEncounter(request, undefined);
+          // No Netlify time limit locally, so give OpenAI as long as the background function does.
+          const result = await generateEncounter(request, undefined, { timeoutMs: 5 * 60 * 1000 });
           res.statusCode = result.status;
           res.end(Buffer.from(await result.arrayBuffer()));
         } catch {

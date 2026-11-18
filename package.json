@@ -10,6 +10,7 @@
     "test": "node --experimental-strip-types --no-warnings --import ./tests/resolve-ts.mjs --test \"tests/*.test.ts\" \"tests/*.test.mjs\""
   },
   "dependencies": {
+    "@netlify/blobs": "^9.1.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
