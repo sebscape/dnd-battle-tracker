@@ -121,8 +121,7 @@ export default function AiGenerate({ encounter, party, monsters, byId, catalogRe
     : cred.status === "missing" ? "Add an OpenAI API token in Settings → AI Encounter Generation first."
     : locked && !password ? "Enter your encryption password to unlock your API token." : "";
 
-  return <fieldset className="auto-generate ai-generate" aria-busy={working}>
-    <legend>Generate with AI</legend>
+  return <div className="auto-generate ai-generate" aria-busy={working}>
     <label>Encounter Situation
       <textarea className="situation" value={situation} maxLength={MAX_SITUATION} disabled={working}
         placeholder="e.g. The party is traveling down a road surrounded by woods. They are making camp for the night. I rolled a random monster encounter."
@@ -152,7 +151,7 @@ export default function AiGenerate({ encounter, party, monsters, byId, catalogRe
     {phase.at === "review" && <Review result={phase.result} picks={phase.picks} party={party} target={difficulty}
       onUse={() => use(phase.result, phase.picks)} onRegenerate={regenerate}
       onCancel={() => { setPhase({ at: "idle" }); setNotice("Generated encounter discarded."); }} />}
-  </fieldset>;
+  </div>;
 }
 
 function Review({ result, picks, party, target, onUse, onRegenerate, onCancel }: {

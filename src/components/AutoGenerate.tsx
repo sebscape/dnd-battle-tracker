@@ -34,8 +34,7 @@ export default function AutoGenerate({ encounter, levels, monsters, onChange }: 
     setMessage("Generated " + r.totalXp.toLocaleString("en-US") + " XP of monsters for a " + difficulty + " encounter (budget " + r.target.toLocaleString("en-US") + " XP). Press Auto generate again for a different set.");
   }
 
-  return <fieldset className="auto-generate">
-    <legend>Auto generate</legend>
+  return <div className="auto-generate">
     <div className="auto-fields">
       <label>Environment<select value={environment} onChange={e => onChange({ environment: e.target.value || undefined })}>
         <option value="">Any environment</option>
@@ -63,5 +62,5 @@ export default function AutoGenerate({ encounter, levels, monsters, onChange }: 
       </span>
     </div>
     {message && <p className="small-text" role="status">{message}</p>}
-  </fieldset>;
+  </div>;
 }

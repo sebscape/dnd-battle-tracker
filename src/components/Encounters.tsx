@@ -6,8 +6,7 @@ import type { MonsterData } from "../lib/useMonsters";
 import { isCustom } from "../lib/format";
 import MonsterPicker from "./MonsterPicker";
 import MonsterDetails from "./MonsterDetails";
-import AutoGenerate from "./AutoGenerate";
-import AiGenerate from "./AiGenerate";
+import GenerateTabs from "./GenerateTabs";
 import DifficultyPanel from "./DifficultyPanel";
 import { encounterDifficulty, monsterXp } from "../lib/difficulty";
 
@@ -118,11 +117,11 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
         </label>)}</div>}
     {missingPcs > 0 && <p className="muted small-text">{missingPcs} character{missingPcs === 1 ? " is" : "s are"} no longer in the party roster and will be skipped.</p>}
 
-    <AiGenerate encounter={encounter} party={presentPcs} monsters={allMonsters} byId={data.byId}
+    <h3>Auto Generate</h3>
+    <GenerateTabs encounter={encounter} party={presentPcs} monsters={allMonsters} byId={data.byId}
       catalogReady={!data.loading && data.bridge !== "connecting"} onChange={set} />
 
     <h3>Monsters</h3>
-    <AutoGenerate encounter={encounter} levels={presentPcs.map(p => p.level)} monsters={allMonsters} onChange={set} />
     {encounter.monsters.length === 0 && <p className="muted">No monsters yet. Auto generate some, or search below to add them.</p>}
     <ul className="encounter-monsters">
       {encounter.monsters.map((em, i) => {

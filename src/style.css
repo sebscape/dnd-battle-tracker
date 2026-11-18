@@ -329,8 +329,6 @@ button.marked { border-color: #f2cf8a; }
 .move-actions{display:flex;gap:10px;flex-wrap:wrap}
 
 /* ---------- Generate with AI ---------- */
-.ai-generate { border-color: #7c6fd6; }
-.ai-generate legend { color: #c4b5fd; }
 .ai-generate textarea.situation { min-height: 96px; }
 .ai-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
 .ai-row > label:first-child { flex: 0 0 160px; }
@@ -364,3 +362,12 @@ textarea.instructions { min-height: 320px; font-size: 14px; line-height: 1.45; }
 .ai-settings h3 { margin: 12px 0 0; }
 .token-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 @media (max-width: 700px) { .token-fields { grid-template-columns: 1fr; } }
+
+/* ---------- Auto Generate tabs (Auto Search / AI) ---------- */
+.gen-tablist { display: flex; gap: 4px; border-bottom: 1px solid #64748b; }
+.gen-tab { border: 0; border-bottom: 3px solid transparent; border-radius: 6px 6px 0 0; background: transparent; color: #aabbd0; padding: 7px 16px; margin-bottom: -1px; font-weight: 600; }
+.gen-tab:hover { background: #243750; color: #fff; }
+.gen-tab[aria-selected="true"] { color: #fff; background: #263d5a; border-bottom-color: #93c5fd; }
+.gen-panel { border: 1px solid #40516a; border-top: 0; border-radius: 0 0 10px 10px; padding: 14px; }
+.gen-panel[hidden] { display: none; }
+.gen-panel .auto-generate { border: 0; padding: 0; }
