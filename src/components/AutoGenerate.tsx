@@ -18,16 +18,18 @@ const CR_CHOICES = ["1/8", "1/4", "1/2", ...Array.from({ length: 30 }, (_, i) =>
 export default function AutoGenerate({ encounter, levels, monsters, onChange }: Props) {
   const [difficulty, setDifficulty] = useState<Difficulty>("moderate");
   const [kinds, setKinds] = useState<Kinds>("any");
+  // null = follow the recommended CR (the default); "" = Any CR (no limit); otherwise the chosen CR.
   const [maxCrChoice, setMaxCrChoice] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [previous, setPrevious] = useState<EncounterMonster[] | null>(null);
   const environment = (encounter.environment ?? "") as Environment | "";
   const suggested = suggestedMaxCr(levels);
   const maxCr = maxCrChoice ?? String(suggested);
-  const poolSize = candidatePool({ pool: monsters, environment, maxCr: crValue(maxCr) }).length;
+  const maxCrLimit = maxCr === "" ? Infinity : crValue(maxCr);
+  const poolSize = candidatePool({ pool: monsters, environment, maxCr: maxCrLimit }).length;
 
   function generate() {
-    const r = generateEncounter({ pool: monsters, levels, environment, difficulty, maxCr: crValue(maxCr), kinds });
+    const r = generateEncounter({ pool: monsters, levels, environment, difficulty, maxCr: maxCrLimit, kinds });
     if ("error" in r) { setMessage(r.error); return; }
     setPrevious(encounter.monsters);
     onChange({ monsters: r.picks.map(p => ({ monster_id: p.monster.id, monster_name: p.monster.name, count: p.count, group_initiative: false })) });
@@ -43,12 +45,10 @@ export default function AutoGenerate({ encounter, levels, monsters, onChange }: 
         <option value="low">Low</option><option value="moderate">Moderate</option><option value="high">High</option></select></label>
       <label title="The strongest monster allowed. Suggested: the party's average level — higher CRs can drop a character in one action.">
         Max CR per monster
-        <span className="cr-pick">
-          <select value={maxCr} onChange={e => setMaxCrChoice(e.target.value === String(suggested) ? null : e.target.value)}>
-            {CR_CHOICES.map(cr => <option key={cr} value={cr}>{cr}{cr === String(suggested) ? " (recommended)" : ""}</option>)}
-          </select>
-          <button type="button" className="small" disabled={maxCrChoice === null} onClick={() => setMaxCrChoice(null)} title={"Back to the recommended CR " + suggested}>Reset</button>
-        </span>
+        <select value={maxCr} onChange={e => setMaxCrChoice(e.target.value === String(suggested) ? null : e.target.value)}>
+          <option value="">Any CR</option>
+          {CR_CHOICES.map(cr => <option key={cr} value={cr}>{cr}{cr === String(suggested) ? " (recommended)" : ""}</option>)}
+        </select>
       </label>
       <label>Monster kinds<select value={kinds} onChange={e => setKinds(e.target.value as Kinds)}>
         <option value="any">Any</option><option value="one">One kind (a pack)</option><option value="two">Two kinds (leader + followers)</option></select></label>
@@ -58,7 +58,7 @@ export default function AutoGenerate({ encounter, levels, monsters, onChange }: 
       {previous && <button type="button" className="small" onClick={() => { onChange({ monsters: previous }); setPrevious(null); setMessage("Previous monsters restored."); }}>Undo</button>}
       <span className="muted small-text">
         {!levels.length ? "Select party members above first — the encounter is sized to them."
-          : poolSize + " monster" + (poolSize === 1 ? "" : "s") + (environment ? " in " + environment : "") + " at CR " + maxCr + " or lower. Replaces the monsters in this encounter."}
+          : poolSize + " monster" + (poolSize === 1 ? "" : "s") + (environment ? " in " + environment : "") + (maxCr === "" ? " at any CR" : " at CR " + maxCr + " or lower") + ". Replaces the monsters in this encounter."}
       </span>
     </div>
     {message && <p className="small-text" role="status">{message}</p>}
