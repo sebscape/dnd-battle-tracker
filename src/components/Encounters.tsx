@@ -7,6 +7,7 @@ import { isCustom } from "../lib/format";
 import MonsterPicker from "./MonsterPicker";
 import MonsterDetails from "./MonsterDetails";
 import GenerateTabs from "./GenerateTabs";
+import TabbedPanels from "./TabbedPanels";
 import DifficultyPanel from "./DifficultyPanel";
 import { encounterDifficulty, monsterXp } from "../lib/difficulty";
 
@@ -151,10 +152,11 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
 
     <DifficultyPanel difficulty={difficulty} partySize={presentPcs.length} />
 
-    <MonsterPicker monsters={allMonsters} onAdd={addMonster} artwork={data.artwork}
-      expandedId={expanded?.startsWith("picker:") ? expanded.slice(7) : null} onToggle={id => toggle("picker:" + id)} />
-
-    <StoryFields encounter={encounter} set={set} />
+    <TabbedPanels label="Monsters and story" storageKey="dnd-battle-tracker-editor-tab-v1" idPrefix={"edit-" + encounter.id} tabs={[
+      { id: "add", label: "Add monsters", content: <MonsterPicker hideHeading monsters={allMonsters} onAdd={addMonster} artwork={data.artwork}
+      expandedId={expanded?.startsWith("picker:") ? expanded.slice(7) : null} onToggle={id => toggle("picker:" + id)} /> },
+      { id: "story", label: "Story and tactics", content: <StoryFields encounter={encounter} set={set} /> },
+    ]} />
 
     <div className="actions">
       <button type="button" className="primary" disabled={data.loading || (encounter.monsters.length === 0 && encounter.party_member_ids.length === 0)} onClick={onStart}>Start battle ▸</button>
@@ -173,8 +175,7 @@ function StoryFields({ encounter, set }: { encounter: Encounter; set: (patch: Pa
   const setOption = (i: number, patch: Partial<AvoidOption>) => set({ avoiding_combat: options.map((o, j) => j === i ? { ...o, ...patch } : o) });
   const text = (key: "read_aloud" | "motivation" | "dm_tactics" | "treasure", label: string, placeholder: string, tall = false) =>
     <label>{label}<textarea className={tall ? "tall" : undefined} value={encounter[key] ?? ""} placeholder={placeholder} onChange={e => set({ [key]: e.target.value || undefined })} /></label>;
-  return <>
-    <h3>Story and tactics</h3>
+  return <div className="story-fields">
     {text("read_aloud", "Read-aloud", "What the characters see and hear, ending with a question to the players.", true)}
     {text("motivation", "Opponent motivation", "Why the opponents are here and why it might come to a fight.")}
     <div className="avoid-list" role="group" aria-label="Ways to avoid combat">
@@ -192,5 +193,5 @@ function StoryFields({ encounter, set }: { encounter: Encounter; set: (patch: Pa
     </div>
     {text("dm_tactics", "DM tactics", "How the opponents fight, when they flee…")}
     {text("treasure", "Treasure", "What the party can find, e.g. Bugbear's pouch: 14 GP and a silver locket")}
-  </>;
+  </div>;
 }

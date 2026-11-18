@@ -12,11 +12,13 @@ interface Props {
   /** Set both to share "one open monster" with another list; otherwise the picker tracks it itself. */
   expandedId?: string | null;
   onToggle?: (id: string) => void;
+  /** Leave out the "Add monsters" heading (when a tab already says it). */
+  hideHeading?: boolean;
 }
 
 const MAX_RESULTS = 40;
 
-export default function MonsterPicker({ monsters, onAdd, artwork = {}, expandedId: sharedId, onToggle: sharedToggle }: Props) {
+export default function MonsterPicker({ monsters, onAdd, artwork = {}, expandedId: sharedId, onToggle: sharedToggle, hideHeading }: Props) {
   const [query, setQuery] = useState("");
   const [source, setSource] = useState("all");
   const [minCr, setMinCr] = useState("");
@@ -39,7 +41,7 @@ export default function MonsterPicker({ monsters, onAdd, artwork = {}, expandedI
   }, [monsters, query, source, minCr, maxCr]);
 
   return <div className="picker">
-    <h3>Add monsters</h3>
+    {!hideHeading && <h3>Add monsters</h3>}
     <div className="picker-filters">
       <label className="grow">Search<input value={query} placeholder="Name, type, tag…" onChange={e => setQuery(e.target.value)} /></label>
       <label>Source<select value={source} onChange={e => setSource(e.target.value)}><option value="all">All</option><option value="published">Published</option><option value="custom">Custom</option></select></label>

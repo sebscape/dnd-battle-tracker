@@ -403,3 +403,5 @@ textarea.instructions { min-height: 320px; font-size: 14px; line-height: 1.45; }
 .convo-errors p { margin: 4px 0; }
 .ai-monsters li { list-style: none; margin-left: -20px; }
 .ai-monsters li.expanded { background: #22344d; outline: 1px solid #93c5fd; border-radius: 8px; padding: 6px 8px; }
+.gen-panel .picker { border: 0; padding: 0; }
+.story-fields { display: flex; flex-direction: column; gap: 12px; }
