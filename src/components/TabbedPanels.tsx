@@ -6,17 +6,18 @@ export interface TabPanel { id: string; label: string; content: ReactNode }
 /**
  * Tabs above a bordered panel (used for "Auto Generate" and "Add monsters / Story and
  * tactics" in the encounter editor). Every panel stays mounted while hidden, so
- * switching tabs never loses what's in progress. The chosen tab is remembered.
+ * switching tabs never loses what's in progress. With `storageKey` the chosen tab is
+ * remembered; without it the first tab is selected each time.
  */
-export default function TabbedPanels({ tabs, label, storageKey, idPrefix }: { tabs: TabPanel[]; label: string; storageKey: string; idPrefix: string }) {
+export default function TabbedPanels({ tabs, label, storageKey, idPrefix }: { tabs: TabPanel[]; label: string; storageKey?: string; idPrefix: string }) {
   const [tab, setTab] = useState<string>(() => {
-    try { const saved = localStorage.getItem(storageKey); if (saved && tabs.some(t => t.id === saved)) return saved; } catch { /* default */ }
+    try { const saved = storageKey ? localStorage.getItem(storageKey) : null; if (saved && tabs.some(t => t.id === saved)) return saved; } catch { /* default */ }
     return tabs[0].id;
   });
   const buttons = useRef<Record<string, HTMLButtonElement | null>>({});
   const choose = (id: string, focus = false) => {
     setTab(id);
-    try { localStorage.setItem(storageKey, id); } catch { /* remembered for this visit only */ }
+    if (storageKey) try { localStorage.setItem(storageKey, id); } catch { /* remembered for this visit only */ }
     if (focus) buttons.current[id]?.focus();
   };
   const onKey = (e: { key: string; preventDefault: () => void }) => {

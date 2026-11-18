@@ -152,10 +152,10 @@ function EncounterEditor({ encounter, party, data, onChange, onDuplicate, onDele
 
     <DifficultyPanel difficulty={difficulty} partySize={presentPcs.length} />
 
-    <TabbedPanels label="Monsters and story" storageKey="dnd-battle-tracker-editor-tab-v1" idPrefix={"edit-" + encounter.id} tabs={[
+    <TabbedPanels label="Monsters and story" idPrefix={"edit-" + encounter.id} tabs={[
+      { id: "story", label: "Story and tactics", content: <StoryFields encounter={encounter} set={set} /> },
       { id: "add", label: "Add monsters", content: <MonsterPicker hideHeading monsters={allMonsters} onAdd={addMonster} artwork={data.artwork}
       expandedId={expanded?.startsWith("picker:") ? expanded.slice(7) : null} onToggle={id => toggle("picker:" + id)} /> },
-      { id: "story", label: "Story and tactics", content: <StoryFields encounter={encounter} set={set} /> },
     ]} />
 
     <div className="actions">
