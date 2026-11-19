@@ -141,3 +141,11 @@ test("the prompt requires every person or creature to be listed, for stat blocks
   await call(body(), async (url, init) => { sent = JSON.parse(init.body); return ok(answer())(); });
   assert.match(sent.input, /List EVERY person or creature in the encounter/);
 });
+
+test("a no-roll option may leave failure empty; a rolled one may not", async () => {
+  const noRoll = { action: "Leave a waterskin on the road.", check: "", dc: 0, success: "They let the traveler pass.", failure: "" };
+  let r = await call(body(), ok(answer({ avoiding_combat: [noRoll] })));
+  assert.equal(r.status, 200);
+  r = await call(body(), ok(answer({ avoiding_combat: [{ ...noRoll, check: "Charisma (Persuasion)", dc: 12 }] })));
+  assert.equal((await err(r)).message, "Way to avoid combat 1: failure is empty.");
+});

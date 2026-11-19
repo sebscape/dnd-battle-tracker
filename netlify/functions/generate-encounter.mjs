@@ -50,7 +50,7 @@ export const ENCOUNTER_SCHEMA = {
           check: text("The ability check, e.g. 'Wisdom (Animal Handling)'. An empty string if no roll is needed."),
           dc: { type: "integer", description: "Difficulty class, usually 10 to 25. 0 if no roll is needed." },
           success: text("What happens on a success."),
-          failure: text("What happens on a failure."),
+          failure: text("What happens on a failure. An empty string if no roll is needed."),
         },
       },
     },
@@ -154,7 +154,9 @@ export function checkEncounter(e, catalogIds) {
   for (const [i, o] of e.avoiding_combat.entries()) {
     const n = "Way to avoid combat " + (i + 1);
     if (!o || typeof o !== "object") return n + ": not an object.";
-    for (const k of ["action", "success", "failure"]) { const p = textProblem(o[k], LIMITS.option_text, false); if (p) return n + ": " + k + " is " + p + "."; }
+    // No roll (no check or DC 0) means nothing can fail, so failure may be empty.
+    const noRoll = (typeof o.check === "string" && !o.check.trim()) || o.dc === 0;
+    for (const k of ["action", "success", "failure"]) { const p = textProblem(o[k], LIMITS.option_text, k === "failure" && noRoll); if (p) return n + ": " + k + " is " + p + "."; }
     const pc = textProblem(o.check, LIMITS.option_text, true); if (pc) return n + ": check is " + pc + ".";
     if (!isInt(o.dc, 0, 40)) return n + ": DC must be a whole number from 0 to 40 (got " + shown(o.dc) + ").";
   }

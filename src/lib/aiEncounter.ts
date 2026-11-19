@@ -128,7 +128,9 @@ export function validateAiEncounter(raw: unknown, byId: ReadonlyMap<string, Mons
         return v.trim();
       };
       // A check of "" with DC 0 means no roll is needed (e.g. simply talking).
-      const [action, check, success, failure] = [f("action"), f("check", true), f("success"), f("failure")];
+      // No roll (no check or DC 0) means nothing can fail, so failure may be empty.
+      const noRoll = (typeof o.check === "string" && !o.check.trim()) || o.dc === 0;
+      const [action, check, success, failure] = [f("action"), f("check", true), f("success"), f("failure", noRoll)];
       const dc = o.dc;
       if (action === null || check === null || success === null || failure === null) return;
       if (typeof dc !== "number" || !Number.isInteger(dc) || dc < 0 || dc > 40) { errors.push(n + ": DC must be a whole number from 0 to 40 (got " + JSON.stringify(dc) + ")."); return; }

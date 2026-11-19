@@ -218,7 +218,7 @@ function Review({ result, picks, party, target, artwork, onUse, onRegenerate, on
     <h5>Motivation</h5><p>{result.motivation}</p>
     {result.avoiding_combat.length > 0 && <><h5>Ways to avoid combat</h5>
       <ul className="ai-options">{result.avoiding_combat.map((o, i) => <li key={i}><strong>{o.action}</strong> — {o.check && o.dc ? o.check + ", DC " + o.dc : "no check needed"}
-        <br /><span className="muted">Success:</span> {o.success}<br /><span className="muted">Failure:</span> {o.failure}</li>)}</ul></>}
+        <br /><span className="muted">Success:</span> {o.success}{o.failure && <><br /><span className="muted">Failure:</span> {o.failure}</>}</li>)}</ul></>}
     <h5>DM tactics</h5><p>{result.dm_tactics}</p>
     <h5>Treasure</h5><p>{result.treasure || "None."}</p>
     <div className="actions-left">

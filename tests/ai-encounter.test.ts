@@ -221,3 +221,12 @@ test("background transport: Cancel stops polling and cancels the job", async () 
   await new Promise(r => setTimeout(r, 10));
   assert.equal(JSON.parse([...store.data.values()][0]).state, "canceled");
 });
+
+test("a no-roll option may leave failure empty; a rolled one may not", () => {
+  const a = goodAnswer() as any;
+  a.avoiding_combat = [{ action: "Back away", check: "", dc: 0, success: "They let you go.", failure: "" }];
+  assert.ok(validateAiEncounter(a, byId).ok);
+  a.avoiding_combat[0] = { action: "Persuade", check: "Charisma (Persuasion)", dc: 12, success: "They step aside.", failure: "" };
+  const v = validateAiEncounter(a, byId);
+  assert.ok(!v.ok && v.errors.join(" ").includes("Way to avoid combat 1: failure is empty."));
+});
